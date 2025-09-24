@@ -5,17 +5,22 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import ToastNotifier from '../../../../components/ToastNotifier';
-import UserFormModal from './components/UserFormModal';
-import { getUsers, createUser, updateUser, deleteUser } from './utils/api';
-import CustomDataTable from '../../../../components/DataTable'; // <-- pakai custom
+import UserFormModal from './components/SiswaFormModal';
+import {
+  getUsersByRole,
+  createUser,
+  updateUser,
+  deleteUser,
+} from '../../../../(main)/superadmin/menu/users/utils/api';
+import CustomDataTable from '../../../../components/DataTable';
 
-export default function UsersPage() {
+export default function SiswaPage() {
   const toastRef = useRef(null);
 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [dialogMode, setDialogMode] = useState(null); // 'add' | 'edit' | 'lengkapi' | null
+  const [dialogMode, setDialogMode] = useState(null); // 'add' | 'edit' | null
   const [token, setToken] = useState('');
 
   useEffect(() => {
@@ -31,11 +36,12 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const res = await getUsers(token);
+      // Ambil hanya siswa
+      const res = await getUsersByRole(token, 'SISWA');
       setUsers(res || []);
     } catch (err) {
       console.error(err);
-      toastRef.current?.showToast('01', 'Gagal memuat data user');
+      toastRef.current?.showToast('01', 'Gagal memuat data siswa');
     } finally {
       setIsLoading(false);
     }
@@ -47,23 +53,23 @@ export default function UsersPage() {
     try {
       if (dialogMode === 'add') {
         await createUser(token, data);
-        toastRef.current?.showToast('00', 'User berhasil dibuat');
-      } else if ((dialogMode === 'edit' || dialogMode === 'lengkapi') && selectedUser) {
+        toastRef.current?.showToast('00', 'Siswa berhasil dibuat');
+      } else if (dialogMode === 'edit' && selectedUser) {
         await updateUser(token, selectedUser.id, data);
-        toastRef.current?.showToast('00', 'User berhasil diupdate');
+        toastRef.current?.showToast('00', 'Siswa berhasil diupdate');
       }
       fetchUsers();
       setDialogMode(null);
       setSelectedUser(null);
     } catch (err) {
       console.error(err);
-      toastRef.current?.showToast('01', 'Gagal menyimpan user');
+      toastRef.current?.showToast('01', 'Gagal menyimpan data siswa');
     }
   };
 
   const handleDelete = (user) => {
     confirmDialog({
-      message: `Yakin ingin menghapus user "${user.name}"?`,
+      message: `Yakin ingin menghapus siswa "${user.name}"?`,
       header: 'Konfirmasi Hapus',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Hapus',
@@ -72,11 +78,11 @@ export default function UsersPage() {
       accept: async () => {
         try {
           await deleteUser(token, user.id);
-          toastRef.current?.showToast('00', 'User berhasil dihapus');
+          toastRef.current?.showToast('00', 'Siswa berhasil dihapus');
           setUsers((prev) => prev.filter((u) => u.id !== user.id));
         } catch (err) {
           console.error(err);
-          toastRef.current?.showToast('01', 'Gagal menghapus user');
+          toastRef.current?.showToast('01', 'Gagal menghapus siswa');
         }
       },
     });
@@ -94,15 +100,6 @@ export default function UsersPage() {
         }}
       />
       <Button
-        icon="pi pi-user-edit"
-        size="small"
-        severity="info"
-        onClick={() => {
-          setSelectedUser(rowData);
-          setDialogMode('lengkapi');
-        }}
-      />
-      <Button
         icon="pi pi-trash"
         size="small"
         severity="danger"
@@ -111,36 +108,37 @@ export default function UsersPage() {
     </div>
   );
 
-  // Definisi kolom untuk CustomDataTable
+  // Kolom untuk CustomDataTable
   const userColumns = [
     { field: 'id', header: 'ID', style: { width: '60px' } },
-    { field: 'name', header: 'Name', filter: true },
+    { field: 'name', header: 'Nama', filter: true },
     { field: 'email', header: 'Email', filter: true },
-    { field: 'role', header: 'Role' },
     {
       field: 'created_at',
-      header: 'Created At',
-      body: (row) => (row.created_at ? new Date(row.created_at).toLocaleString() : '-'),
+      header: 'Dibuat',
+      body: (row) =>
+        row.created_at ? new Date(row.created_at).toLocaleString() : '-',
     },
     {
       field: 'updated_at',
-      header: 'Updated At',
-      body: (row) => (row.updated_at ? new Date(row.updated_at).toLocaleString() : '-'),
+      header: 'Diperbarui',
+      body: (row) =>
+        row.updated_at ? new Date(row.updated_at).toLocaleString() : '-',
     },
     {
-      header: 'Actions',
+      header: 'Aksi',
       body: actionBodyTemplate,
-      style: { width: '150px' },
+      style: { width: '120px' },
     },
   ];
 
   return (
     <div className="card p-4">
-      <h3 className="text-xl font-semibold mb-4">Manage Users</h3>
+      <h3 className="text-xl font-semibold mb-4">Manajemen Siswa</h3>
 
       <div className="flex justify-content-end mb-3">
         <Button
-          label="Tambah User"
+          label="Tambah Siswa"
           icon="pi pi-plus"
           onClick={() => {
             setDialogMode('add');
@@ -149,12 +147,10 @@ export default function UsersPage() {
         />
       </div>
 
-      {/* Gunakan CustomDataTable */}
       <CustomDataTable data={users} loading={isLoading} columns={userColumns} />
 
       <ConfirmDialog />
 
-      {/* Dialog Add/Edit/Lengkapi */}
       <UserFormModal
         isOpen={dialogMode !== null}
         onClose={() => {

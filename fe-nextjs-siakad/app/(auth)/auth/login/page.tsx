@@ -4,12 +4,13 @@ import { InputText } from 'primereact/inputtext';
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { roleRoutes } from 'utils/roleRoutes';
-import ToastNotifier, { ToastNotifierHandle } from '../../../components/ToastNotifier'
+import ToastNotifier, { ToastNotifierHandle } from '../../../components/ToastNotifier';
 import '@/styles/gradient.css';
+import axios from 'axios';
 
 const LoginPage = () => {
   const router = useRouter();
-  const toastRef = useRef<ToastNotifierHandle>(null); // ref ToastNotifier
+  const toastRef = useRef<ToastNotifierHandle>(null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,32 +21,35 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        { email, password },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true, // kalau backend pakai cookie/session
+        }
+      );
 
-      const data = await res.json();
+      const data = res.data;
 
-      if (!res.ok) {
-        toastRef.current?.showToast('01', data.message || 'Login gagal'); // gunakan toast
+      if (!data || !data.token || !data.user) {
+        toastRef.current?.showToast('01', data.message || 'Login gagal');
         setLoading(false);
         return;
       }
 
-      // simpan token & role
+      // ✅ simpan token & role
       localStorage.setItem('token', data.token);
-      localStorage.setItem('role', data.user.role);
+      localStorage.setItem('ROLE', data.user.role);
+      localStorage.setItem('USER_NAME', data.user.name || '');
 
-      toastRef.current?.showToast('00', 'Login berhasil'); // toast success
+      toastRef.current?.showToast('00', 'Login berhasil');
 
-      // redirect sesuai role
+      // ✅ redirect sesuai role
       const redirect = roleRoutes[data.user.role] || '/';
       router.push(redirect);
-
-    } catch (err) {
-      toastRef.current?.showToast('99', 'Terjadi kesalahan koneksi');
+    } catch (err: any) {
+      toastRef.current?.showToast('99', err.response?.data?.message || 'Terjadi kesalahan koneksi');
     } finally {
       setLoading(false);
     }

@@ -5,4 +5,7 @@ export const roleRoutes: Record<string, string> = {
   KEUANGAN: "/keuangan/dashboard",
   GURU: "/guru/dashboard",
   SISWA: "/siswa/dashboard",
+  ADMIN_WEB: "/adminweb/dashboard",
+  TU_TASM: "/tutasm/dashboard",
+  BP_BKM: "/bpbkm/dashboard",
 };

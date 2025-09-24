@@ -18,28 +18,64 @@ const roles = [
   { label: 'SISWA', value: 'SISWA' },
 ];
 
-const defaultValues = {
-  name: '',
-  email: '',
-  role: 'KURIKULUM',
-  password: '',
+// Field khusus tiap role
+const roleFields = {
+  SISWA: [
+    { name: 'nis', label: 'NIS', type: 'text' },
+    { name: 'kelas', label: 'Kelas', type: 'text' },
+    { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'text' },
+    { name: 'alamat', label: 'Alamat', type: 'text' },
+  ],
+  GURU: [
+    { name: 'nip', label: 'NIP', type: 'text' },
+    { name: 'mata_pelajaran', label: 'Mata Pelajaran', type: 'text' },
+    { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'text' },
+  ],
+  KEUANGAN: [
+    { name: 'id_keuangan', label: 'ID Keuangan', type: 'text' },
+    { name: 'jabatan', label: 'Jabatan', type: 'text' },
+  ],
+  KURIKULUM: [
+    { name: 'id_kurikulum', label: 'ID Kurikulum', type: 'text' },
+    { name: 'jabatan', label: 'Jabatan', type: 'text' },
+  ],
+  // bisa tambah role lain jika perlu
 };
-
-const validationSchema = Yup.object({
-  name: Yup.string().required('Nama wajib diisi'),
-  email: Yup.string().email('Email tidak valid').required('Email wajib diisi'),
-  role: Yup.string().required('Role wajib dipilih'),
-  password: Yup.string(),
-});
 
 const UserFormModal = ({ isOpen, onClose, onSubmit, user, mode }) => {
   const isEdit = mode === 'edit';
+  const isLengkapi = mode === 'lengkapi';
 
-  const initialValues = user
-    ? { name: user.name, email: user.email, role: user.role, password: '' }
-    : defaultValues;
+  const defaultValues = {
+    name: '',
+    email: '',
+    role: 'KURIKULUM',
+    password: '',
+    nis: '',
+    kelas: '',
+    tanggal_lahir: '',
+    alamat: '',
+    nip: '',
+    mata_pelajaran: '',
+    id_keuangan: '',
+    id_kurikulum: '',
+    jabatan: '',
+  };
 
-  const title = isEdit ? `Edit User: ${user?.name || ''}` : 'Tambah User';
+  const initialValues = user ? { ...defaultValues, ...user } : defaultValues;
+
+  const validationSchema = Yup.object({
+    name: Yup.string().required('Nama wajib diisi'),
+    email: Yup.string().email('Email tidak valid').required('Email wajib diisi'),
+    role: Yup.string().required('Role wajib dipilih'),
+    password: !isEdit && !isLengkapi ? Yup.string().required('Password wajib diisi') : Yup.string(),
+  });
+
+  const title = isEdit
+    ? `Edit User: ${user?.name || ''}`
+    : isLengkapi
+    ? `Lengkapi Data Diri: ${user?.name || ''}`
+    : 'Tambah User';
 
   return (
     <Dialog style={{ minWidth: '50vw' }} header={title} visible={isOpen} onHide={onClose}>
@@ -48,17 +84,46 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, mode }) => {
         enableReinitialize
         validationSchema={validationSchema}
         onSubmit={(values, actions) => {
-          const payload = isEdit
-            ? { name: values.name, email: values.email, role: values.role }
-            : values; // include password for new user
+          // Filter payload agar hanya kirim field yang relevan
+          let payload = {
+            name: values.name,
+            email: values.email,
+            role: values.role,
+          };
+
+          if (!isEdit && !isLengkapi) {
+            payload.password = values.password;
+          }
+
+          // Tambahkan field spesifik role jika mode lengkapi
+          if (isLengkapi) {
+            if (values.role === 'SISWA') {
+              payload.nis = values.nis;
+              payload.kelas = values.kelas;
+              payload.tanggal_lahir = values.tanggal_lahir;
+              payload.alamat = values.alamat;
+            } else if (values.role === 'GURU') {
+              payload.nip = values.nip;
+              payload.mata_pelajaran = values.mata_pelajaran;
+              payload.tanggal_lahir = values.tanggal_lahir;
+            } else if (values.role === 'KEUANGAN') {
+              payload.id_keuangan = values.id_keuangan;
+              payload.jabatan = values.jabatan;
+            } else if (values.role === 'KURIKULUM') {
+              payload.id_kurikulum = values.id_kurikulum;
+              payload.jabatan = values.jabatan;
+            }
+          }
+
           onSubmit(payload);
           actions.setSubmitting(false);
         }}
       >
         {({ values, handleChange, setFieldValue, isSubmitting }) => (
-          <Form className="flex flex-col gap-3">
-            <div>
-              <label htmlFor="name">Name</label>
+          <Form>
+            {/* Basic Fields */}
+            <div className="mt-3">
+              <label htmlFor="name">Nama</label>
               <InputText
                 id="name"
                 name="name"
@@ -69,7 +134,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, mode }) => {
               <ErrorMessage name="name" component="small" className="p-error" />
             </div>
 
-            <div>
+            <div className="mt-3">
               <label htmlFor="email">Email</label>
               <InputText
                 id="email"
@@ -81,8 +146,8 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, mode }) => {
               <ErrorMessage name="email" component="small" className="p-error" />
             </div>
 
-            {!isEdit && (
-              <div>
+            {!isEdit && !isLengkapi && (
+              <div className="mt-3">
                 <label htmlFor="password">Password</label>
                 <InputText
                   id="password"
@@ -96,24 +161,42 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, mode }) => {
               </div>
             )}
 
-            <div>
-              <label htmlFor="role">Role</label>
-              <Dropdown
-                id="role"
-                name="role"
-                value={values.role}
-                options={roles}
-                onChange={(e) => setFieldValue('role', e.value)}
-                className="w-full mt-2"
-                placeholder="Select Role"
-              />
-              <ErrorMessage name="role" component="small" className="p-error" />
-            </div>
+            {!isLengkapi && (
+              <div className="mt-3">
+                <label htmlFor="role">Role</label>
+                <Dropdown
+                  id="role"
+                  name="role"
+                  value={values.role}
+                  options={roles}
+                  onChange={(e) => setFieldValue('role', e.value)}
+                  className="w-full mt-2"
+                  placeholder="Select Role"
+                />
+                <ErrorMessage name="role" component="small" className="p-error" />
+              </div>
+            )}
 
-            <div className="flex justify-end gap-2 mt-3">
-              <Button label="Cancel" severity="secondary" onClick={onClose} />
+            {/* Dynamic Fields hanya untuk lengkapi data */}
+            {isLengkapi &&
+              roleFields[values.role]?.map((field) => (
+                <div className="mt-3" key={field.name}>
+                  <label htmlFor={field.name}>{field.label}</label>
+                  <InputText
+                    id={field.name}
+                    name={field.name}
+                    className="w-full mt-2"
+                    value={values[field.name]}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage name={field.name} component="small" className="p-error" />
+                </div>
+              ))}
+
+            <div className="flex justify-end gap-2 mt-5">
+              <Button label="Batal" severity="secondary" onClick={onClose} />
               <Button
-                label={isEdit ? 'Update' : 'Simpan'}
+                label={isEdit ? 'Update' : isLengkapi ? 'Simpan Data' : 'Simpan'}
                 type="submit"
                 severity="success"
                 disabled={isSubmitting}

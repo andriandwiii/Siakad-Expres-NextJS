@@ -1,4 +1,4 @@
-import { getUserByEmail, addUser, getUserByRole } from "../models/userModel.js";
+import { getUserByEmail, addUser, getUsersByRole } from "../models/userModel.js";
 import { addLoginHistory } from "../models/loginHistoryModel.js";
 import { loginSchema, registerSchema } from "../scemas/authSchema.js";
 import { comparePassword, hashPassword } from "../utils/hash.js";

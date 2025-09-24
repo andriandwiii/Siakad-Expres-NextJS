@@ -25,5 +25,5 @@ export const deleteUser = async (id) =>
   db("users").where({ id }).del();
 
 // ✅ Ambil user berdasarkan role
-export const getUserByRole = async (role) =>
-  db("users").where({ role }).first();
+export const getUsersByRole = async (role) =>
+  db("users").where({ role }).select("*");

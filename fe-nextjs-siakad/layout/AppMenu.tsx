@@ -10,7 +10,7 @@ const AppMenu = () => {
 
 useEffect(() => {
   if (typeof window !== "undefined") {
-    const roleFromLocalStorage = localStorage.getItem("role");
+    const roleFromLocalStorage = localStorage.getItem("ROLE"); // <- pakai "ROLE"
     console.log("ROLE DI LOCALSTORAGE:", roleFromLocalStorage);
     setUserRole(roleFromLocalStorage);
   }
@@ -39,7 +39,7 @@ useEffect(() => {
           { label: "Sumber Daya Manusia", icon: "pi pi-fw pi-users", to: "/superadmin/sdm" },
           { label: "Kebutuhan Pendidikan Khusus", icon: "pi pi-fw pi-briefcase", to: "/superadmin/kebutuhan-khusus" },
           { label: "Evaluasi Diri/Review", icon: "pi pi-fw pi-check-square", to: "/superadmin/review" },
-          { label: "Manajemen User", icon: "pi pi-fw pi-check-square", to: "/superadmin/menu/users" },
+          { label: "Manajemen User", icon: "pi pi-fw pi-users", to: "/superadmin/menu/users" },
 
         ],
       },
@@ -49,7 +49,7 @@ useEffect(() => {
   // =========================
   // 2. KURIKULUM
   // =========================
-  else if (userRole === "Kurikulum") {
+  else if (userRole === "KURIKULUM") {
     model = [
       {
         label: "Dashboard Kurikulum",
@@ -70,7 +70,7 @@ useEffect(() => {
   // =========================
   // 3. KESISWAAN
   // =========================
-  else if (userRole === "Kesiswaan") {
+  else if (userRole === "KESISWAAN") {
     model = [
       {
         label: "Dashboard Kesiswaan",
@@ -79,7 +79,7 @@ useEffect(() => {
       {
         label: "Data Siswa",
         items: [
-          { label: "Manajemen Data Siswa", icon: "pi pi-fw pi-users", to: "/kesiswaan/data-siswa" },
+          { label: "Manajemen Data Siswa", icon: "pi pi-fw pi-users", to: "/kesiswaan/menu/data-siswa" },
           { label: "Profil Siswa", icon: "pi pi-fw pi-id-card", to: "/kesiswaan/profil-siswa" },
         ],
       },
@@ -89,7 +89,7 @@ useEffect(() => {
   // =========================
   // 4. KEUANGAN
   // =========================
-  else if (userRole === "Keuangan") {
+  else if (userRole === "KEUANGAN") {
     model = [
       {
         label: "Dashboard Keuangan",
@@ -98,8 +98,8 @@ useEffect(() => {
       {
         label: "Keuangan",
         items: [
-          { label: "Manajemen Keuangan", icon: "pi pi-fw pi-wallet", to: "/keuangan/manajemen" },
-          { label: "Laporan Keuangan", icon: "pi pi-fw pi-file", to: "/keuangan/laporan" },
+          { label: "Manajemen Keuangan", icon: "pi pi-fw pi-wallet", to: "/keuangan/menu/manajemen" },
+          { label: "Laporan Keuangan", icon: "pi pi-fw pi-file", to: "/keuangan/menu/laporan" },
         ],
       },
     ];
@@ -108,11 +108,11 @@ useEffect(() => {
   // =========================
   // 5. TU/TAS
   // =========================
-  else if (userRole === "TU" || userRole === "TAS") {
+  else if (userRole === "TU" || userRole === "TU_TASM") {
     model = [
       {
         label: "Dashboard TU/TAS",
-        items: [{ label: "Beranda", icon: "pi pi-fw pi-home", to: "/tu/dashboard" }],
+        items: [{ label: "Beranda", icon: "pi pi-fw pi-home", to: "/tutasm/dashboard" }],
       },
       {
         label: "Kehadiran",
@@ -128,17 +128,17 @@ useEffect(() => {
   // =========================
   // 6. BP/BK
   // =========================
-  else if (userRole === "BP" || userRole === "BK") {
+  else if (userRole === "BP" || userRole === "BP_BKM") {
     model = [
       {
         label: "Dashboard BK",
-        items: [{ label: "Beranda", icon: "pi pi-fw pi-home", to: "/bk/dashboard" }],
+        items: [{ label: "Beranda", icon: "pi pi-fw pi-home", to: "/bpbkm/dashboard" }],
       },
       {
         label: "Bimbingan Konseling",
         items: [
-          { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/bk/absensi" },
-          { label: "Catatan BK", icon: "pi pi-fw pi-file-edit", to: "/bk/catatan" },
+          { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/bpbkm/absensi" },
+          { label: "Catatan BK", icon: "pi pi-fw pi-file-edit", to: "/bpbkm/menu/catatan" },
         ],
       },
     ];
@@ -147,7 +147,7 @@ useEffect(() => {
   // =========================
   // 7. ADMIN WEB SEKOLAH
   // =========================
-  else if (userRole === "Admin Web Sekolah") {
+  else if (userRole === "ADMIN_WEB") {
     model = [
       {
         label: "Dashboard Admin Web",
@@ -166,7 +166,7 @@ useEffect(() => {
   // =========================
   // 8. GURU
   // =========================
-  else if (userRole === "Guru") {
+  else if (userRole === "GURU") {
     model = [
       {
         label: "Dashboard Guru",
@@ -175,9 +175,9 @@ useEffect(() => {
       {
         label: "Kehadiran & Mengajar",
         items: [
-          { label: "Absensi Guru", icon: "pi pi-fw pi-user-check", to: "/guru/absensi" },
-          { label: "Absensi Kelas", icon: "pi pi-fw pi-users", to: "/guru/absensi-kelas" },
-          { label: "Agenda Mengajar", icon: "pi pi-fw pi-calendar", to: "/guru/agenda" },
+          { label: "Absensi Guru", icon: "pi pi-fw pi-user-check", to: "/guru/menu/absensi" },
+          { label: "Absensi Kelas", icon: "pi pi-fw pi-users", to: "/guru/menu/absensi-kelas" },
+          { label: "Agenda Mengajar", icon: "pi pi-fw pi-calendar", to: "/guru/menu/agenda" },
         ],
       },
       {
@@ -190,7 +190,7 @@ useEffect(() => {
   // =========================
   // 9. SISWA
   // =========================
-  else if (userRole === "Siswa") {
+  else if (userRole === "SISWA") {
     model = [
       {
         label: "Dashboard Siswa",
@@ -199,9 +199,9 @@ useEffect(() => {
       {
         label: "Akademik",
         items: [
-          { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/siswa/absensi" },
-          { label: "Nilai & Rapor", icon: "pi pi-fw pi-book", to: "/siswa/nilai" },
-          { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/siswa/informasi" },
+          { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/siswa/menu/absensi" },
+          { label: "Nilai & Rapor", icon: "pi pi-fw pi-book", to: "/siswa/menu/nilai" },
+          { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/siswa/menu/informasi" },
         ],
       },
       {

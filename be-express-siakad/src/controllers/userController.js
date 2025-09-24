@@ -1,4 +1,4 @@
-import { getAllUsers, getUserByEmail, addUser, getUserById, updateUser, deleteUser } from "../models/userModel.js";
+import { getAllUsers, getUserByEmail, addUser, getUserById, updateUser, deleteUser, getUsersByRole } from "../models/userModel.js";
 import { registerSchema } from "../scemas/authSchema.js";
 import { datetime, status } from "../utils/general.js";
 import { hashPassword } from "../utils/hash.js";
@@ -8,7 +8,14 @@ import { hashPassword } from "../utils/hash.js";
 // =======================
 export const fetchAllUsers = async (req, res) => {
   try {
-    const users = await getAllUsers();
+    const { role } = req.query;
+    let users;
+
+    if (role) {
+      users = await getUsersByRole(role); // ambil langsung dari DB
+    } else {
+      users = await getAllUsers();
+    }
 
     if (!users || users.length === 0) {
       return res.status(404).json({
@@ -32,6 +39,7 @@ export const fetchAllUsers = async (req, res) => {
     });
   }
 };
+
 
 // =======================
 // Get user by ID (SUPER ADMIN)

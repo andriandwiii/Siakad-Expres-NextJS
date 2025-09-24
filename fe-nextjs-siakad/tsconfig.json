@@ -8,6 +8,7 @@
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "module": "esnext",
         "moduleResolution": "node",
         "resolveJsonModule": true,
@@ -24,6 +25,6 @@
             "@/*": ["./*"]
         }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/(main)/superadmin/menu/users/components/UserTable.js", "app/components/ToastNotifier.tsx"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/(main)/superadmin/menu/users/components/UserTable.js", "app/components/ToastNotifier.tsx", "app/(main)/guru/dashboard/page.js"],
     "exclude": ["node_modules"]
 }

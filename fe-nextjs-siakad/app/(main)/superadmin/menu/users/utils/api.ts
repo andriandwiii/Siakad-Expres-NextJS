@@ -72,3 +72,11 @@ export const deleteUser = async (token: string, id: number) => {
   });
   return res.data;
 };
+
+// GET USERS BY ROLE
+export const getUsersByRole = async (token: string, role: string): Promise<User[]> => {
+  const res = await axiosInstance.get(`/user/?role=${role}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.users;
+};
