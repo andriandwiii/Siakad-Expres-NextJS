@@ -4,9 +4,13 @@ import { InputText } from 'primereact/inputtext';
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { roleRoutes } from 'utils/roleRoutes';
-import ToastNotifier, { ToastNotifierHandle } from '../../../components/ToastNotifier';
+import ToastNotifier from '../../../components/ToastNotifier';
 import '@/styles/gradient.css';
 import axios from 'axios';
+
+type ToastNotifierHandle = {
+  showToast: (status: string, message?: string) => void;
+};
 
 const LoginPage = () => {
   const router = useRouter();
@@ -49,7 +53,10 @@ const LoginPage = () => {
       const redirect = roleRoutes[data.user.role] || '/';
       router.push(redirect);
     } catch (err: any) {
-      toastRef.current?.showToast('99', err.response?.data?.message || 'Terjadi kesalahan koneksi');
+      toastRef.current?.showToast(
+        '99',
+        err.response?.data?.message || 'Terjadi kesalahan koneksi'
+      );
     } finally {
       setLoading(false);
     }
@@ -65,12 +72,15 @@ const LoginPage = () => {
             <div className="col-12 md:col-6 flex flex-col justify-center h-full px-4">
               <div>
                 <h3 className="text-2xl text-center font-semibold mb-5">
-                  {process.env.NEXT_PUBLIC_APP_NAME || 'Sistem Informasi Akademik SMA'}
+                  {process.env.NEXT_PUBLIC_APP_NAME ||
+                    'Sistem Informasi Akademik SMA'}
                 </h3>
 
                 <form className="grid" onSubmit={handleSubmit}>
                   <div className="col-12 mb-4">
-                    <label htmlFor="email" className="block text-sm font-semibold">Email</label>
+                    <label htmlFor="email" className="block text-sm font-semibold">
+                      Email
+                    </label>
                     <InputText
                       id="email"
                       type="email"
@@ -82,7 +92,9 @@ const LoginPage = () => {
                   </div>
 
                   <div className="col-12 mb-4">
-                    <label htmlFor="password" className="block text-sm font-semibold">Password</label>
+                    <label htmlFor="password" className="block text-sm font-semibold">
+                      Password
+                    </label>
                     <InputText
                       id="password"
                       type="password"

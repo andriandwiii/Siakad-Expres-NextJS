@@ -57,10 +57,10 @@ const AppMenu = () => {
             {
                 label: "Akademik",
                 items: [
-                    { label: "Pengaturan Jadwal Pelajaran", icon: "pi pi-fw pi-calendar", to: "/kurikulum/jadwal" },
-                    { label: "Ujian", icon: "pi pi-fw pi-pencil", to: "/kurikulum/ujian" },
-                    { label: "Cetak Rapor", icon: "pi pi-fw pi-file", to: "/kurikulum/rapor" },
-                    { label: "Perencanaan Kegiatan Belajar", icon: "pi pi-fw pi-book", to: "/kurikulum/rencana" },
+                    { label: "Pengaturan Jadwal Pelajaran", icon: "pi pi-fw pi-calendar", to: "/kurikulum/menu/jadwal" },
+                    { label: "Ujian", icon: "pi pi-fw pi-pencil", to: "/kurikulum/menu/ujian" },
+                    { label: "Cetak Rapor", icon: "pi pi-fw pi-file", to: "/kurikulum/menu/rapor" },
+                    { label: "Perencanaan Kegiatan Belajar", icon: "pi pi-fw pi-book", to: "/kurikulum/menu/rencana" },
                 ],
             },
         ];
@@ -181,7 +181,7 @@ const AppMenu = () => {
             },
             {
                 label: "Penilaian",
-                items: [{ label: "Input Nilai", icon: "pi pi-fw pi-pencil", to: "/guru/nilai" }],
+                items: [{ label: "Input Nilai", icon: "pi pi-fw pi-pencil", to: "/guru/menu/nilai" }],
             },
         ];
     }

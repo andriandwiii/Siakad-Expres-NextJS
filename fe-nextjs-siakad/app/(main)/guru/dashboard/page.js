@@ -1,133 +1,197 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import { Chart } from 'primereact/chart';
-import React, { useContext, useEffect, useState } from 'react';
+
+import React, { useContext, useRef, useEffect, useState } from 'react';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import CustomDataTable from '@/components/DataTable'; // ✅ gunakan alias @
-
-const lineData = {
-    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-    datasets: [
-        {
-            label: 'Kehadiran Siswa',
-            data: [20, 22, 18, 25, 24, 15, 0],
-            fill: false,
-            backgroundColor: '#2f4860',
-            borderColor: '#2f4860',
-            tension: 0.4
-        },
-        {
-            label: 'Tugas Terkumpul',
-            data: [18, 20, 15, 23, 21, 12, 0],
-            fill: false,
-            backgroundColor: '#00bb7e',
-            borderColor: '#00bb7e',
-            tension: 0.4
-        }
-    ]
-};
-
-// ✅ contoh data dummy siswa
-const siswaHariIni = [
-    { id: 1, name: 'Budi', status: 'Hadir', waktu: '07:15' },
-    { id: 2, name: 'Ani', status: 'Izin', waktu: '-' }
-];
-
-const siswaMinggu = [
-    { id: 1, name: 'Budi', hadir: 5, alpa: 0 },
-    { id: 2, name: 'Ani', hadir: 4, alpa: 1 }
-];
-
-const siswaBulan = [
-    { id: 1, name: 'Budi', hadir: 20, alpa: 1 },
-    { id: 2, name: 'Ani', hadir: 18, alpa: 3 }
-];
-
-// ✅ definisi kolom untuk tiap tabel
-const columnsHariIni = [
-    { field: 'id', header: 'ID' },
-    { field: 'name', header: 'Nama' },
-    { field: 'status', header: 'Status' },
-    { field: 'waktu', header: 'Waktu' }
-];
-
-const columnsMinggu = [
-    { field: 'id', header: 'ID' },
-    { field: 'name', header: 'Nama' },
-    { field: 'hadir', header: 'Hadir' },
-    { field: 'alpa', header: 'Alpa' }
-];
-
-const columnsBulan = [
-    { field: 'id', header: 'ID' },
-    { field: 'name', header: 'Nama' },
-    { field: 'hadir', header: 'Hadir' },
-    { field: 'alpa', header: 'Alpa' }
-];
+import { Chart } from 'primereact/chart';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { Dropdown } from 'primereact/dropdown';
+import CustomDataTable from '../../../components/DataTable';
+import ToastNotifier from '../../../components/ToastNotifier';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
 
 const DashboardGuru = () => {
-    const [lineOptions, setLineOptions] = useState({});
     const { layoutConfig } = useContext(LayoutContext);
+    const toastRef = useRef(null);
 
-    const applyLightTheme = () => {
-        setLineOptions({
-            plugins: { legend: { labels: { color: '#495057' } } },
-            scales: {
-                x: { ticks: { color: '#495057' }, grid: { color: '#ebedef' } },
-                y: { ticks: { color: '#495057' }, grid: { color: '#ebedef' } }
-            }
-        });
+    // --- Data Dummy ---
+    const summary = {
+        totalKelasDiajar: 5,
+        totalSiswaDiajar: 150,
+        jadwalHariIni: 3,
+        mataPelajaranDiampu: 'Matematika'
     };
 
-    const applyDarkTheme = () => {
-        setLineOptions({
-            plugins: { legend: { labels: { color: '#ebedef' } } },
-            scales: {
-                x: { ticks: { color: '#ebedef' }, grid: { color: 'rgba(160, 167, 181, .3)' } },
-                y: { ticks: { color: '#ebedef' }, grid: { color: 'rgba(160, 167, 181, .3)' } }
+    const agenda = [
+        { id: 1, jam: '08:00 - 09:30', kelas: 'X IPA 1', mataPelajaran: 'Matematika', status: 'Selesai' },
+        { id: 2, jam: '09:45 - 11:15', kelas: 'XI IPS 2', mataPelajaran: 'Matematika', status: 'Selesai' },
+        { id: 3, jam: '13:00 - 14:30', kelas: 'XII IPA 3', mataPelajaran: 'Matematika', status: 'Belum Dimulai' },
+    ];
+
+    const attendanceData = {
+        labels: ['X IPA 1', 'XI IPS 2', 'XII IPA 3'],
+        datasets: [
+            {
+                label: 'Hadir',
+                backgroundColor: '#42A5F5',
+                data: [30, 28, 25]
+            },
+            {
+                label: 'Sakit',
+                backgroundColor: '#FFC107',
+                data: [1, 2, 0]
+            },
+            {
+                label: 'Izin',
+                backgroundColor: '#66BB6A',
+                data: [1, 0, 1]
+            },
+            {
+                label: 'Alpha',
+                backgroundColor: '#EF5350',
+                data: [0, 1, 2]
             }
-        });
+        ]
     };
 
-    useEffect(() => {
-        if (layoutConfig.colorScheme === 'light') applyLightTheme();
-        else applyDarkTheme();
-    }, [layoutConfig.colorScheme]);
+    const barChartOptions = {
+        plugins: {
+            legend: {
+                labels: {
+                    color: layoutConfig.colorScheme === 'light' ? '#495057' : '#ebedef'
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: layoutConfig.colorScheme === 'light' ? '#495057' : '#ebedef'
+                },
+                grid: {
+                    color: layoutConfig.colorScheme === 'light' ? '#ebedef' : '#323438'
+                }
+            },
+            y: {
+                ticks: {
+                    color: layoutConfig.colorScheme === 'light' ? '#495057' : '#ebedef'
+                },
+                grid: {
+                    color: layoutConfig.colorScheme === 'light' ? '#ebedef' : '#323438'
+                }
+            }
+        }
+    };
 
+    // --- State & Fungsi ---
+    const [agendaTable, setAgendaTable] = useState(agenda);
+    const [selectedAgenda, setSelectedAgenda] = useState(null);
+
+    const actionTemplate = (rowData) => (
+        <div className="flex gap-2">
+            <Button label="Buka Absen" size="small" icon="pi pi-user-plus" severity="info" onClick={() => {
+                toastRef.current?.showToast('00', `Buka form absensi untuk kelas ${rowData.kelas}`);
+            }} />
+        </div>
+    );
+    
+    const statusTemplate = (rowData) => {
+        const severity = rowData.status === 'Selesai' ? 'success' : 'warning';
+        return <span className={`bg-${severity}-100 text-${severity}-600 font-bold px-2 py-1 border-round-sm text-xs`}>{rowData.status}</span>;
+    };
+
+    const agendaColumns = [
+        { field: 'jam', header: 'Jam Mengajar' },
+        { field: 'kelas', header: 'Kelas' },
+        { field: 'mataPelajaran', header: 'Mata Pelajaran' },
+        { field: 'status', header: 'Status', body: statusTemplate },
+        { header: 'Aksi', body: actionTemplate, style: { width: '120px' } },
+    ];
+
+    const useCustom = !!(typeof CustomDataTable !== 'undefined');
+    
     return (
         <div className="grid">
-            {/* --- 4 Summary Cards --- */}
-            {/* ... card summary tetap sama ... */}
+            <ToastNotifier ref={toastRef} />
 
-            {/* Chart Mingguan */}
-            <div className="col-12">
-                <div className="card">
-                    <h5>Kehadiran dan Tugas Mingguan</h5>
-                    <Chart type="line" data={lineData} options={lineOptions} />
+            {/* Ringkasan */}
+            <div className="col-12 lg:col-6 xl:col-4">
+                <div className="card mb-2">
+                    <div className="flex justify-content-between">
+                        <div>
+                            <span className="block text-500 font-medium mb-2">Mata Pelajaran Diampu</span>
+                            <div className="text-900 font-medium text-xl">{summary.mataPelajaranDiampu}</div>
+                        </div>
+                        <div className="flex align-items-center justify-content-center bg-green-100 border-round" style={{ width: '3rem', height: '3rem' }}>
+                            <i className="pi pi-book text-green-600 text-xl" />
+                        </div>
+                    </div>
+                    <small className="text-500">Mata pelajaran yang Anda ajarkan</small>
                 </div>
             </div>
 
-            {/* DataTable Hari Ini */}
-            <div className="col-12">
-                <div className="card">
-                    <h5>Data Siswa Hari Ini</h5>
-                    <CustomDataTable data={siswaHariIni} columns={columnsHariIni} />
+            <div className="col-12 lg:col-6 xl:col-4">
+                <div className="card mb-2">
+                    <div className="flex justify-content-between">
+                        <div>
+                            <span className="block text-500 font-medium mb-2">Total Kelas Diajar</span>
+                            <div className="text-900 font-medium text-xl">{summary.totalKelasDiajar}</div>
+                        </div>
+                        <div className="flex align-items-center justify-content-center bg-blue-100 border-round" style={{ width: '3rem', height: '3rem' }}>
+                            <i className="pi pi-building text-blue-600 text-xl" />
+                        </div>
+                    </div>
+                    <small className="text-500">Jumlah kelas yang Anda ampu</small>
                 </div>
             </div>
 
-            {/* DataTable Minggu Ini */}
-            <div className="col-12">
-                <div className="card">
-                    <h5>Data Siswa Minggu Ini</h5>
-                    <CustomDataTable data={siswaMinggu} columns={columnsMinggu} />
+            <div className="col-12 lg:col-6 xl:col-4">
+                <div className="card mb-2">
+                    <div className="flex justify-content-between">
+                        <div>
+                            <span className="block text-500 font-medium mb-2">Jadwal Hari Ini</span>
+                            <div className="text-900 font-medium text-xl">{summary.jadwalHariIni} Jadwal</div>
+                        </div>
+                        <div className="flex align-items-center justify-content-center bg-orange-100 border-round" style={{ width: '3rem', height: '3rem' }}>
+                            <i className="pi pi-calendar text-orange-600 text-xl" />
+                        </div>
+                    </div>
+                    <small className="text-500">Agenda mengajar Anda hari ini</small>
                 </div>
             </div>
 
-            {/* DataTable Bulan Ini */}
+            {/* Agenda Mengajar */}
+            <div className="col-12 md:col-7">
+                <div className="card">
+                    <h5>Agenda Mengajar Hari Ini</h5>
+                    <CustomDataTable
+                        data={agendaTable}
+                        columns={agendaColumns}
+                        paginator
+                        rows={5}
+                        rowsPerPageOptions={[5, 10, 20]}
+                    />
+                </div>
+            </div>
+
+            {/* Statistik Absensi */}
+            <div className="col-12 md:col-5">
+                <div className="card flex flex-column align-items-center">
+                    <h5>Statistik Absensi Siswa per Kelas</h5>
+                    <Chart type="bar" data={attendanceData} options={barChartOptions} className="w-full h-20rem" />
+                    <small className="text-500 mt-3">Grafik kehadiran siswa di beberapa kelas</small>
+                </div>
+            </div>
+
+            {/* Riwayat Absensi */}
             <div className="col-12">
                 <div className="card">
-                    <h5>Data Siswa Bulan Ini</h5>
-                    <CustomDataTable data={siswaBulan} columns={columnsBulan} />
+                    <div className="flex justify-content-between align-items-center mb-3">
+                        <h5>Riwayat Absensi</h5>
+                        <Button label="Lihat Riwayat Lengkap" icon="pi pi-search" outlined onClick={() => toastRef.current?.showToast('00', 'Buka halaman riwayat absensi')} />
+                    </div>
+                    <p className="text-500 text-sm">Lihat rekap absensi harian Anda dan kelas yang Anda ajar.</p>
                 </div>
             </div>
         </div>
