@@ -120,7 +120,7 @@ const LoginPage = () => {
             {/* Gambar */}
             <div className="hidden md:block md:col-6 h-full">
               <img
-                src="https://api.minio.jatimprov.go.id/kominfo-jatim/images/e1a81661-d82b-4775-af7a-aaa72616961f.jpg"
+                src="https://serayunews.pw/wp-content/uploads/2025/04/1000238162.png"
                 className="w-full h-full object-cover rounded-lg"
                 alt="cover"
               />

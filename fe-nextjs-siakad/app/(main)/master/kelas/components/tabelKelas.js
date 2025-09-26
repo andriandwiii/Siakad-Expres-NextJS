@@ -1,0 +1,97 @@
+"use client";
+
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Button } from "primereact/button";
+
+// CSS untuk styling tabel
+const TabelKelasStyles = {
+  datatable: {
+    backgroundColor: "#f4f4f9", /* Latar belakang tabel yang lembut */
+    borderRadius: "8px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+  },
+  datatableHeader: {
+    backgroundColor: "#007ad9", /* Warna header tabel */
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  columnHeader: {
+    fontSize: "16px",
+  },
+  columnHeaderContent: {
+    color: "#ffffff",
+  },
+  rowHover: {
+    backgroundColor: "#e0f7fa", /* Warna hover untuk baris */
+  },
+  cell: {
+    padding: "10px", /* Padding untuk cell tabel */
+  },
+  button: {
+    transition: "all 0.3s ease-in-out",
+  },
+  buttonHover: {
+    transform: "scale(1.05)", /* Efek zoom saat hover pada tombol */
+  },
+  buttonWarning: {
+    backgroundColor: "#f9a825", /* Warna tombol edit */
+    border: "none",
+  },
+  buttonWarningHover: {
+    backgroundColor: "#f57f17", /* Warna hover tombol edit */
+  },
+  buttonDanger: {
+    backgroundColor: "#d32f2f", /* Warna tombol hapus */
+    border: "none",
+  },
+  buttonDangerHover: {
+    backgroundColor: "#c62828", /* Warna hover tombol hapus */
+  },
+  responsive: {
+    "@media (max-width: 768px)": {
+      fontSize: "14px", /* Ukuran font lebih kecil pada layar kecil */
+    },
+  },
+};
+
+const TabelKelas = ({ data, loading, onEdit, onDelete }) => {
+  return (
+    <DataTable value={data} paginator rows={10} loading={loading} size="small" scrollable style={TabelKelasStyles.datatable}>
+      <Column field="KELAS_ID" header="ID Kelas" />
+      <Column field="KODE_KELAS" header="Kode Kelas" />
+      <Column field="TINGKAT" header="Tingkat" />
+      <Column field="JURUSAN" header="Jurusan" />
+      <Column field="NAMA_KELAS" header="Nama Kelas" />
+      <Column field="STATUS" header="Status" />
+      <Column
+        header="Aksi"
+        body={(row) => (
+          <div className="flex gap-2">
+            <Button
+              icon="pi pi-pencil"
+              size="small"
+              severity="warning"
+              style={TabelKelasStyles.buttonWarning}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelKelasStyles.buttonWarningHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelKelasStyles.buttonWarning.backgroundColor)}
+              onClick={() => onEdit(row)}
+            />
+            <Button
+              icon="pi pi-trash"
+              size="small"
+              severity="danger"
+              style={TabelKelasStyles.buttonDanger}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelKelasStyles.buttonDangerHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelKelasStyles.buttonDanger.backgroundColor)}
+              onClick={() => onDelete(row)}
+            />
+          </div>
+        )}
+        style={{ width: "150px" }}
+      />
+    </DataTable>
+  );
+};
+
+export default TabelKelas;
