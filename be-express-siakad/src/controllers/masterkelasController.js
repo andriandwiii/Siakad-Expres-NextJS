@@ -1,36 +1,40 @@
 import {
-  addMasterMesin,
-  editMasterMesin,
-  getAllMasterMesin,
-  getMasterMesinById,
-  removeMasterMesin,
-} from "../models/masterMesinModel.js";
+  getAllKelas,
+  getKelasById,
+  addKelas,
+  updateKelas,
+  removeKelas,
+} from "../models/masterKelasModel.js";
+
 import {
-  addMasterMesinSchema,
-  updateMasterMesinSchema,
-} from "../scemas/masterMesinSchema.js";
+  addMasterKelasSchema,
+  updateMasterKelasSchema,
+} from "../scemas/masterKelasSchema.js";
+
 import { datetime, status } from "../utils/general.js";
 
-export const fetchAllMasterMesin = async (req, res) => {
+// =======================
+// Fetch all kelas
+// =======================
+export const fetchAllKelas = async (req, res) => {
   try {
-    const masterMesin = await getAllMasterMesin();
+    const kelas = await getAllKelas();
 
-    if (masterMesin.length === 0) {
+    if (!kelas || kelas.length === 0) {
       return res.status(404).json({
         status: status.NOT_FOUND,
-        message: "Data User kosong",
+        message: "Data kelas kosong",
         datetime: datetime(),
       });
     }
 
     return res.status(200).json({
       status: status.SUKSES,
-      message: "Data User berhasil di dapatkan",
+      message: "Data kelas berhasil didapatkan",
       datetime: datetime(),
-      master_mesin: masterMesin,
+      kelas,
     });
   } catch (error) {
-    console.error(error.message);
     return res.status(500).json({
       status: status.GAGAL,
       message: `Terjadi kesalahan pada server: ${error.message}`,
@@ -39,28 +43,29 @@ export const fetchAllMasterMesin = async (req, res) => {
   }
 };
 
-export const fetchMasterMesinById = async (req, res) => {
+// =======================
+// Get kelas by ID
+// =======================
+export const getKelasByIdController = async (req, res) => {
   try {
     const { id } = req.params;
-    // console.log(req.params.id);
-    const masterMesin = await getMasterMesinById(id);
-    // console.log(masterMesin);
-    if (!masterMesin) {
+    const kelas = await getKelasById(id);
+
+    if (!kelas) {
       return res.status(404).json({
         status: status.NOT_FOUND,
-        message: "Data Mesin tidak ditemukan",
+        message: "Data kelas tidak ditemukan",
         datetime: datetime(),
       });
     }
 
     return res.status(200).json({
       status: status.SUKSES,
-      message: "Data User berhasil di dapatkan",
+      message: "Data kelas berhasil didapatkan",
       datetime: datetime(),
-      master_mesin: masterMesin,
+      kelas,
     });
   } catch (error) {
-    console.error(error.message);
     return res.status(500).json({
       status: status.GAGAL,
       message: `Terjadi kesalahan pada server: ${error.message}`,
@@ -69,9 +74,12 @@ export const fetchMasterMesinById = async (req, res) => {
   }
 };
 
-export const createMasterMesin = async (req, res) => {
+// =======================
+// Create new kelas
+// =======================
+export const createNewKelas = async (req, res) => {
   try {
-    const validation = addMasterMesinSchema.safeParse(req.body);
+    const validation = addMasterKelasSchema.safeParse(req.body);
 
     if (!validation.success) {
       return res.status(400).json({
@@ -85,22 +93,24 @@ export const createMasterMesin = async (req, res) => {
       });
     }
 
-    const { kode_mesin, nama_mesin, suhu_maksimal } = validation.data;
+    const { kode_kelas, tingkat, jurusan, nama_kelas, status: kelasStatus } =
+      validation.data;
 
-    const masterMesin = await addMasterMesin({
-      kode_mesin,
-      nama_mesin,
-      suhu_maksimal,
+    const kelas = await addKelas({
+      kode_kelas,
+      tingkat,
+      jurusan,
+      nama_kelas,
+      status: kelasStatus,
     });
 
-    return res.status(200).json({
+    return res.status(201).json({
       status: status.SUKSES,
-      message: "Data master mesin berhasil dibuat",
+      message: "Kelas berhasil ditambahkan",
       datetime: datetime(),
-      master_mesin: masterMesin,
+      kelas,
     });
   } catch (error) {
-    console.error(error.message);
     return res.status(500).json({
       status: status.GAGAL,
       message: `Terjadi kesalahan pada server: ${error.message}`,
@@ -109,10 +119,13 @@ export const createMasterMesin = async (req, res) => {
   }
 };
 
-export const updateMasterMesin = async (req, res) => {
+// =======================
+// Update kelas
+// =======================
+export const updateKelasController = async (req, res) => {
   try {
     const { id } = req.params;
-    const validation = updateMasterMesinSchema.safeParse(req.body);
+    const validation = updateMasterKelasSchema.safeParse(req.body);
 
     if (!validation.success) {
       return res.status(400).json({
@@ -126,27 +139,26 @@ export const updateMasterMesin = async (req, res) => {
       });
     }
 
-    const { kode_mesin, nama_mesin, suhu_maksimal } = validation.data;
+    const { kode_kelas, tingkat, jurusan, nama_kelas, status: kelasStatus } =
+      validation.data;
 
-    // console.log(kode_mesin, nama_mesin, suhu_maksimal);
-
-    const masterMesin = await editMasterMesin({
-      id,
-      kode_mesin,
-      nama_mesin,
-      suhu_maksimal,
+    await updateKelas(id, {
+      kode_kelas,
+      tingkat,
+      jurusan,
+      nama_kelas,
+      status: kelasStatus,
     });
 
-    console.log(masterMesin);
+    const updatedKelas = await getKelasById(id);
 
     return res.status(200).json({
       status: status.SUKSES,
-      message: "Data master mesin berhasil diperbarui",
+      message: "Kelas berhasil diupdate",
       datetime: datetime(),
-      master_mesin: masterMesin,
+      kelas: updatedKelas,
     });
   } catch (error) {
-    console.error(error.message);
     return res.status(500).json({
       status: status.GAGAL,
       message: `Terjadi kesalahan pada server: ${error.message}`,
@@ -155,29 +167,21 @@ export const updateMasterMesin = async (req, res) => {
   }
 };
 
-export const destroyMasterMesin = async (req, res) => {
+// =======================
+// Delete kelas
+// =======================
+export const deleteKelasController = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const existing = await getMasterMesinById(id);
-    if (!existing) {
-      return res.status(404).json({
-        status: status.SUKSES,
-        message: "Data Mesin tidak ditemukan",
-        datetime: datetime(),
-      });
-    }
-
-    const masterMesin = await removeMasterMesin(id);
+    await removeKelas(id);
 
     return res.status(200).json({
       status: status.SUKSES,
-      message: "Data master mesin berhasil diperbarui",
+      message: "Kelas berhasil dihapus",
       datetime: datetime(),
-      master_mesin: masterMesin,
     });
   } catch (error) {
-    console.error(error.message);
     return res.status(500).json({
       status: status.GAGAL,
       message: `Terjadi kesalahan pada server: ${error.message}`,
