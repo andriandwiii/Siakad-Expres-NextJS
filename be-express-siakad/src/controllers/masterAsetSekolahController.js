@@ -40,12 +40,10 @@ export const createAset = async (req, res) => {
       STATUS, // ✅ ikutkan status
     } = req.body;
 
-    // Validasi input
     if (!NAMA_BARANG || !JUMLAH_BARANG) {
       return res.status(400).json({ message: "NAMA_BARANG dan JUMLAH_BARANG wajib diisi" });
     }
 
-    // Buat data baru
     const newData = await MasterAsetSekolahModel.createAset({
       NAMA_BARANG,
       MERK_TYPE,
@@ -77,12 +75,6 @@ export const updateAset = async (req, res) => {
       STATUS, // ✅ ikutkan status
     } = req.body;
 
-    // Validasi input status
-    if (STATUS && !['Aktif', 'Tidak Aktif'].includes(STATUS)) {
-      return res.status(400).json({ message: "Status harus 'Aktif' atau 'Tidak Aktif'" });
-    }
-
-    // Update data aset
     const updated = await MasterAsetSekolahModel.updateAset(req.params.id, {
       NAMA_BARANG,
       MERK_TYPE,

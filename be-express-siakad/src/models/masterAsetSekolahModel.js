@@ -22,6 +22,7 @@ export const createAset = async ({
   ASAL_USUL_PEROLEHAN,
   PERIODE,
   KETERANGAN,
+  STATUS, // ✅ tambahkan STATUS
 }) => {
   const [id] = await db("master_aset_sekolah").insert({
     NAMA_BARANG,
@@ -30,6 +31,7 @@ export const createAset = async ({
     ASAL_USUL_PEROLEHAN,
     PERIODE,
     KETERANGAN,
+    STATUS, // ✅ ikut tersimpan
   });
 
   return db("master_aset_sekolah").where({ ID: id }).first();
@@ -40,7 +42,15 @@ export const createAset = async ({
  **/
 export const updateAset = async (
   id,
-  { NAMA_BARANG, MERK_TYPE, JUMLAH_BARANG, ASAL_USUL_PEROLEHAN, PERIODE, KETERANGAN }
+  {
+    NAMA_BARANG,
+    MERK_TYPE,
+    JUMLAH_BARANG,
+    ASAL_USUL_PEROLEHAN,
+    PERIODE,
+    KETERANGAN,
+    STATUS, // ✅ tambahkan STATUS
+  }
 ) => {
   await db("master_aset_sekolah")
     .where({ ID: id })
@@ -51,6 +61,8 @@ export const updateAset = async (
       ASAL_USUL_PEROLEHAN,
       PERIODE,
       KETERANGAN,
+      STATUS, // ✅ ikut diupdate
+      UPDATED_AT: db.fn.now(), // biar kolom updated_at ke-refresh
     });
 
   return db("master_aset_sekolah").where({ ID: id }).first();

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as MapelController from "../controllers/masterMapelController.js";
+import * as MapelController from "../controllers/mapelController.js";
 
 const router = Router();
 
