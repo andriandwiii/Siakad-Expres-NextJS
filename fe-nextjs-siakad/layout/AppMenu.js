@@ -32,14 +32,14 @@ const AppMenu = () => {
             {
                 label: "Manajemen SIM",
                 items: [
-                    { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/superadmin/informasi-sekolah" },
-                    { label: "Profil Siswa", icon: "pi pi-fw pi-id-card", to: "/superadmin/profil-siswa" },
-                    { label: "Pengelolaan Aset", icon: "pi pi-fw pi-box", to: "/superadmin/aset" },
-                    { label: "Keuangan", icon: "pi pi-fw pi-wallet", to: "/superadmin/keuangan" },
-                    { label: "Sumber Daya Manusia", icon: "pi pi-fw pi-users", to: "/superadmin/sdm" },
-                    { label: "Kebutuhan Pendidikan Khusus", icon: "pi pi-fw pi-briefcase", to: "/superadmin/kebutuhan-khusus" },
-                    { label: "Evaluasi Diri/Review", icon: "pi pi-fw pi-check-square", to: "/superadmin/review" },
-                    { label: "Manajemen User", icon: "pi pi-fw pi-users", to: "/superadmin/menu/users" },
+                { label: "Agama", icon: "pi pi-user-plus", to: "/master/agama" },
+                { label: "Aset Sekolah", icon: "pi pi-tags", to: "/master/aset_sekolah" },
+                { label: "Guru", icon: "pi pi-fw pi-users", to: "/master/guru" },
+                { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/master/informasi_sekolah" },
+                { label: "Kelas", icon: "pi pi-fw pi-th-large", to: "/master/kelas" },
+                { label: "Kurikulum", icon: "pi pi-fw pi-book", to: "/master/kurikulum" },
+                { label: "Mapel", icon: "pi pi-fw pi-bookmark", to: "/master/mapel" },
+                { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" },
                 ],
             },
         ];
@@ -57,10 +57,10 @@ const AppMenu = () => {
             {
                 label: "Akademik",
                 items: [
-                    { label: "Pengaturan Jadwal Pelajaran", icon: "pi pi-fw pi-calendar", to: "/kurikulum/jadwal" },
-                    { label: "Ujian", icon: "pi pi-fw pi-pencil", to: "/kurikulum/ujian" },
-                    { label: "Cetak Rapor", icon: "pi pi-fw pi-file", to: "/kurikulum/rapor" },
-                    { label: "Perencanaan Kegiatan Belajar", icon: "pi pi-fw pi-book", to: "/kurikulum/rencana" },
+                    { label: "Pengaturan Jadwal Pelajaran", icon: "pi pi-fw pi-calendar", to: "/kurikulum/menu/jadwal" },
+                    { label: "Ujian", icon: "pi pi-fw pi-pencil", to: "/kurikulum/menu/ujian" },
+                    { label: "Cetak Rapor", icon: "pi pi-fw pi-file", to: "/kurikulum/menu/rapor" },
+                    { label: "Perencanaan Kegiatan Belajar", icon: "pi pi-fw pi-book", to: "/kurikulum/menu/rencana" },
                 ],
             },
         ];
@@ -181,7 +181,7 @@ const AppMenu = () => {
             },
             {
                 label: "Penilaian",
-                items: [{ label: "Input Nilai", icon: "pi pi-fw pi-pencil", to: "/guru/nilai" }],
+                items: [{ label: "Input Nilai", icon: "pi pi-fw pi-pencil", to: "/guru/menu/nilai" }],
             },
         ];
     }

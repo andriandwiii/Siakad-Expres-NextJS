@@ -10,7 +10,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Toolbar } from 'primereact/toolbar';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Toast } from 'primereact/toast';
-import CustomDataTable from '../../../components/DataTable'; // <-- gunakan komponenmu (fallback ke DataTable Prime jika tidak ada)
+import CustomDataTable from '../../../components/DataTable'; 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
