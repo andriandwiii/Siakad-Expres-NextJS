@@ -1,4 +1,7 @@
+// src/controllers/informasiSekolahController.js
 import * as InformasiSekolahModel from "../models/informasiSekolahModel.js";
+
+const validStatus = ["Aktif", "Tidak Aktif"];
 
 /**
  * GET semua informasi sekolah
@@ -8,6 +11,7 @@ export const getAllInformasiSekolah = async (req, res) => {
     const data = await InformasiSekolahModel.getAllInformasiSekolah();
     res.status(200).json(data);
   } catch (err) {
+    console.error("Error getAllInformasiSekolah:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -18,9 +22,12 @@ export const getAllInformasiSekolah = async (req, res) => {
 export const getInformasiSekolahById = async (req, res) => {
   try {
     const data = await InformasiSekolahModel.getInformasiSekolahById(req.params.id);
-    if (!data) return res.status(404).json({ message: "Informasi sekolah tidak ditemukan" });
+    if (!data) {
+      return res.status(404).json({ message: "Informasi sekolah tidak ditemukan" });
+    }
     res.status(200).json(data);
   } catch (err) {
+    console.error("Error getInformasiSekolahById:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -32,9 +39,13 @@ export const createInformasiSekolah = async (req, res) => {
   try {
     const { NAMA_SEKOLAH, ALAMAT, JENJANG_AKREDITASI, TANGGAL_AKREDITASI, NPSN, STATUS } = req.body;
 
-    if (!NAMA_SEKOLAH || !ALAMAT) {
-      return res.status(400).json({ message: "NAMA_SEKOLAH dan ALAMAT wajib diisi" });
+    // Validasi dasar
+    if (!NAMA_SEKOLAH || !ALAMAT || !NPSN) {
+      return res.status(400).json({ message: "NAMA_SEKOLAH, ALAMAT, dan NPSN wajib diisi" });
     }
+
+    // Validasi status
+    const finalStatus = validStatus.includes(STATUS) ? STATUS : "Aktif";
 
     const newData = await InformasiSekolahModel.createInformasiSekolah({
       NAMA_SEKOLAH,
@@ -42,11 +53,12 @@ export const createInformasiSekolah = async (req, res) => {
       JENJANG_AKREDITASI,
       TANGGAL_AKREDITASI,
       NPSN,
-      STATUS: STATUS || "Aktif",
+      STATUS: finalStatus,
     });
 
     res.status(201).json(newData);
   } catch (err) {
+    console.error("Error createInformasiSekolah:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -58,19 +70,27 @@ export const updateInformasiSekolah = async (req, res) => {
   try {
     const { NAMA_SEKOLAH, ALAMAT, JENJANG_AKREDITASI, TANGGAL_AKREDITASI, NPSN, STATUS } = req.body;
 
+    // Validasi status
+    const finalStatus = validStatus.includes(STATUS) ? STATUS : "Aktif";
+
+    // Cek dulu apakah data ada
+    const existing = await InformasiSekolahModel.getInformasiSekolahById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ message: "Informasi sekolah tidak ditemukan" });
+    }
+
     const updated = await InformasiSekolahModel.updateInformasiSekolah(req.params.id, {
       NAMA_SEKOLAH,
       ALAMAT,
       JENJANG_AKREDITASI,
       TANGGAL_AKREDITASI,
       NPSN,
-      STATUS,
+      STATUS: finalStatus,
     });
-
-    if (!updated) return res.status(404).json({ message: "Informasi sekolah tidak ditemukan" });
 
     res.status(200).json(updated);
   } catch (err) {
+    console.error("Error updateInformasiSekolah:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -80,11 +100,16 @@ export const updateInformasiSekolah = async (req, res) => {
  */
 export const deleteInformasiSekolah = async (req, res) => {
   try {
-    const deleted = await InformasiSekolahModel.deleteInformasiSekolah(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Informasi sekolah tidak ditemukan" });
+    // Cek dulu apakah ada datanya
+    const existing = await InformasiSekolahModel.getInformasiSekolahById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ message: "Informasi sekolah tidak ditemukan" });
+    }
 
+    await InformasiSekolahModel.deleteInformasiSekolah(req.params.id);
     res.status(200).json({ message: "Informasi sekolah berhasil dihapus" });
   } catch (err) {
+    console.error("Error deleteInformasiSekolah:", err);
     res.status(500).json({ error: err.message });
   }
 };

@@ -1,4 +1,4 @@
-import * as MapelModel from "../models/mapelModel.js";
+import * as MapelModel from "../models/masterMapelModel.js";
 
 /**
  * Ambil semua data mapel
@@ -32,7 +32,7 @@ export const getMapelById = async (req, res) => {
  */
 export const createMapel = async (req, res) => {
   try {
-    const { KODE_MAPEL, NAMA_MAPEL, KATEGORI, STATUS } = req.body;
+    const { KODE_MAPEL, NAMA_MAPEL, KATEGORI, DESKRIPSI, STATUS } = req.body;
 
     if (!KODE_MAPEL || !NAMA_MAPEL) {
       return res
@@ -44,6 +44,7 @@ export const createMapel = async (req, res) => {
       KODE_MAPEL,
       NAMA_MAPEL,
       KATEGORI,
+      DESKRIPSI, // ✅ tambahkan deskripsi
       STATUS,
     });
 
@@ -58,12 +59,13 @@ export const createMapel = async (req, res) => {
  */
 export const updateMapel = async (req, res) => {
   try {
-    const { KODE_MAPEL, NAMA_MAPEL, KATEGORI, STATUS } = req.body;
+    const { KODE_MAPEL, NAMA_MAPEL, KATEGORI, DESKRIPSI, STATUS } = req.body;
 
     const updatedMapel = await MapelModel.updateMapel(req.params.id, {
       KODE_MAPEL,
       NAMA_MAPEL,
       KATEGORI,
+      DESKRIPSI, // ✅ tambahkan deskripsi
       STATUS,
     });
 

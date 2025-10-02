@@ -2,8 +2,8 @@
 
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import TabelMapel from "./components/tabelMapel"; // Pastikan path benar
-import FormMapel from "./components/formDialogMapel"; // Pastikan path benar
+import TabelMapel from "./components/tabelMapel"; // pastikan path benar
+import FormMapel from "./components/formDialogMapel"; // pastikan path benar
 import HeaderBar from "@/app/components/headerbar";
 import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -28,7 +28,7 @@ const MapelPage = () => {
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
-  // Fetch semua Mapel
+  // 🚀 Ambil semua data mapel
   useEffect(() => {
     fetchMapel();
   }, []);
@@ -47,19 +47,23 @@ const MapelPage = () => {
     }
   };
 
-  // Validasi Form
+  // 🚀 Validasi form
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.KODE_MAPEL?.trim()) newErrors.KODE_MAPEL = "Kode Mapel wajib diisi";
-    if (!formData.NAMA_MAPEL?.trim()) newErrors.NAMA_MAPEL = "Nama Mapel wajib diisi";
-    if (!formData.KATEGORI?.trim()) newErrors.KATEGORI = "Kategori wajib diisi";
-    if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
+    if (!formData.KODE_MAPEL?.trim())
+      newErrors.KODE_MAPEL = "Kode Mapel wajib diisi";
+    if (!formData.NAMA_MAPEL?.trim())
+      newErrors.NAMA_MAPEL = "Nama Mapel wajib diisi";
+    if (!formData.KATEGORI?.trim())
+      newErrors.KATEGORI = "Kategori wajib diisi";
+    if (!formData.STATUS?.trim())
+      newErrors.STATUS = "Status wajib diisi";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Pencarian
+  // 🚀 Pencarian
   const handleSearch = (keyword) => {
     if (!keyword) {
       setData(originalData);
@@ -74,13 +78,13 @@ const MapelPage = () => {
     }
   };
 
-  // Submit form (POST/PUT)
+  // 🚀 Simpan form (POST / PUT)
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
     const isEdit = !!formData.MAPEL_ID;
     const url = isEdit
-      ? `${API_URL}/master-mapel?id=${formData.MAPEL_ID}`
+      ? `${API_URL}/master-mapel/${formData.MAPEL_ID}` // ✅ pakai path param
       : `${API_URL}/master-mapel`;
 
     try {
@@ -100,13 +104,13 @@ const MapelPage = () => {
     }
   };
 
-  // Edit mapel
+  // 🚀 Edit mapel
   const handleEdit = (row) => {
     setFormData({ ...row });
     setDialogVisible(true);
   };
 
-  // Hapus mapel
+  // 🚀 Hapus mapel
   const handleDelete = (row) => {
     confirmDialog({
       message: `Apakah Anda yakin ingin menghapus Mapel ${row.NAMA_MAPEL}?`,
@@ -116,7 +120,7 @@ const MapelPage = () => {
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/master-mapel?id=${row.MAPEL_ID}`);
+          await axios.delete(`${API_URL}/master-mapel/${row.MAPEL_ID}`); // ✅ pakai path param
           fetchMapel();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
@@ -127,7 +131,7 @@ const MapelPage = () => {
     });
   };
 
-  // Reset form
+  // 🚀 Reset form
   const resetForm = () => {
     setFormData({
       MAPEL_ID: 0,

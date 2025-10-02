@@ -11,25 +11,15 @@ const formatDate = (date) => {
  * Ambil semua informasi sekolah + jumlah siswa & guru (total aktif)
  */
 export const getAllInformasiSekolah = async () => {
-  return db("master_informasi_sekolah as s")
-    .select(
-      "s.*",
-      db("master_siswa").count("*").where("STATUS", "Aktif").as("JUMLAH_SISWA"),
-      db("master_guru").count("*").where("STATUS", "Aktif").as("JUMLAH_GURU")
-    );
+  return db("master_info_sekolah").select("*");
 };
 
 /**
  * Ambil informasi sekolah berdasarkan ID
  */
 export const getInformasiSekolahById = async (id) => {
-  return db("master_informasi_sekolah as s")
-    .select(
-      "s.*",
-      db("master_siswa").count("*").where("STATUS", "Aktif").as("JUMLAH_SISWA"),
-      db("master_guru").count("*").where("STATUS", "Aktif").as("JUMLAH_GURU")
-    )
-    .where("s.ID_SEKOLAH", id)
+  return db("master_info_sekolah")
+    .where("ID_SEKOLAH", id)
     .first();
 };
 
@@ -44,14 +34,18 @@ export const createInformasiSekolah = async ({
   NPSN,
   STATUS,
 }) => {
-  const [id] = await db("master_informasi_sekolah").insert({
+  // Pastikan STATUS tidak undefined
+  const finalStatus = STATUS ?? "Aktif";
+
+  const [id] = await db("master_info_sekolah").insert({
     NAMA_SEKOLAH,
     ALAMAT,
     JENJANG_AKREDITASI,
     TANGGAL_AKREDITASI: formatDate(TANGGAL_AKREDITASI),
     NPSN,
-    STATUS,
+    STATUS: finalStatus,
   });
+
 
   return getInformasiSekolahById(id);
 };
@@ -63,7 +57,9 @@ export const updateInformasiSekolah = async (
   id,
   { NAMA_SEKOLAH, ALAMAT, JENJANG_AKREDITASI, TANGGAL_AKREDITASI, NPSN, STATUS }
 ) => {
-  await db("master_informasi_sekolah")
+  const finalStatus = STATUS ?? "Aktif";
+
+  await db("master_info_sekolah")
     .where({ ID_SEKOLAH: id })
     .update({
       NAMA_SEKOLAH,
@@ -81,4 +77,4 @@ export const updateInformasiSekolah = async (
  * Hapus informasi sekolah
  */
 export const deleteInformasiSekolah = async (id) =>
-  db("master_informasi_sekolah").where({ ID_SEKOLAH: id }).del();
+  db("master_info_sekolah").where({ ID_SEKOLAH: id }).del();

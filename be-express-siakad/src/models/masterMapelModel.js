@@ -1,55 +1,71 @@
+// src/models/masterMapelModel.js
 import { db } from "../core/config/knex.js";
 
 /**
- * Ambil semua mata pelajaran
- **/
-export const getAllMapel = async () => db("master_mata_pelajaran").select("*");
+ * Ambil semua mapel
+ */
+export const getAllMapel = async () => {
+  return db("master_mapel").select("*");
+};
 
 /**
- * Ambil mata pelajaran berdasarkan ID
- **/
-export const getMapelById = async (id) =>
-  db("master_mata_pelajaran").where({ MAPEL_ID: id }).first();
+ * Ambil mapel berdasarkan ID
+ */
+export const getMapelById = async (id) => {
+  return db("master_mapel").where({ MAPEL_ID: id }).first();
+};
 
 /**
- * Ambil mata pelajaran berdasarkan kode
- **/
-export const getMapelByKode = async (kode) =>
-  db("master_mata_pelajaran").where({ KODE_MAPEL: kode }).first();
+ * Ambil mapel berdasarkan kode
+ */
+export const getMapelByKode = async (kode) => {
+  return db("master_mapel").where({ KODE_MAPEL: kode }).first();
+};
 
 /**
- * Tambah mata pelajaran baru
- **/
+ * Tambah mapel baru
+ */
 export const createMapel = async ({
   KODE_MAPEL,
   NAMA_MAPEL,
   KATEGORI,
+  DESKRIPSI, // ✅ tambahin
   STATUS,
 }) => {
-  const [id] = await db("master_mata_pelajaran").insert({
+  const [id] = await db("master_mapel").insert({
     KODE_MAPEL,
     NAMA_MAPEL,
     KATEGORI,
+    DESKRIPSI, // ✅ ikut disimpan
     STATUS,
   });
-  return db("master_mata_pelajaran").where({ MAPEL_ID: id }).first();
+
+  return db("master_mapel").where({ MAPEL_ID: id }).first();
 };
 
 /**
- * Update mata pelajaran
- **/
+ * Update mapel berdasarkan ID
+ */
 export const updateMapel = async (
   id,
-  { KODE_MAPEL, NAMA_MAPEL, KATEGORI, STATUS }
+  { KODE_MAPEL, NAMA_MAPEL, KATEGORI, DESKRIPSI, STATUS } // ✅ tambahin
 ) => {
-  await db("master_mata_pelajaran")
+  await db("master_mapel")
     .where({ MAPEL_ID: id })
-    .update({ KODE_MAPEL, NAMA_MAPEL, KATEGORI, STATUS });
-  return db("master_mata_pelajaran").where({ MAPEL_ID: id }).first();
+    .update({
+      KODE_MAPEL,
+      NAMA_MAPEL,
+      KATEGORI,
+      DESKRIPSI, // ✅ ikut disimpan
+      STATUS,
+    });
+
+  return db("master_mapel").where({ MAPEL_ID: id }).first();
 };
 
 /**
- * Hapus mata pelajaran
- **/
-export const deleteMapel = async (id) =>
-  db("master_mata_pelajaran").where({ MAPEL_ID: id }).del();
+ * Hapus mapel berdasarkan ID
+ */
+export const deleteMapel = async (id) => {
+  return db("master_mapel").where({ MAPEL_ID: id }).del();
+};
