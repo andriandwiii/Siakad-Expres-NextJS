@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import TabelMapel from "./components/tabelMapel"; // Pastikan path benar
 import FormMapel from "./components/formDialogMapel"; // Pastikan path benar
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "/app/components/toastNotifier";
+import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;

@@ -12,7 +12,7 @@ export const fetchAllUsers = async (req, res) => {
     let users;
 
     if (role) {
-      users = await getUsersByRole(role); // ambil langsung dari DB
+      users = await getUsersByRole(role); 
     } else {
       users = await getAllUsers();
     }

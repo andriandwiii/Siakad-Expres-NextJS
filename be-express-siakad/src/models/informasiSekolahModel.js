@@ -1,6 +1,13 @@
 import { db } from "../core/config/knex.js";
 
 /**
+ * Helper untuk format tanggal ke YYYY-MM-DD
+ */
+const formatDate = (date) => {
+  return date ? new Date(date).toISOString().split("T")[0] : null;
+};
+
+/**
  * Ambil semua informasi sekolah + jumlah siswa & guru (total aktif)
  */
 export const getAllInformasiSekolah = async () => {
@@ -41,10 +48,11 @@ export const createInformasiSekolah = async ({
     NAMA_SEKOLAH,
     ALAMAT,
     JENJANG_AKREDITASI,
-    TANGGAL_AKREDITASI,
+    TANGGAL_AKREDITASI: formatDate(TANGGAL_AKREDITASI),
     NPSN,
     STATUS,
   });
+
   return getInformasiSekolahById(id);
 };
 
@@ -57,7 +65,14 @@ export const updateInformasiSekolah = async (
 ) => {
   await db("master_informasi_sekolah")
     .where({ ID_SEKOLAH: id })
-    .update({ NAMA_SEKOLAH, ALAMAT, JENJANG_AKREDITASI, TANGGAL_AKREDITASI, NPSN, STATUS });
+    .update({
+      NAMA_SEKOLAH,
+      ALAMAT,
+      JENJANG_AKREDITASI,
+      TANGGAL_AKREDITASI: formatDate(TANGGAL_AKREDITASI),
+      NPSN,
+      STATUS,
+    });
 
   return getInformasiSekolahById(id);
 };

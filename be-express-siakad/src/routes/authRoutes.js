@@ -10,6 +10,9 @@ router.post("/login", AuthController.login);
 // REGISTER (hanya SUPER_ADMIN bisa menambahkan user, proteksi bisa di middleware)
 router.post("/register", AuthController.register);
 
+router.post("/register-siswa", AuthController.registerSiswa);
+router.post("/register-guru", AuthController.registerGuru);
+
 // LOGOUT
 router.post("/logout", verifyToken, AuthController.logout);
 
