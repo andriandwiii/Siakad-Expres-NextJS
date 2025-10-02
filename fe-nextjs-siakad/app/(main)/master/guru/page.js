@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import TabelWilayah from "./components/tabelWilayah"; // Pastikan pathnya benar
 import FormWilayah from "./components/formDialogWilayah"; // Pastikan pathnya benar
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/toastNotifier";
+import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;

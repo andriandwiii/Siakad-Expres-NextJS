@@ -1,166 +1,144 @@
 /* eslint-disable @next/next/no-img-element */
-"use client";
+'use client';
 
-import React, { useState, useRef } from "react";
-import { Card } from "primereact/card";
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
-import { Button } from "primereact/button";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Divider } from "primereact/divider";
-import { Column } from "primereact/column";
-import ToastNotifier from "../../../../components/ToastNotifier";
-import CustomDataTable from "../../../../components/DataTable";
+import { useState, useRef } from 'react';
+import { Button } from 'primereact/button';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { InputText } from 'primereact/inputtext';
+import ToastNotifier from '@/app/components/ToastNotifier';
+import CustomDataTable from '@/app/components/DataTable';
+import FormAbsensiSiswaModal from './components/FormAbsensiSiswa';
 
 export default function AbsensiKelasPage() {
-    const toastRef = useRef(null);
+  const toastRef = useRef(null);
 
-    // --- State Form Absensi Siswa ---
-    const [kelasSiswa, setKelasSiswa] = useState(null);
-    const [mapelSiswa, setMapelSiswa] = useState(null);
-    const [jamMulai, setJamMulai] = useState(null);
-    const [jamSelesai, setJamSelesai] = useState(null);
-    const [catatan, setCatatan] = useState("");
-    const [absensiLog, setAbsensiLog] = useState([]);
+  const [records, setRecords] = useState([
+    {
+      id: 1,
+      kelas: 'XI IPA 1',
+      mapel: 'Matematika',
+      jam: '07:00 - 08:30',
+      catatan: 'Pertemuan pertama',
+      waktuDibuat: '2025-09-29 08:00:00'
+    },
+    {
+      id: 2,
+      kelas: 'XI IPA 2',
+      mapel: 'Bahasa Indonesia',
+      jam: '08:45 - 10:15',
+      catatan: 'materi pengantar',
+      waktuDibuat: '2025-09-29 08:05:00'
+    },
+    {
+      id: 3,
+      kelas: 'XI IPS 1',
+      mapel: 'Bahasa Inggris',
+      jam: '10:30 - 12:00',
+      catatan: 'materi dasar grammar',
+      waktuDibuat: '2025-09-29 08:10:00'
+    }
+  ]);
 
-    const kelasOptions = ["XI IPA 1", "XI IPA 2", "XI IPS 1"];
-    const mapelOptions = ["Matematika", "Bahasa Indonesia", "Bahasa Inggris"];
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [dialogMode, setDialogMode] = useState(null);
+  const [globalFilter, setGlobalFilter] = useState('');
 
-    const handleBukaAbsensiSiswa = () => {
-        if (!kelasSiswa || !mapelSiswa || !jamMulai || !jamSelesai) {
-            toastRef.current?.showToast('01', 'Lengkapi semua data terlebih dahulu!');
-            return;
-        }
-
-        const newLogEntry = {
-            id: absensiLog.length + 1,
-            kelas: kelasSiswa,
-            mapel: mapelSiswa,
-            jam: `${jamMulai.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} - ${jamSelesai.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
-            catatan: catatan || '-',
-            waktuDibuat: new Date().toLocaleString('id-ID')
-        };
-
-        setAbsensiLog(prev => [newLogEntry, ...prev]);
-        toastRef.current?.showToast('00', `Absensi untuk kelas ${kelasSiswa} (${mapelSiswa}) berhasil dibuka!`);
-
-        // Reset form
-        setKelasSiswa(null);
-        setMapelSiswa(null);
-        setJamMulai(null);
-        setJamSelesai(null);
-        setCatatan("");
+  const handleSubmit = (data) => {
+    const newRecord = {
+      id: Date.now(),
+      kelas: data.kelas,
+      mapel: data.mapel,
+      jam: `${data.jamMulai.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} - ${data.jamSelesai.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
+      catatan: data.catatan || '-',
+      waktuDibuat: new Date().toLocaleString('id-ID')
     };
 
-    const logColumns = [
-        { field: 'kelas', header: 'Kelas', style: { minWidth: '100px' } },
-        { field: 'mapel', header: 'Mata Pelajaran', style: { minWidth: '150px' } },
-        { field: 'jam', header: 'Jam', style: { minWidth: '150px' } },
-        { field: 'catatan', header: 'Catatan', style: { minWidth: '150px' } },
-        { field: 'waktuDibuat', header: 'Waktu Dibuat', style: { minWidth: '150px' } },
-    ];
-    
-    const useCustom = !!(typeof CustomDataTable !== 'undefined');
+    setRecords((prev) => [newRecord, ...prev]);
+    toastRef.current?.showToast('00', 'Absensi siswa berhasil ditambahkan');
 
-    return (
-        <div className="grid justify-content-center">
-            <ToastNotifier ref={toastRef} />
-            <div className="col-12 md:col-10">
-                <Card className="mb-4 shadow-1">
-                    <h5 className="font-bold text-900">Buka Absensi Kelas</h5>
-                    <p className="text-sm text-500 mb-3">Buat sesi absensi baru untuk siswa di kelas Anda.</p>
-                    <Divider />
-                    <div className="p-fluid formgrid grid">
-                        <div className="field col-12 md:col-6">
-                            <label htmlFor="kelasSiswa" className="font-medium">Kelas</label>
-                            <Dropdown
-                                id="kelasSiswa"
-                                value={kelasSiswa}
-                                options={kelasOptions}
-                                onChange={(e) => setKelasSiswa(e.value)}
-                                placeholder="Pilih Kelas"
-                            />
-                        </div>
-                        <div className="field col-12 md:col-6">
-                            <label htmlFor="mapelSiswa" className="font-medium">Mata Pelajaran</label>
-                            <Dropdown
-                                id="mapelSiswa"
-                                value={mapelSiswa}
-                                options={mapelOptions}
-                                onChange={(e) => setMapelSiswa(e.value)}
-                                placeholder="Pilih Mata Pelajaran"
-                            />
-                        </div>
-                        <div className="field col-12 md:col-6">
-                            <label htmlFor="jamMulai" className="font-medium">Jam Mulai</label>
-                            <Calendar
-                                id="jamMulai"
-                                value={jamMulai}
-                                onChange={(e) => setJamMulai(e.value)}
-                                timeOnly
-                                hourFormat="24"
-                                placeholder="Pilih Jam Mulai"
-                                showIcon
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="field col-12 md:col-6">
-                            <label htmlFor="jamSelesai" className="font-medium">Jam Selesai</label>
-                            <Calendar
-                                id="jamSelesai"
-                                value={jamSelesai}
-                                onChange={(e) => setJamSelesai(e.value)}
-                                timeOnly
-                                hourFormat="24"
-                                placeholder="Pilih Jam Selesai"
-                                showIcon
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="field col-12">
-                            <label htmlFor="catatan" className="font-medium">Catatan / Deskripsi (Opsional)</label>
-                            <InputTextarea
-                                id="catatan"
-                                value={catatan}
-                                onChange={(e) => setCatatan(e.target.value)}
-                                rows={3}
-                                autoResize
-                                placeholder="Misalnya: Absensi harian pertemuan pertama."
-                            />
-                        </div>
-                    </div>
-                    <div className="mt-4">
-                        <Button label="Buka Absensi Siswa" icon="pi pi-check" className="p-button-success" onClick={handleBukaAbsensiSiswa} />
-                    </div>
-                </Card>
-                <Card className="shadow-1">
-                    <h5 className="font-bold text-900">Riwayat Sesi Absensi</h5>
-                    <Divider className="my-2" />
-                    {useCustom ? (
-                        <CustomDataTable
-                            data={absensiLog}
-                            columns={logColumns}
-                            paginator
-                            rows={5}
-                            rowsPerPageOptions={[5, 10, 20]}
-                        />
-                    ) : (
-                        <DataTable
-                            value={absensiLog}
-                            paginator
-                            rows={5}
-                            responsiveLayout="scroll"
-                            className="p-datatable-sm"
-                        >
-                            <Column field="kelas" header="Kelas" sortable />
-                            <Column field="mapel" header="Mata Pelajaran" sortable />
-                            <Column field="jam" header="Jam" sortable />
-                            <Column field="catatan" header="Catatan" />
-                            <Column field="waktuDibuat" header="Waktu Dibuat" sortable />
-                        </DataTable>
-                    )}
-                </Card>
-            </div>
-        </div>
-    );
+    setDialogMode(null);
+    setSelectedRecord(null);
+  };
+
+  const handleDelete = (row) => {
+    confirmDialog({
+      message: `Yakin ingin menghapus absensi kelas "${row.kelas}"?`,
+      header: 'Konfirmasi Hapus',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Hapus',
+      rejectLabel: 'Batal',
+      acceptClassName: 'p-button-danger',
+      accept: () => {
+        setRecords((prev) => prev.filter((r) => r.id !== row.id));
+        toastRef.current?.showToast('00', 'Data absensi berhasil dihapus');
+      },
+    });
+  };
+
+  const actionBodyTemplate = (row) => (
+    <div className="flex gap-2">
+      <Button
+        icon="pi pi-trash"
+        size="small"
+        severity="danger"
+        onClick={() => handleDelete(row)}
+      />
+    </div>
+  );
+
+  const columns = [
+    { field: 'kelas', header: 'Kelas', filter: true },
+    { field: 'mapel', header: 'Mata Pelajaran', filter: true },
+    { field: 'jam', header: 'Jam' },
+    { field: 'catatan', header: 'Catatan' },
+    { field: 'waktuDibuat', header: 'Waktu Dibuat' },
+    { header: 'Aksi', body: actionBodyTemplate, style: { width: '120px' } },
+  ];
+
+  return (
+    <div className="card p-4">
+      <h3 className="text-xl font-semibold mb-4">Absensi Kelas</h3>
+
+      <div className="flex justify-content-end gap-3 mb-3">
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText
+            placeholder="Cari kelas atau mata pelajaran..."
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+          />
+        </span>
+        <Button
+          label="Tambah Absensi"
+          icon="pi pi-plus"
+          onClick={() => {
+            setDialogMode('add');
+            setSelectedRecord(null);
+          }}
+        />
+      </div>
+
+      <CustomDataTable
+        data={records.filter((r) =>
+          r.kelas.toLowerCase().includes(globalFilter.toLowerCase()) ||
+          r.mapel.toLowerCase().includes(globalFilter.toLowerCase())
+        )}
+        columns={columns}
+      />
+
+      <ConfirmDialog />
+
+      <FormAbsensiSiswaModal
+        isOpen={dialogMode !== null}
+        onClose={() => {
+          setDialogMode(null);
+          setSelectedRecord(null);
+        }}
+        onSubmit={handleSubmit}
+        initialData={selectedRecord}
+      />
+
+      <ToastNotifier ref={toastRef} />
+    </div>
+  );
 }

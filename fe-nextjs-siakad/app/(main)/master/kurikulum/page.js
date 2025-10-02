@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import TabelKurikulum from "./components/tabelKurikulum"; // Pastikan pathnya benar
 import FormKurikulum from "./components/formDialogKurikulum"; // Pastikan pathnya benar
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "/app/components/toastNotifier";
+import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import * as MasterWilayahModel from "../models/masterWilayahModel.js";
 
 /**
@@ -7,11 +8,21 @@ export const getAllWilayah = async (req, res) => {
   try {
     const wilayah = await MasterWilayahModel.getAllWilayah();
     res.status(200).json(wilayah);
+=======
+import * as GuruModel from "../models/guruModel.js";
+
+// Ambil semua guru
+export const getAllGuru = async (req, res) => {
+  try {
+    const data = await GuruModel.getAllGuruWithUser();
+    res.json({ status: "00", message: "Data guru ditemukan", data });
+>>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ status: "01", message: err.message });
   }
 };
 
+<<<<<<< HEAD
 /**
  * Ambil wilayah berdasarkan ID
  */
@@ -22,11 +33,22 @@ export const getWilayahById = async (req, res) => {
       return res.status(404).json({ message: "Wilayah tidak ditemukan" });
     }
     res.status(200).json(wilayah);
+=======
+// Ambil guru by ID
+export const getGuruById = async (req, res) => {
+  try {
+    const data = await GuruModel.getGuruByIdWithUser(req.params.id);
+    if (!data) {
+      return res.status(404).json({ status: "01", message: "Guru tidak ditemukan" });
+    }
+    res.json({ status: "00", message: "Data guru ditemukan", data });
+>>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ status: "01", message: err.message });
   }
 };
 
+<<<<<<< HEAD
 /**
  * Tambah wilayah baru
  */
@@ -50,11 +72,19 @@ export const createWilayah = async (req, res) => {
     });
 
     res.status(201).json(newWilayah);
+=======
+// Tambah guru
+export const createGuru = async (req, res) => {
+  try {
+    const guru = await GuruModel.addGuru(req.body);
+    res.json({ status: "00", message: "Guru berhasil ditambahkan", guru });
+>>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ status: "01", message: err.message });
   }
 };
 
+<<<<<<< HEAD
 /**
  * Update wilayah berdasarkan ID
  */
@@ -78,11 +108,19 @@ export const updateWilayah = async (req, res) => {
     }
 
     res.status(200).json(updatedWilayah);
+=======
+// Update guru
+export const updateGuru = async (req, res) => {
+  try {
+    const guru = await GuruModel.updateGuru(req.params.id, req.body);
+    res.json({ status: "00", message: "Guru berhasil diperbarui", guru });
+>>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ status: "01", message: err.message });
   }
 };
 
+<<<<<<< HEAD
 /**
  * Hapus wilayah berdasarkan ID
  */
@@ -95,7 +133,14 @@ export const deleteWilayah = async (req, res) => {
     }
 
     res.status(200).json({ message: "Wilayah berhasil dihapus" });
+=======
+// Hapus guru
+export const deleteGuru = async (req, res) => {
+  try {
+    await GuruModel.deleteGuru(req.params.id);
+    res.json({ status: "00", message: "Guru berhasil dihapus" });
+>>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ status: "01", message: err.message });
   }
 };

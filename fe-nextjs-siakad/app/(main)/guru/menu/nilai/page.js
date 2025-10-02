@@ -8,8 +8,8 @@ import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import ToastNotifier from '../../../../components/ToastNotifier';
-import CustomDataTable from '../../../../components/DataTable';
+import ToastNotifier from '@/app/components/ToastNotifier';
+import CustomDataTable from '@/app/components/DataTable';
 
 const NilaiSiswaPage = () => {
     const toastRef = useRef(null);
