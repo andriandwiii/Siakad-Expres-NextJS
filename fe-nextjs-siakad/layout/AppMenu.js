@@ -25,23 +25,22 @@ const AppMenu = () => {
     // =========================
     if (userRole === "SUPER_ADMIN") {
         model = [
-            {
-                label: "Dashboard",
-                items: [{ label: "Dashboard Utama", icon: "pi pi-fw pi-home", to: "/superadmin/dashboard" }],
-            },
-            {
-                label: "Manajemen SIM",
-                items: [
-                { label: "Agama", icon: "pi pi-user-plus", to: "/master/agama" },
-                { label: "Aset Sekolah", icon: "pi pi-tags", to: "/master/aset_sekolah" },
-                { label: "Guru", icon: "pi pi-fw pi-users", to: "/master/guru" },
-                { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/master/informasi_sekolah" },
-                { label: "Kelas", icon: "pi pi-fw pi-th-large", to: "/master/kelas" },
-                { label: "Kurikulum", icon: "pi pi-fw pi-book", to: "/master/kurikulum" },
-                { label: "Mapel", icon: "pi pi-fw pi-bookmark", to: "/master/mapel" },
-                { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" },
-                ],
-            },
+           {
+            label: "Manajemen SIM",
+            items: [
+                { label: "Agama", icon: "pi pi-heart", to: "/master/agama" },
+                { label: "Aset Sekolah", icon: "pi pi-briefcase", to: "/master/aset_sekolah" },
+                { label: "Guru", icon: "pi pi-users", to: "/master/guru" },
+                { label: "Informasi Sekolah", icon: "pi pi-info-circle", to: "/master/informasi_sekolah" },
+                { label: "Kelas", icon: "pi pi-building", to: "/master/kelas" },
+                { label: "Kurikulum", icon: "pi pi-book", to: "/master/kurikulum" },
+                { label: "Mapel", icon: "pi pi-bookmark", to: "/master/mapel" },
+                { label: "Wilayah", icon: "pi pi-globe", to: "/master/wilayah" },
+                { label: "Waktu Pelajaran", icon: "pi pi-clock", to: "/master/waktu_pelajaran" },
+                { label: "Ujian", icon: "pi pi-check-circle", to: "/master/ujian" }, // Tambahkan baris ini untuk Ujian
+                { label: "User", icon: "pi pi-user", to: "/superadmin/menu/users" }
+            ]
+            }
         ];
     }
 

@@ -4,7 +4,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 
-const TabelGuruStyles = {
+const TabelWilayahStyles = {
   datatable: {
     backgroundColor: "#f4f4f9",
     borderRadius: "8px",
@@ -54,15 +54,19 @@ const TabelGuruStyles = {
   },
 };
 
-const TabelGuru = ({ data, loading, onEdit, onDelete }) => {
+const TabelWilayah = ({ data, loading, onEdit, onDelete }) => {
   return (
-    <DataTable value={data} paginator rows={10} loading={loading} size="small" scrollable style={TabelGuruStyles.datatable}>
-      <Column field="GURU_ID" header="ID Guru" />
-      <Column field="NIP" header="NIP" />
-      <Column field="NAMA" header="Nama" />
-      <Column field="GELAR" header="Gelar" />
-      <Column field="PANGKAT" header="Pangkat" />
-      <Column field="JABATAN" header="Jabatan" />
+    <DataTable value={data} paginator rows={10} loading={loading} size="small" scrollable style={TabelWilayahStyles.datatable}>
+      <Column field="ID" header="ID Wilayah" />
+      <Column field="PROVINSI" header="Provinsi" />
+      <Column field="KABUPATEN" header="Kabupaten" />
+      <Column field="KECAMATAN" header="Kecamatan" />
+      <Column field="DESA_KELURAHAN" header="Desa/Kelurahan" />
+      <Column field="KODEPOS" header="Kode Pos" />
+      <Column field="RT" header="RT" />
+      <Column field="RW" header="RW" />
+      <Column field="JALAN" header="Jalan" />
+      <Column field="STATUS" header="Status" />
       <Column
         header="Aksi"
         body={(row) => (
@@ -71,18 +75,18 @@ const TabelGuru = ({ data, loading, onEdit, onDelete }) => {
               icon="pi pi-pencil"
               size="small"
               severity="warning"
-              style={TabelGuruStyles.buttonWarning}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelGuruStyles.buttonWarningHover.backgroundColor)}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelGuruStyles.buttonWarning.backgroundColor)}
+              style={TabelWilayahStyles.buttonWarning}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelWilayahStyles.buttonWarningHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelWilayahStyles.buttonWarning.backgroundColor)}
               onClick={() => onEdit(row)}
             />
             <Button
               icon="pi pi-trash"
               size="small"
               severity="danger"
-              style={TabelGuruStyles.buttonDanger}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelGuruStyles.buttonDangerHover.backgroundColor)}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelGuruStyles.buttonDanger.backgroundColor)}
+              style={TabelWilayahStyles.buttonDanger}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelWilayahStyles.buttonDangerHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelWilayahStyles.buttonDanger.backgroundColor)}
               onClick={() => onDelete(row)}
             />
           </div>
@@ -93,4 +97,4 @@ const TabelGuru = ({ data, loading, onEdit, onDelete }) => {
   );
 };
 
-export default TabelGuru;
+export default TabelWilayah;

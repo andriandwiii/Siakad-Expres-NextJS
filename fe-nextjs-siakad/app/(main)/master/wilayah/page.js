@@ -4,12 +4,13 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelWilayah from "./components/tabelWilayah"; // Pastikan pathnya benar
-import FormWilayah from "./components/formDialogWilayah"; // Pastikan pathnya benar
+import TabelWilayah from "./components/tabelWilayah"; // Make sure path is correct
+import FormWilayah from "./components/formDialogWilayah"; // Make sure path is correct
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/toastNotifier";
+import ToastNotifier from "/app/components/toastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
+// API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const WilayahPage = () => {
@@ -19,7 +20,7 @@ const WilayahPage = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    ID: 0,
+    ID: "", // Ensure ID is handled as string or number
     PROVINSI: "",
     KABUPATEN: "",
     KECAMATAN: "",
@@ -132,7 +133,7 @@ const WilayahPage = () => {
 
   const resetForm = () => {
     setFormData({
-      ID: 0,
+      ID: "",
       PROVINSI: "",
       KABUPATEN: "",
       KECAMATAN: "",

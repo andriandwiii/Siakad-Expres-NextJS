@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 
 // CSS untuk styling tabel
-const TabelInformasiSekolahStyles = {
+const TabelWaktuPelajaranStyles = {
   datatable: {
     backgroundColor: "#f4f4f9", /* Latar belakang tabel yang lembut */
     borderRadius: "8px",
@@ -55,18 +55,19 @@ const TabelInformasiSekolahStyles = {
   },
 };
 
-const TabelInformasiSekolah = ({ data, loading, onEdit, onDelete }) => {
+const TabelWaktuPelajaran = ({ data, loading, onEdit, onDelete }) => {
   return (
-    <DataTable value={data} paginator rows={10} loading={loading} size="small" scrollable style={TabelInformasiSekolahStyles.datatable}>
-      {/* Menambahkan Kolom ID */}
-      <Column field="ID" header="ID" style={{ width: "100px" }} />
-      <Column field="NAMA_SEKOLAH" header="Nama Sekolah" />
-      <Column field="ALAMAT" header="Alamat" />
-      <Column field="JENJANG_AKREDITASI" header="Jenjang Akreditasi" />
-      <Column field="TANGGAL_AKREDITASI" header="Tanggal Akreditasi" />
-      <Column field="NPSN" header="NPSN" />
+    <DataTable value={data} paginator rows={10} loading={loading} size="small" scrollable style={TabelWaktuPelajaranStyles.datatable}>
+      <Column field="ID" header="ID Waktu Pelajaran" />
+      <Column field="HARI" header="Hari" />
+      <Column field="JAM_MULAI" header="Jam Mulai" />
+      <Column field="JAM_SELESAI" header="Jam Selesai" />
+      <Column field="DURASI" header="Durasi (Menit)" />
+      <Column field="MATA_PELAJARAN" header="Mata Pelajaran" />
+      <Column field="KELAS" header="Kelas" />
+      <Column field="RUANGAN" header="Ruangan" />
+      <Column field="GURU_PENGAJAR" header="Guru Pengajar" />
       <Column field="STATUS" header="Status" />
-      {/* Kolom Aksi dengan Tombol Edit dan Delete */}
       <Column
         header="Aksi"
         body={(row) => (
@@ -75,19 +76,19 @@ const TabelInformasiSekolah = ({ data, loading, onEdit, onDelete }) => {
               icon="pi pi-pencil"
               size="small"
               severity="warning"
-              style={TabelInformasiSekolahStyles.buttonWarning}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonWarningHover.backgroundColor)}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonWarning.backgroundColor)}
-              onClick={() => onEdit(row)} // Mengirimkan seluruh row, termasuk ID
+              style={TabelWaktuPelajaranStyles.buttonWarning}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelWaktuPelajaranStyles.buttonWarningHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelWaktuPelajaranStyles.buttonWarning.backgroundColor)}
+              onClick={() => onEdit(row)}
             />
             <Button
               icon="pi pi-trash"
               size="small"
               severity="danger"
-              style={TabelInformasiSekolahStyles.buttonDanger}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonDangerHover.backgroundColor)}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonDanger.backgroundColor)}
-              onClick={() => onDelete(row)} // Mengirimkan seluruh row, termasuk ID
+              style={TabelWaktuPelajaranStyles.buttonDanger}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelWaktuPelajaranStyles.buttonDangerHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelWaktuPelajaranStyles.buttonDanger.backgroundColor)}
+              onClick={() => onDelete(row)}
             />
           </div>
         )}
@@ -97,4 +98,4 @@ const TabelInformasiSekolah = ({ data, loading, onEdit, onDelete }) => {
   );
 };
 
-export default TabelInformasiSekolah;
+export default TabelWaktuPelajaran;

@@ -4,15 +4,15 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelWilayah from "./components/tabelWilayah"; // Pastikan pathnya benar
-import FormWilayah from "./components/formDialogWilayah"; // Pastikan pathnya benar
+import TabelWaktuPelajaran from "./components/tabelWaktuPelajaran"; // pastikan path benar
+import FormWaktuPelajaran from "./components/formDialogWaktuPelajaran"; // pastikan path benar
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/toastNotifier";
+import ToastNotifier from "/app/components/toastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const WilayahPage = () => {
+const WaktuPelajaranPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,28 +20,28 @@ const WilayahPage = () => {
 
   const [formData, setFormData] = useState({
     ID: 0,
-    PROVINSI: "",
-    KABUPATEN: "",
-    KECAMATAN: "",
-    DESA_KELURAHAN: "",
-    KODEPOS: "",
-    RT: "",
-    RW: "",
-    JALAN: "",
-    STATUS: "Aktif",
+    HARI: "",
+    JAM_MULAI: "",
+    JAM_SELESAI: "",
+    DURASI: "",
+    MATA_PELAJARAN: "",
+    KELAS: "",
+    RUANGAN: "",
+    GURU_PENGAJAR: "",
+    STATUS: "",
   });
 
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchWilayah();
+    fetchWaktuPelajaran();
   }, []);
 
-  const fetchWilayah = async () => {
+  const fetchWaktuPelajaran = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/master-wilayah`);
+      const res = await axios.get(`${API_URL}/master-waktu-pelajaran`);
       setData(res.data);
       setOriginalData(res.data);
     } catch (err) {
@@ -53,15 +53,14 @@ const WilayahPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.PROVINSI?.trim()) newErrors.PROVINSI = "Provinsi wajib diisi";
-    if (!formData.KABUPATEN?.trim()) newErrors.KABUPATEN = "Kabupaten wajib diisi";
-    if (!formData.KECAMATAN?.trim()) newErrors.KECAMATAN = "Kecamatan wajib diisi";
-    if (!formData.DESA_KELURAHAN?.trim()) newErrors.DESA_KELURAHAN = "Desa/Kelurahan wajib diisi";
-    if (!formData.KODEPOS?.trim()) newErrors.KODEPOS = "Kode Pos wajib diisi";
-    if (!formData.RT?.trim()) newErrors.RT = "RT wajib diisi";
-    if (!formData.RW?.trim()) newErrors.RW = "RW wajib diisi";
-    if (!formData.JALAN?.trim()) newErrors.JALAN = "Jalan wajib diisi";
-
+    if (!formData.HARI?.trim()) newErrors.HARI = "Hari wajib diisi";
+    if (!formData.JAM_MULAI?.trim()) newErrors.JAM_MULAI = "Jam Mulai wajib diisi";
+    if (!formData.JAM_SELESAI?.trim()) newErrors.JAM_SELESAI = "Jam Selesai wajib diisi";
+    if (!formData.MATA_PELAJARAN?.trim()) newErrors.MATA_PELAJARAN = "Mata Pelajaran wajib diisi";
+    if (!formData.KELAS?.trim()) newErrors.KELAS = "Kelas wajib diisi";
+    if (!formData.RUANGAN?.trim()) newErrors.RUANGAN = "Ruangan wajib diisi";
+    if (!formData.GURU_PENGAJAR?.trim()) newErrors.GURU_PENGAJAR = "Guru Pengajar wajib diisi";
+    if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -70,11 +69,13 @@ const WilayahPage = () => {
     if (!keyword) {
       setData(originalData);
     } else {
+      const q = keyword.toLowerCase();
       const filtered = originalData.filter(
         (item) =>
-          item.PROVINSI.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.KABUPATEN.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.KECAMATAN.toLowerCase().includes(keyword.toLowerCase())
+          item.HARI?.toLowerCase().includes(q) ||
+          item.MATA_PELAJARAN?.toLowerCase().includes(q) ||
+          item.KELAS?.toLowerCase().includes(q) ||
+          item.GURU_PENGAJAR?.toLowerCase().includes(q)
       );
       setData(filtered);
     }
@@ -85,8 +86,8 @@ const WilayahPage = () => {
 
     const isEdit = !!formData.ID;
     const url = isEdit
-      ? `${API_URL}/master-wilayah/${formData.ID}`
-      : `${API_URL}/master-wilayah`;
+      ? `${API_URL}/master-waktu-pelajaran/${formData.ID}`
+      : `${API_URL}/master-waktu-pelajaran`;
 
     try {
       if (isEdit) {
@@ -96,7 +97,7 @@ const WilayahPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchWilayah();
+      fetchWaktuPelajaran();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -112,15 +113,15 @@ const WilayahPage = () => {
 
   const handleDelete = (row) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus wilayah ${row.PROVINSI}?`,
+      message: `Apakah Anda yakin ingin menghapus waktu pelajaran ${row.MATA_PELAJARAN} - ${row.KELAS}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/master-wilayah/${row.ID}`);
-          fetchWilayah();
+          await axios.delete(`${API_URL}/master-waktu-pelajaran/${row.ID}`);
+          fetchWaktuPelajaran();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
           console.error("Gagal menghapus data:", err);
@@ -133,15 +134,15 @@ const WilayahPage = () => {
   const resetForm = () => {
     setFormData({
       ID: 0,
-      PROVINSI: "",
-      KABUPATEN: "",
-      KECAMATAN: "",
-      DESA_KELURAHAN: "",
-      KODEPOS: "",
-      RT: "",
-      RW: "",
-      JALAN: "",
-      STATUS: "Aktif",
+      HARI: "",
+      JAM_MULAI: "",
+      JAM_SELESAI: "",
+      DURASI: "",
+      MATA_PELAJARAN: "",
+      KELAS: "",
+      RUANGAN: "",
+      GURU_PENGAJAR: "",
+      STATUS: "",
     });
     setErrors({});
   };
@@ -151,12 +152,12 @@ const WilayahPage = () => {
       <ToastNotifier ref={toastRef} />
       <ConfirmDialog />
 
-      <h3 className="text-xl font-semibold mb-3">Master Wilayah</h3>
+      <h3 className="text-xl font-semibold mb-3">Master Waktu Pelajaran</h3>
 
       <div className="flex items-center justify-end">
         <HeaderBar
           title=""
-          placeholder="Cari Wilayah"
+          placeholder="Cari Hari/Mapel/Kelas/Guru"
           onSearch={handleSearch}
           onAddClick={() => {
             resetForm();
@@ -165,14 +166,14 @@ const WilayahPage = () => {
         />
       </div>
 
-      <TabelWilayah
+      <TabelWaktuPelajaran
         data={data}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
-      <FormWilayah
+      <FormWaktuPelajaran
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -187,4 +188,4 @@ const WilayahPage = () => {
   );
 };
 
-export default WilayahPage;
+export default WaktuPelajaranPage;
