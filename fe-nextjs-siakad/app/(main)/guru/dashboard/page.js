@@ -2,13 +2,13 @@
 'use client';
 
 import React, { useContext, useRef, useEffect, useState } from 'react';
-import { LayoutContext } from '../../../../layout/context/layoutcontext';
+import { LayoutContext } from '@/layout/context/layoutcontext';
 import { Chart } from 'primereact/chart';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
-import CustomDataTable from '../../../components/DataTable';
-import ToastNotifier from '../../../components/ToastNotifier';
+import CustomDataTable from '@/app/components/DataTable';
+import ToastNotifier from '@/app/components/ToastNotifier';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 

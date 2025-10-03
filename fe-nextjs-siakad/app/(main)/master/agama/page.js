@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import HeaderBar from "@/app/components/headerbar";
 import TabelAgama from "./components/tabelAgama";
 import FormDialogAgama from "./components/formDialogAgama";
-import ToastNotifier from "/app/components/toastNotifier";
+import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;

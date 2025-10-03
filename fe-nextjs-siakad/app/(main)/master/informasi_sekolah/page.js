@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import TabelInformasiSekolah from "./components/tabelInformasiSekolah"; // Ensure the path is correct
 import FormInformasiSekolah from "./components/formDialogInformasiSekolah"; // Ensure the path is correct
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "/app/components/toastNotifier";
+import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 // API URL

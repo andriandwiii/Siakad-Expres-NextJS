@@ -1,35 +1,51 @@
-import { db } from "../core/config/knex.js";
+import { db } from "../core/config/knex.js"; // Pastikan path knex.js benar
 
-/**
- * Get all siswa
- **/
-export const getAllSiswa = async () => db("master_siswa").select("*");
+// Ambil semua siswa + data user
+export const getAllSiswaWithUser = async () => {
+  return db("m_siswa as s")
+    .leftJoin("users as u", "s.user_id", "u.id") // ✅ ganti ke u.id
+    .select(
+      "s.SISWA_ID",
+      "s.user_id",
+      "s.NIS",
+      "s.NISN",
+      "s.NAMA",
+      "s.GENDER",
+      "s.TGL_LAHIR",
+      "s.STATUS",
+      "s.EMAIL",
+      "u.name as user_name",   // ✅ cocok dengan hasil register
+      "u.email as user_email",
+      "u.role as user_role"
+    );
+};
 
-/**
- * Get siswa by ID
- **/
-export const getSiswaById = async (id) =>
-  db("master_siswa").where({ SISWA_ID: id }).first();
+// Ambil siswa by ID + data user
+export const getSiswaByIdWithUser = async (id) => {
+  return db("m_siswa as s")
+    .leftJoin("users as u", "s.user_id", "u.id") // ✅ disamakan
+    .select(
+      "s.SISWA_ID",
+      "s.user_id",
+      "s.NIS",
+      "s.NISN",
+      "s.NAMA",
+      "s.GENDER",
+      "s.TGL_LAHIR",
+      "s.STATUS",
+      "s.EMAIL",
+      "u.name as user_name",
+      "u.email as user_email",
+      "u.role as user_role"
+    )
+    .where("s.SISWA_ID", id)
+    .first();
+};
 
-/**
- * Get siswa by NIS
- **/
-export const getSiswaByNis = async (nis) =>
-  db("master_siswa").where({ NIS: nis }).first();
-
-/**
- * Create new siswa
- **/
-export const addSiswa = async ({
-  NIS,
-  NISN,
-  NAMA,
-  GENDER,
-  TGL_LAHIR,
-  STATUS,
-  EMAIL,
-}) => {
-  const [id] = await db("master_siswa").insert({
+// Menambahkan siswa baru
+export const addSiswa = async ({ user_id, NIS, NISN, NAMA, GENDER, TGL_LAHIR, STATUS, EMAIL }) => {
+  const [id] = await db("m_siswa").insert({
+    user_id, // relasi ke tabel users
     NIS,
     NISN,
     NAMA,
@@ -38,24 +54,26 @@ export const addSiswa = async ({
     STATUS,
     EMAIL,
   });
-  return db("master_siswa").where({ SISWA_ID: id }).first();
+
+  return getSiswaByIdWithUser(id); // supaya langsung return dengan data user
 };
 
-/**
- * Update siswa
- **/
-export const updateSiswa = async (
-  id,
-  { NIS, NISN, NAMA, GENDER, TGL_LAHIR, STATUS, EMAIL }
-) => {
-  await db("master_siswa")
-    .where({ SISWA_ID: id })
-    .update({ NIS, NISN, NAMA, GENDER, TGL_LAHIR, STATUS, EMAIL });
-  return db("master_siswa").where({ SISWA_ID: id }).first();
+// Memperbarui data siswa
+export const updateSiswa = async (id, { NIS, NISN, NAMA, GENDER, TGL_LAHIR, STATUS, EMAIL }) => {
+  await db("m_siswa").where({ SISWA_ID: id }).update({
+    NIS,
+    NISN,
+    NAMA,
+    GENDER,
+    TGL_LAHIR,
+    STATUS,
+    EMAIL,
+  });
+
+  return getSiswaByIdWithUser(id); // return data terbaru + user
 };
 
-/**
- * Delete siswa
- **/
-export const deleteSiswa = async (id) =>
-  db("master_siswa").where({ SISWA_ID: id }).del();
+// Menghapus siswa berdasarkan ID
+export const deleteSiswa = async (id) => {
+  await db("m_siswa").where({ SISWA_ID: id }).del();
+};

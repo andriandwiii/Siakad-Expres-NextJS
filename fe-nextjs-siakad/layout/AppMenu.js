@@ -174,8 +174,8 @@ const AppMenu = () => {
             {
                 label: "Kehadiran & Mengajar",
                 items: [
-                    { label: "Absensi Guru", icon: "pi pi-fw pi-user-check", to: "/guru/menu/absensi" },
-                    { label: "Absensi Kelas", icon: "pi pi-fw pi-users", to: "/guru/menu/absen-kelas" },
+                    { label: "Absensi Guru", icon: "pi pi-fw pi-user", to: "/guru/menu/absensi" },
+                    { label: "Absensi Kelas", icon: "pi pi-fw pi-box", to: "/guru/menu/absen-kelas" },
                     { label: "Agenda Mengajar", icon: "pi pi-fw pi-calendar", to: "/guru/menu/agenda" },
                 ],
             },
@@ -198,7 +198,7 @@ const AppMenu = () => {
             {
                 label: "Akademik",
                 items: [
-                    { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/siswa/menu/absensi" },
+                    { label: "Absensi Siswa", icon: "pi pi-fw pi-user-edit", to: "/siswa/menu/absensi" },
                     { label: "Nilai & Rapor", icon: "pi pi-fw pi-book", to: "/siswa/menu/nilai" },
                     { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/siswa/menu/informasi" },
                 ],
