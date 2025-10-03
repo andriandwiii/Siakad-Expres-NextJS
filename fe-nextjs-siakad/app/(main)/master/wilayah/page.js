@@ -1,58 +1,52 @@
 "use client";
+
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelGuru from "./components/tabelGuru";
-import FormGuru from "./components/formDialogGuru";
+import TabelWilayah from "./components/tabelWilayah"; // Make sure path is correct
+import FormWilayah from "./components/formDialogWilayah"; // Make sure path is correct
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/ToastNotifier";
+import ToastNotifier from "/app/components/toastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
+// API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const GuruPage = () => {
+const WilayahPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
+
   const [formData, setFormData] = useState({
-    GURU_ID: 0,
-    user_id: "",
-    NIP: "",
-    NAMA: "",
-    GELAR_DEPAN: "",
-    GELAR_BELAKANG: "",
-    PANGKAT: "",
-    JABATAN: "",
-    STATUS_KEPEGAWAIAN: "",
-    EMAIL: "",
-    TGL_LAHIR: "",
-    TEMPAT_LAHIR: "",
-    GENDER: "",
-    ALAMAT: "",
-    NO_TELP: "",
+    ID: "", // Ensure ID is handled as string or number
+    PROVINSI: "",
+    KABUPATEN: "",
+    KECAMATAN: "",
+    DESA_KELURAHAN: "",
+    KODEPOS: "",
+    RT: "",
+    RW: "",
+    JALAN: "",
+    STATUS: "Aktif",
   });
+
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchGuru();
+    fetchWilayah();
   }, []);
 
-  const fetchGuru = async () => {
+  const fetchWilayah = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/master-guru`);
-      if (res.data.status === "00") {
-        setData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
-        setOriginalData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
-      } else {
-        toastRef.current?.showToast("01", res.data.message || "Gagal mengambil data");
-      }
+      const res = await axios.get(`${API_URL}/master-wilayah`);
+      setData(res.data);
+      setOriginalData(res.data);
     } catch (err) {
       console.error("Gagal mengambil data:", err);
-      toastRef.current?.showToast("01", "Gagal mengambil data");
     } finally {
       setLoading(false);
     }
@@ -60,12 +54,15 @@ const GuruPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.NIP?.trim()) newErrors.NIP = "NIP wajib diisi";
-    if (!formData.NAMA?.trim()) newErrors.NAMA = "Nama wajib diisi";
-    if (!formData.PANGKAT?.trim()) newErrors.PANGKAT = "Pangkat wajib diisi";
-    if (!formData.JABATAN?.trim()) newErrors.JABATAN = "Jabatan wajib diisi";
-    if (!formData.STATUS_KEPEGAWAIAN?.trim()) newErrors.STATUS_KEPEGAWAIAN = "Status wajib diisi";
-    if (!formData.EMAIL?.trim()) newErrors.EMAIL = "Email wajib diisi";
+    if (!formData.PROVINSI?.trim()) newErrors.PROVINSI = "Provinsi wajib diisi";
+    if (!formData.KABUPATEN?.trim()) newErrors.KABUPATEN = "Kabupaten wajib diisi";
+    if (!formData.KECAMATAN?.trim()) newErrors.KECAMATAN = "Kecamatan wajib diisi";
+    if (!formData.DESA_KELURAHAN?.trim()) newErrors.DESA_KELURAHAN = "Desa/Kelurahan wajib diisi";
+    if (!formData.KODEPOS?.trim()) newErrors.KODEPOS = "Kode Pos wajib diisi";
+    if (!formData.RT?.trim()) newErrors.RT = "RT wajib diisi";
+    if (!formData.RW?.trim()) newErrors.RW = "RW wajib diisi";
+    if (!formData.JALAN?.trim()) newErrors.JALAN = "Jalan wajib diisi";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -76,8 +73,9 @@ const GuruPage = () => {
     } else {
       const filtered = originalData.filter(
         (item) =>
-          item.NIP?.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.NAMA?.toLowerCase().includes(keyword.toLowerCase())
+          item.PROVINSI.toLowerCase().includes(keyword.toLowerCase()) ||
+          item.KABUPATEN.toLowerCase().includes(keyword.toLowerCase()) ||
+          item.KECAMATAN.toLowerCase().includes(keyword.toLowerCase())
       );
       setData(filtered);
     }
@@ -85,10 +83,12 @@ const GuruPage = () => {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    const isEdit = !!formData.GURU_ID;
+
+    const isEdit = !!formData.ID;
     const url = isEdit
-      ? `${API_URL}/master-guru/${formData.GURU_ID}`
-      : `${API_URL}/master-guru`;
+      ? `${API_URL}/master-wilayah/${formData.ID}`
+      : `${API_URL}/master-wilayah`;
+
     try {
       if (isEdit) {
         await axios.put(url, formData);
@@ -97,7 +97,7 @@ const GuruPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchGuru();
+      fetchWilayah();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -113,15 +113,15 @@ const GuruPage = () => {
 
   const handleDelete = (row) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus guru ${row.NAMA}?`,
+      message: `Apakah Anda yakin ingin menghapus wilayah ${row.PROVINSI}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/master-guru/${row.GURU_ID}`);
-          fetchGuru();
+          await axios.delete(`${API_URL}/master-wilayah/${row.ID}`);
+          fetchWilayah();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
           console.error("Gagal menghapus data:", err);
@@ -133,21 +133,16 @@ const GuruPage = () => {
 
   const resetForm = () => {
     setFormData({
-      GURU_ID: 0,
-      user_id: "",
-      NIP: "",
-      NAMA: "",
-      GELAR_DEPAN: "",
-      GELAR_BELAKANG: "",
-      PANGKAT: "",
-      JABATAN: "",
-      STATUS_KEPEGAWAIAN: "",
-      EMAIL: "",
-      TGL_LAHIR: "",
-      TEMPAT_LAHIR: "",
-      GENDER: "",
-      ALAMAT: "",
-      NO_TELP: "",
+      ID: "",
+      PROVINSI: "",
+      KABUPATEN: "",
+      KECAMATAN: "",
+      DESA_KELURAHAN: "",
+      KODEPOS: "",
+      RT: "",
+      RW: "",
+      JALAN: "",
+      STATUS: "Aktif",
     });
     setErrors({});
   };
@@ -156,11 +151,13 @@ const GuruPage = () => {
     <div className="card">
       <ToastNotifier ref={toastRef} />
       <ConfirmDialog />
-      <h3 className="text-xl font-semibold mb-3">Master Guru</h3>
+
+      <h3 className="text-xl font-semibold mb-3">Master Wilayah</h3>
+
       <div className="flex items-center justify-end">
         <HeaderBar
           title=""
-          placeholder="Cari Guru"
+          placeholder="Cari Wilayah"
           onSearch={handleSearch}
           onAddClick={() => {
             resetForm();
@@ -168,13 +165,15 @@ const GuruPage = () => {
           }}
         />
       </div>
-      <TabelGuru
+
+      <TabelWilayah
         data={data}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-      <FormGuru
+
+      <FormWilayah
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -189,4 +188,4 @@ const GuruPage = () => {
   );
 };
 
-export default GuruPage;
+export default WilayahPage;

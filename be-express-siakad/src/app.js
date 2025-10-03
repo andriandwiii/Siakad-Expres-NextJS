@@ -16,6 +16,11 @@ import masterAsetSekolahRoutes from "./routes/masterAsetSekolahRoutes.js";
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import userRoutes from "./routes/userRoutes.js";
 import masterKelasRoutes from "./routes/masterKelasRoutes.js";
+import masterWilayahRoutes from "./routes/masterWilayahRoutes.js";  // Import masterWilayahRoutes
+import masterWaktuPelajaranRoutes from "./routes/masterWaktuPelajaranRoutes.js"; 
+import masterUjianRoutes from './routes/masterUjianRoutes.js';
+ // Import masterWaktuPelajaranRoutes
+
 
 const app = express();
 
@@ -57,7 +62,7 @@ app.get("/", [setResponseHeader], (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/siswa", siswaRoutes);
 app.use("/api/kelas", kelasRoutes);
-app.use("/api/guru", masterGuruRoutes);
+app.use("/api/master-guru", masterGuruRoutes);
 app.use("/api/mapel", mapelRoutes);
 app.use("/api/kurikulum", masterKurikulumRoutes);
 app.use("/api/agama", masterAgamaRoutes);
@@ -67,6 +72,9 @@ app.use("/api/master-aset-sekolah", masterAsetSekolahRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/master-kelas", masterKelasRoutes);
-app.use("/api/master-guru", masterGuruRoutes); 
+app.use("/api/master-wilayah", masterWilayahRoutes);  // Add this line
+app.use("/api/master-waktu-pelajaran", masterWaktuPelajaranRoutes); 
+app.use("/api/master-ujian", masterUjianRoutes); // Add this line for master waktu pelajaran
+// Add this line for uang
 
 export default app;

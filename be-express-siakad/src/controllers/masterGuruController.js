@@ -46,9 +46,10 @@ export const updateGuru = async (req, res) => {
 // Hapus guru
 export const deleteGuru = async (req, res) => {
   try {
-    await GuruModel.deleteGuru(req.params.id);
-    res.json({ status: "00", message: "Guru berhasil dihapus" });
+    const guru = await GuruModel.deleteGuru(req.params.id);
+    res.json({ status: "00", message: "Guru dan user terkait berhasil dihapus", guru });
   } catch (err) {
+    console.error("Error deleteGuru:", err);
     res.status(500).json({ status: "01", message: err.message });
   }
 };

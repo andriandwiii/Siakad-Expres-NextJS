@@ -73,7 +73,26 @@ export const updateSiswa = async (id, { NIS, NISN, NAMA, GENDER, TGL_LAHIR, STAT
   return getSiswaByIdWithUser(id); // return data terbaru + user
 };
 
-// Menghapus siswa berdasarkan ID
+// Hapus siswa
 export const deleteSiswa = async (id) => {
-  await db("m_siswa").where({ SISWA_ID: id }).del();
+  // Cari siswa
+  const siswa = await db("m_siswa").where("SISWA_ID", id).first();
+  if (!siswa) return null; // kembalikan null jika siswa tidak ada
+
+  // Hapus siswa
+  await db("m_siswa").where("SISWA_ID", id).del();
+
+  // Hapus user terkait jika ada
+  if (siswa.user_id) {
+    const user = await db("users").where("id", siswa.user_id).first();
+    if (user) {
+      await db("users").where("id", siswa.user_id).del();
+    } else {
+      console.warn(`User dengan id ${siswa.user_id} tidak ditemukan`);
+    }
+  }
+
+  return siswa;
 };
+
+

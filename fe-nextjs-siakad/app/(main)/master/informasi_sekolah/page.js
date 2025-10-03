@@ -20,7 +20,7 @@ const InformasiSekolahPage = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    ID_SEKOLAH: 0,
+    ID: "", // Ensure ID is handled as a string or number
     NAMA_SEKOLAH: "",
     ALAMAT: "",
     JENJANG_AKREDITASI: "",
@@ -40,6 +40,7 @@ const InformasiSekolahPage = () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_URL}/informasi-sekolah`);
+      console.log("Fetched data:", res.data); // Debugging line to ensure ID is in the response
       setData(res.data);
       setOriginalData(res.data);
     } catch (err) {
@@ -85,12 +86,14 @@ const InformasiSekolahPage = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const isEdit = !!formData.ID_SEKOLAH;
+    const isEdit = !!formData.ID; // Ensure ID is available for edit
     const url = isEdit
-      ? `${API_URL}/informasi-sekolah/${formData.ID_SEKOLAH}`
+      ? `${API_URL}/informasi-sekolah/${formData.ID}` // Updated endpoint to use ID
       : `${API_URL}/informasi-sekolah`;
 
     try {
+      console.log("Submitting form data:", formData); // Debugging line
+
       if (isEdit) {
         await axios.put(url, formData);
         toastRef.current?.showToast("00", "Data berhasil diperbarui");
@@ -108,11 +111,13 @@ const InformasiSekolahPage = () => {
   };
 
   const handleEdit = (row) => {
+    console.log("Editing row with ID:", row.ID); // Debugging line to ensure ID is passed
     setFormData({ ...row });
     setDialogVisible(true);
   };
 
   const handleDelete = (row) => {
+    console.log("Deleting row with ID:", row.ID); // Debugging line to ensure ID is passed
     confirmDialog({
       message: `Apakah Anda yakin ingin menghapus informasi sekolah ${row.NAMA_SEKOLAH}?`,
       header: "Konfirmasi Hapus",
@@ -121,7 +126,7 @@ const InformasiSekolahPage = () => {
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/informasi-sekolah/${row.ID_SEKOLAH}`);
+          await axios.delete(`${API_URL}/informasi-sekolah/${row.ID}`); // Ensure ID is used in delete request
           fetchInformasiSekolah();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
@@ -134,7 +139,7 @@ const InformasiSekolahPage = () => {
 
   const resetForm = () => {
     setFormData({
-      ID_SEKOLAH: 0,
+      ID: "", // Ensure ID is handled correctly
       NAMA_SEKOLAH: "",
       ALAMAT: "",
       JENJANG_AKREDITASI: "",

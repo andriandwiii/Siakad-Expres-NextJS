@@ -1,31 +1,18 @@
 import { db } from "../core/config/knex.js";
 
-/**
- * Helper untuk format tanggal ke YYYY-MM-DD
- */
 const formatDate = (date) => {
   return date ? new Date(date).toISOString().split("T")[0] : null;
 };
 
-/**
- * Ambil semua informasi sekolah + jumlah siswa & guru (total aktif)
- */
 export const getAllInformasiSekolah = async () => {
-  return db("master_informasi_sekolah").select("*");
+  return db("master_info_sekolah").select("*");
 };
 
-/**
- * Ambil informasi sekolah berdasarkan ID
- */
 export const getInformasiSekolahById = async (id) => {
-  return db("master_informasi_sekolah")
-    .where("ID_SEKOLAH", id)
-    .first();
+  console.log("Fetching school with ID:", id);
+  return db("master_info_sekolah").where({ id }).first();
 };
 
-/**
- * Tambah informasi sekolah baru
- */
 export const createInformasiSekolah = async ({
   NAMA_SEKOLAH,
   ALAMAT,
@@ -34,51 +21,45 @@ export const createInformasiSekolah = async ({
   NPSN,
   STATUS,
 }) => {
-  // Pastikan STATUS tidak undefined
+  const formattedDate = formatDate(TANGGAL_AKREDITASI);
   const finalStatus = STATUS ?? "Aktif";
 
-  const [id] = await db("master_informasi_sekolah").insert({
+  const [id] = await db("master_info_sekolah").insert({
     NAMA_SEKOLAH,
     ALAMAT,
     JENJANG_AKREDITASI,
-    TANGGAL_AKREDITASI: formatDate(TANGGAL_AKREDITASI),
+    TANGGAL_AKREDITASI: formattedDate,
     NPSN,
     STATUS: finalStatus,
     CREATED_AT: db.fn.now(),
   });
 
-
   return getInformasiSekolahById(id);
 };
 
-/**
- * Update informasi sekolah
- */
 export const updateInformasiSekolah = async (
   id,
   { NAMA_SEKOLAH, ALAMAT, JENJANG_AKREDITASI, TANGGAL_AKREDITASI, NPSN, STATUS }
 ) => {
+  console.log("Updating school with ID:", id);
+  const formattedDate = formatDate(TANGGAL_AKREDITASI);
   const finalStatus = STATUS ?? "Aktif";
 
-  await db("master_informasi_sekolah")
-    .where({ ID_SEKOLAH: id })
+  await db("master_info_sekolah")
+    .where({ id })
     .update({
       NAMA_SEKOLAH,
       ALAMAT,
       JENJANG_AKREDITASI,
-      TANGGAL_AKREDITASI: formatDate(TANGGAL_AKREDITASI),
+      TANGGAL_AKREDITASI: formattedDate,
       NPSN,
-      STATUS,
+      STATUS: finalStatus,
     });
 
   return getInformasiSekolahById(id);
 };
 
-/**
- * Hapus informasi sekolah
- */
 export const deleteInformasiSekolah = async (id) => {
-  return db("master_informasi_sekolah")
-    .where({ ID_SEKOLAH: id })
-    .del();
+  console.log("Deleting school with ID:", id);
+  return db("master_info_sekolah").where({ id }).del();
 };

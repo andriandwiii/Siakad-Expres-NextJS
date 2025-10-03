@@ -111,7 +111,7 @@ export const updateSiswa = async (req, res) => {
 // DELETE siswa
 export const deleteSiswa = async (req, res) => {
   try {
-    const siswa = await SiswaModel.getSiswaById(req.params.id);
+    const siswa = await SiswaModel.deleteSiswa(req.params.id);
     if (!siswa) {
       return res.status(404).json({
         status: "04",
@@ -119,12 +119,12 @@ export const deleteSiswa = async (req, res) => {
       });
     }
 
-    await SiswaModel.deleteSiswa(req.params.id);
     res.status(200).json({
       status: "00",
       message: "Siswa berhasil dihapus",
     });
   } catch (err) {
+    console.error("Error hapus siswa:", err);
     res.status(500).json({
       status: "99",
       message: "Terjadi kesalahan saat menghapus siswa",
@@ -132,3 +132,4 @@ export const deleteSiswa = async (req, res) => {
     });
   }
 };
+

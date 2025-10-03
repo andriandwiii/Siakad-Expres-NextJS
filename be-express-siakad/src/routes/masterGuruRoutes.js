@@ -1,22 +1,12 @@
-
 import { Router } from "express";
-import * as MasterGuruController from "../controllers/masterGuruController.js";
+import * as masterGuruController from "../controllers/masterGuruController.js";
 
 const router = Router();
 
-// GET all guru
-router.get("/", MasterGuruController.getAllGuru);
-
-// GET guru by ID
-router.get("/:id", MasterGuruController.getGuruById);
-
-// POST new guru
-router.post("/", MasterGuruController.createGuru);
-
-// PUT update guru
-router.put("/:id", MasterGuruController.updateGuru);
-
-// DELETE guru
-router.delete("/:id", MasterGuruController.deleteGuru);
+router.get("/", masterGuruController.getAllGuru);
+router.get("/:id", masterGuruController.getGuruById);
+router.post("/", masterGuruController.createGuru);
+router.put("/:id", masterGuruController.updateGuru);
+router.delete("/:id", masterGuruController.deleteGuru);
 
 export default router;

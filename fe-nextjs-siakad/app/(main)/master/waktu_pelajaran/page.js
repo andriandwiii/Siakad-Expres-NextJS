@@ -1,58 +1,51 @@
 "use client";
+
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelGuru from "./components/tabelGuru";
-import FormGuru from "./components/formDialogGuru";
+import TabelWaktuPelajaran from "./components/tabelWaktuPelajaran"; // pastikan path benar
+import FormWaktuPelajaran from "./components/formDialogWaktuPelajaran"; // pastikan path benar
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/ToastNotifier";
+import ToastNotifier from "/app/components/toastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const GuruPage = () => {
+const WaktuPelajaranPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
+
   const [formData, setFormData] = useState({
-    GURU_ID: 0,
-    user_id: "",
-    NIP: "",
-    NAMA: "",
-    GELAR_DEPAN: "",
-    GELAR_BELAKANG: "",
-    PANGKAT: "",
-    JABATAN: "",
-    STATUS_KEPEGAWAIAN: "",
-    EMAIL: "",
-    TGL_LAHIR: "",
-    TEMPAT_LAHIR: "",
-    GENDER: "",
-    ALAMAT: "",
-    NO_TELP: "",
+    ID: 0,
+    HARI: "",
+    JAM_MULAI: "",
+    JAM_SELESAI: "",
+    DURASI: "",
+    MATA_PELAJARAN: "",
+    KELAS: "",
+    RUANGAN: "",
+    GURU_PENGAJAR: "",
+    STATUS: "",
   });
+
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchGuru();
+    fetchWaktuPelajaran();
   }, []);
 
-  const fetchGuru = async () => {
+  const fetchWaktuPelajaran = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/master-guru`);
-      if (res.data.status === "00") {
-        setData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
-        setOriginalData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
-      } else {
-        toastRef.current?.showToast("01", res.data.message || "Gagal mengambil data");
-      }
+      const res = await axios.get(`${API_URL}/master-waktu-pelajaran`);
+      setData(res.data);
+      setOriginalData(res.data);
     } catch (err) {
       console.error("Gagal mengambil data:", err);
-      toastRef.current?.showToast("01", "Gagal mengambil data");
     } finally {
       setLoading(false);
     }
@@ -60,12 +53,14 @@ const GuruPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.NIP?.trim()) newErrors.NIP = "NIP wajib diisi";
-    if (!formData.NAMA?.trim()) newErrors.NAMA = "Nama wajib diisi";
-    if (!formData.PANGKAT?.trim()) newErrors.PANGKAT = "Pangkat wajib diisi";
-    if (!formData.JABATAN?.trim()) newErrors.JABATAN = "Jabatan wajib diisi";
-    if (!formData.STATUS_KEPEGAWAIAN?.trim()) newErrors.STATUS_KEPEGAWAIAN = "Status wajib diisi";
-    if (!formData.EMAIL?.trim()) newErrors.EMAIL = "Email wajib diisi";
+    if (!formData.HARI?.trim()) newErrors.HARI = "Hari wajib diisi";
+    if (!formData.JAM_MULAI?.trim()) newErrors.JAM_MULAI = "Jam Mulai wajib diisi";
+    if (!formData.JAM_SELESAI?.trim()) newErrors.JAM_SELESAI = "Jam Selesai wajib diisi";
+    if (!formData.MATA_PELAJARAN?.trim()) newErrors.MATA_PELAJARAN = "Mata Pelajaran wajib diisi";
+    if (!formData.KELAS?.trim()) newErrors.KELAS = "Kelas wajib diisi";
+    if (!formData.RUANGAN?.trim()) newErrors.RUANGAN = "Ruangan wajib diisi";
+    if (!formData.GURU_PENGAJAR?.trim()) newErrors.GURU_PENGAJAR = "Guru Pengajar wajib diisi";
+    if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,10 +69,13 @@ const GuruPage = () => {
     if (!keyword) {
       setData(originalData);
     } else {
+      const q = keyword.toLowerCase();
       const filtered = originalData.filter(
         (item) =>
-          item.NIP?.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.NAMA?.toLowerCase().includes(keyword.toLowerCase())
+          item.HARI?.toLowerCase().includes(q) ||
+          item.MATA_PELAJARAN?.toLowerCase().includes(q) ||
+          item.KELAS?.toLowerCase().includes(q) ||
+          item.GURU_PENGAJAR?.toLowerCase().includes(q)
       );
       setData(filtered);
     }
@@ -85,10 +83,12 @@ const GuruPage = () => {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    const isEdit = !!formData.GURU_ID;
+
+    const isEdit = !!formData.ID;
     const url = isEdit
-      ? `${API_URL}/master-guru/${formData.GURU_ID}`
-      : `${API_URL}/master-guru`;
+      ? `${API_URL}/master-waktu-pelajaran/${formData.ID}`
+      : `${API_URL}/master-waktu-pelajaran`;
+
     try {
       if (isEdit) {
         await axios.put(url, formData);
@@ -97,7 +97,7 @@ const GuruPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchGuru();
+      fetchWaktuPelajaran();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -113,15 +113,15 @@ const GuruPage = () => {
 
   const handleDelete = (row) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus guru ${row.NAMA}?`,
+      message: `Apakah Anda yakin ingin menghapus waktu pelajaran ${row.MATA_PELAJARAN} - ${row.KELAS}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/master-guru/${row.GURU_ID}`);
-          fetchGuru();
+          await axios.delete(`${API_URL}/master-waktu-pelajaran/${row.ID}`);
+          fetchWaktuPelajaran();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
           console.error("Gagal menghapus data:", err);
@@ -133,21 +133,16 @@ const GuruPage = () => {
 
   const resetForm = () => {
     setFormData({
-      GURU_ID: 0,
-      user_id: "",
-      NIP: "",
-      NAMA: "",
-      GELAR_DEPAN: "",
-      GELAR_BELAKANG: "",
-      PANGKAT: "",
-      JABATAN: "",
-      STATUS_KEPEGAWAIAN: "",
-      EMAIL: "",
-      TGL_LAHIR: "",
-      TEMPAT_LAHIR: "",
-      GENDER: "",
-      ALAMAT: "",
-      NO_TELP: "",
+      ID: 0,
+      HARI: "",
+      JAM_MULAI: "",
+      JAM_SELESAI: "",
+      DURASI: "",
+      MATA_PELAJARAN: "",
+      KELAS: "",
+      RUANGAN: "",
+      GURU_PENGAJAR: "",
+      STATUS: "",
     });
     setErrors({});
   };
@@ -156,11 +151,13 @@ const GuruPage = () => {
     <div className="card">
       <ToastNotifier ref={toastRef} />
       <ConfirmDialog />
-      <h3 className="text-xl font-semibold mb-3">Master Guru</h3>
+
+      <h3 className="text-xl font-semibold mb-3">Master Waktu Pelajaran</h3>
+
       <div className="flex items-center justify-end">
         <HeaderBar
           title=""
-          placeholder="Cari Guru"
+          placeholder="Cari Hari/Mapel/Kelas/Guru"
           onSearch={handleSearch}
           onAddClick={() => {
             resetForm();
@@ -168,13 +165,15 @@ const GuruPage = () => {
           }}
         />
       </div>
-      <TabelGuru
+
+      <TabelWaktuPelajaran
         data={data}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-      <FormGuru
+
+      <FormWaktuPelajaran
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -189,4 +188,4 @@ const GuruPage = () => {
   );
 };
 
-export default GuruPage;
+export default WaktuPelajaranPage;

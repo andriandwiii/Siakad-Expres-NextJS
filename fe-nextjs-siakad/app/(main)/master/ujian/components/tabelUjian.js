@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 
 // CSS untuk styling tabel
-const TabelInformasiSekolahStyles = {
+const TabelUjianStyles = {
   datatable: {
     backgroundColor: "#f4f4f9", /* Latar belakang tabel yang lembut */
     borderRadius: "8px",
@@ -55,18 +55,15 @@ const TabelInformasiSekolahStyles = {
   },
 };
 
-const TabelInformasiSekolah = ({ data, loading, onEdit, onDelete }) => {
+const TabelUjian = ({ data, loading, onEdit, onDelete }) => {
   return (
-    <DataTable value={data} paginator rows={10} loading={loading} size="small" scrollable style={TabelInformasiSekolahStyles.datatable}>
-      {/* Menambahkan Kolom ID */}
-      <Column field="ID" header="ID" style={{ width: "100px" }} />
-      <Column field="NAMA_SEKOLAH" header="Nama Sekolah" />
-      <Column field="ALAMAT" header="Alamat" />
-      <Column field="JENJANG_AKREDITASI" header="Jenjang Akreditasi" />
-      <Column field="TANGGAL_AKREDITASI" header="Tanggal Akreditasi" />
-      <Column field="NPSN" header="NPSN" />
+    <DataTable value={data} paginator rows={10} loading={loading} size="small" scrollable style={TabelUjianStyles.datatable}>
+      <Column field="UJIAN_ID" header="ID Ujian" />
+      <Column field="NAMA_UJIAN" header="Nama Ujian" />
+      <Column field="JENIS_UJIAN" header="Jenis Ujian" />
+      <Column field="TANGGAL_UJIAN" header="Tanggal Ujian" />
+      <Column field="MAPEL_ID" header="Mata Pelajaran ID" />
       <Column field="STATUS" header="Status" />
-      {/* Kolom Aksi dengan Tombol Edit dan Delete */}
       <Column
         header="Aksi"
         body={(row) => (
@@ -75,19 +72,19 @@ const TabelInformasiSekolah = ({ data, loading, onEdit, onDelete }) => {
               icon="pi pi-pencil"
               size="small"
               severity="warning"
-              style={TabelInformasiSekolahStyles.buttonWarning}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonWarningHover.backgroundColor)}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonWarning.backgroundColor)}
-              onClick={() => onEdit(row)} // Mengirimkan seluruh row, termasuk ID
+              style={TabelUjianStyles.buttonWarning}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelUjianStyles.buttonWarningHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelUjianStyles.buttonWarning.backgroundColor)}
+              onClick={() => onEdit(row)}
             />
             <Button
               icon="pi pi-trash"
               size="small"
               severity="danger"
-              style={TabelInformasiSekolahStyles.buttonDanger}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonDangerHover.backgroundColor)}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelInformasiSekolahStyles.buttonDanger.backgroundColor)}
-              onClick={() => onDelete(row)} // Mengirimkan seluruh row, termasuk ID
+              style={TabelUjianStyles.buttonDanger}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = TabelUjianStyles.buttonDangerHover.backgroundColor)}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = TabelUjianStyles.buttonDanger.backgroundColor)}
+              onClick={() => onDelete(row)}
             />
           </div>
         )}
@@ -97,4 +94,4 @@ const TabelInformasiSekolah = ({ data, loading, onEdit, onDelete }) => {
   );
 };
 
-export default TabelInformasiSekolah;
+export default TabelUjian;
