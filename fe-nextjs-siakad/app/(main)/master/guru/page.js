@@ -4,8 +4,8 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelGuru from "./components/tabelGuru"; // Pastikan pathnya benar
-import FormGuru from "./components/formDialogGuru"; // Pastikan pathnya benar
+import TabelGuru from "./components/tabelGuru"; 
+import FormGuru from "./components/formDialogGuru"; 
 import HeaderBar from "@/app/components/headerbar";
 import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -20,11 +20,20 @@ const GuruPage = () => {
 
   const [formData, setFormData] = useState({
     GURU_ID: 0,
+    user_id: "",
     NIP: "",
     NAMA: "",
-    GELAR: "",
+    GELAR_DEPAN: "",
+    GELAR_BELAKANG: "",
     PANGKAT: "",
     JABATAN: "",
+    STATUS_KEPEGAWAIAN: "",
+    EMAIL: "",
+    TGL_LAHIR: "",
+    TEMPAT_LAHIR: "",
+    GENDER: "",
+    ALAMAT: "",
+    NO_TELP: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -37,11 +46,16 @@ const GuruPage = () => {
   const fetchGuru = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/guru`);
-      setData(res.data);
-      setOriginalData(res.data);
+      const res = await axios.get(`${API_URL}/master-guru`);
+      if (res.data.status === "00") {
+        setData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
+        setOriginalData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
+      } else {
+        toastRef.current?.showToast("01", res.data.message || "Gagal mengambil data");
+      }
     } catch (err) {
       console.error("Gagal mengambil data:", err);
+      toastRef.current?.showToast("01", "Gagal mengambil data");
     } finally {
       setLoading(false);
     }
@@ -51,10 +65,11 @@ const GuruPage = () => {
     const newErrors = {};
     if (!formData.NIP?.trim()) newErrors.NIP = "NIP wajib diisi";
     if (!formData.NAMA?.trim()) newErrors.NAMA = "Nama wajib diisi";
-    if (!formData.GELAR?.trim()) newErrors.GELAR = "Gelar wajib diisi";
     if (!formData.PANGKAT?.trim()) newErrors.PANGKAT = "Pangkat wajib diisi";
     if (!formData.JABATAN?.trim()) newErrors.JABATAN = "Jabatan wajib diisi";
-    
+    if (!formData.STATUS_KEPEGAWAIAN?.trim()) newErrors.STATUS_KEPEGAWAIAN = "Status wajib diisi";
+    if (!formData.EMAIL?.trim()) newErrors.EMAIL = "Email wajib diisi";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -65,8 +80,8 @@ const GuruPage = () => {
     } else {
       const filtered = originalData.filter(
         (item) =>
-          item.NIP.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.NAMA.toLowerCase().includes(keyword.toLowerCase())
+          item.NIP?.toLowerCase().includes(keyword.toLowerCase()) ||
+          item.NAMA?.toLowerCase().includes(keyword.toLowerCase())
       );
       setData(filtered);
     }
@@ -77,8 +92,8 @@ const GuruPage = () => {
 
     const isEdit = !!formData.GURU_ID;
     const url = isEdit
-      ? `${API_URL}/guru/${formData.GURU_ID}`
-      : `${API_URL}/guru`;
+      ? `${API_URL}/master-guru/${formData.GURU_ID}`
+      : `${API_URL}/master-guru`;
 
     try {
       if (isEdit) {
@@ -111,7 +126,7 @@ const GuruPage = () => {
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/guru/${row.GURU_ID}`);
+          await axios.delete(`${API_URL}/master-guru/${row.GURU_ID}`);
           fetchGuru();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
@@ -125,11 +140,20 @@ const GuruPage = () => {
   const resetForm = () => {
     setFormData({
       GURU_ID: 0,
+      user_id: "",
       NIP: "",
       NAMA: "",
-      GELAR: "",
+      GELAR_DEPAN: "",
+      GELAR_BELAKANG: "",
       PANGKAT: "",
       JABATAN: "",
+      STATUS_KEPEGAWAIAN: "",
+      EMAIL: "",
+      TGL_LAHIR: "",
+      TEMPAT_LAHIR: "",
+      GENDER: "",
+      ALAMAT: "",
+      NO_TELP: "",
     });
     setErrors({});
   };

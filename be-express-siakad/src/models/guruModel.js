@@ -137,6 +137,19 @@ export const updateGuru = async (
 };
 
 // Hapus guru
+
 export const deleteGuru = async (id) => {
-  await db("m_guru").where({ GURU_ID: id }).del();
+  // Cari guru untuk ambil user_id
+  const guru = await db("m_guru").where("GURU_ID", id).first();
+  if (!guru) throw new Error("Guru tidak ditemukan");
+
+  // Hapus guru
+  await db("m_guru").where("GURU_ID", id).del();
+
+  // Hapus user juga jika ada relasi
+  if (guru.user_id) {
+    await db("users").where("id", guru.user_id).del();
+  }
+
+  return guru;
 };

@@ -35,6 +35,7 @@ const AppMenu = () => {
                 { label: "Agama", icon: "pi pi-user-plus", to: "/master/agama" },
                 { label: "Aset Sekolah", icon: "pi pi-tags", to: "/master/aset_sekolah" },
                 { label: "Guru", icon: "pi pi-fw pi-users", to: "/master/guru" },
+                { label: "Siswa", icon: "pi pi-fw pi-users", to: "/master/siswa" },
                 { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/master/informasi_sekolah" },
                 { label: "Kelas", icon: "pi pi-fw pi-th-large", to: "/master/kelas" },
                 { label: "Kurikulum", icon: "pi pi-fw pi-book", to: "/master/kurikulum" },
