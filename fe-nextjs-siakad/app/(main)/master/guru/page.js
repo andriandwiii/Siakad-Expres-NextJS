@@ -12,7 +12,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const GuruPage = () => {
+const WilayahPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,10 +40,10 @@ const GuruPage = () => {
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchGuru();
+    fetchWilayah();
   }, []);
 
-  const fetchGuru = async () => {
+  const fetchWilayah = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_URL}/master-guru`);
@@ -90,7 +90,7 @@ const GuruPage = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const isEdit = !!formData.GURU_ID;
+    const isEdit = !!formData.ID;
     const url = isEdit
       ? `${API_URL}/master-guru/${formData.GURU_ID}`
       : `${API_URL}/master-guru`;
@@ -103,7 +103,7 @@ const GuruPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchGuru();
+      fetchWilayah();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -119,7 +119,7 @@ const GuruPage = () => {
 
   const handleDelete = (row) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus guru ${row.NAMA}?`,
+      message: `Apakah Anda yakin ingin menghapus wilayah ${row.PROVINSI}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
@@ -163,12 +163,12 @@ const GuruPage = () => {
       <ToastNotifier ref={toastRef} />
       <ConfirmDialog />
 
-      <h3 className="text-xl font-semibold mb-3">Master Guru</h3>
+      <h3 className="text-xl font-semibold mb-3">Master Wilayah</h3>
 
       <div className="flex items-center justify-end">
         <HeaderBar
           title=""
-          placeholder="Cari Guru"
+          placeholder="Cari Wilayah"
           onSearch={handleSearch}
           onAddClick={() => {
             resetForm();
@@ -177,14 +177,14 @@ const GuruPage = () => {
         />
       </div>
 
-      <TabelGuru
+      <TabelWilayah
         data={data}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
-      <FormGuru
+      <FormWilayah
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -199,4 +199,4 @@ const GuruPage = () => {
   );
 };
 
-export default GuruPage;
+export default WilayahPage;

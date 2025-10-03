@@ -4,28 +4,30 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelInformasiSekolah from "./components/tabelInformasiSekolah"; // Ensure the path is correct
-import FormInformasiSekolah from "./components/formDialogInformasiSekolah"; // Ensure the path is correct
+import TabelWaktuPelajaran from "./components/tabelWaktuPelajaran"; // pastikan path benar
+import FormWaktuPelajaran from "./components/formDialogWaktuPelajaran"; // pastikan path benar
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/ToastNotifier";
+import ToastNotifier from "/app/components/toastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
-// API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const InformasiSekolahPage = () => {
+const WaktuPelajaranPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    ID: "", // Ensure ID is handled as a string or number
-    NAMA_SEKOLAH: "",
-    ALAMAT: "",
-    JENJANG_AKREDITASI: "",
-    TANGGAL_AKREDITASI: null, // Updated to Date type
-    NPSN: "",
+    ID: 0,
+    HARI: "",
+    JAM_MULAI: "",
+    JAM_SELESAI: "",
+    DURASI: "",
+    MATA_PELAJARAN: "",
+    KELAS: "",
+    RUANGAN: "",
+    GURU_PENGAJAR: "",
     STATUS: "",
   });
 
@@ -33,18 +35,17 @@ const InformasiSekolahPage = () => {
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchInformasiSekolah();
+    fetchWaktuPelajaran();
   }, []);
 
-  const fetchInformasiSekolah = async () => {
+  const fetchWaktuPelajaran = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/informasi-sekolah`);
-      console.log("Fetched data:", res.data); // Debugging line to ensure ID is in the response
+      const res = await axios.get(`${API_URL}/master-waktu-pelajaran`);
       setData(res.data);
       setOriginalData(res.data);
     } catch (err) {
-      console.error("Failed to fetch data:", err);
+      console.error("Gagal mengambil data:", err);
     } finally {
       setLoading(false);
     }
@@ -52,20 +53,14 @@ const InformasiSekolahPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate text fields
-    if (!formData.NAMA_SEKOLAH?.trim()) newErrors.NAMA_SEKOLAH = "Nama Sekolah wajib diisi";
-    if (!formData.ALAMAT?.trim()) newErrors.ALAMAT = "Alamat wajib diisi";
-    if (!formData.JENJANG_AKREDITASI?.trim()) newErrors.JENJANG_AKREDITASI = "Jenjang Akreditasi wajib diisi";
-
-    // Validate Date (TANGGAL_AKREDITASI)
-    if (!(formData.TANGGAL_AKREDITASI instanceof Date) || isNaN(formData.TANGGAL_AKREDITASI)) {
-      newErrors.TANGGAL_AKREDITASI = "Tanggal Akreditasi wajib diisi";
-    }
-
-    if (!formData.NPSN?.trim()) newErrors.NPSN = "NPSN wajib diisi";
+    if (!formData.HARI?.trim()) newErrors.HARI = "Hari wajib diisi";
+    if (!formData.JAM_MULAI?.trim()) newErrors.JAM_MULAI = "Jam Mulai wajib diisi";
+    if (!formData.JAM_SELESAI?.trim()) newErrors.JAM_SELESAI = "Jam Selesai wajib diisi";
+    if (!formData.MATA_PELAJARAN?.trim()) newErrors.MATA_PELAJARAN = "Mata Pelajaran wajib diisi";
+    if (!formData.KELAS?.trim()) newErrors.KELAS = "Kelas wajib diisi";
+    if (!formData.RUANGAN?.trim()) newErrors.RUANGAN = "Ruangan wajib diisi";
+    if (!formData.GURU_PENGAJAR?.trim()) newErrors.GURU_PENGAJAR = "Guru Pengajar wajib diisi";
     if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,10 +69,13 @@ const InformasiSekolahPage = () => {
     if (!keyword) {
       setData(originalData);
     } else {
+      const q = keyword.toLowerCase();
       const filtered = originalData.filter(
         (item) =>
-          item.NAMA_SEKOLAH.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.ALAMAT.toLowerCase().includes(keyword.toLowerCase())
+          item.HARI?.toLowerCase().includes(q) ||
+          item.MATA_PELAJARAN?.toLowerCase().includes(q) ||
+          item.KELAS?.toLowerCase().includes(q) ||
+          item.GURU_PENGAJAR?.toLowerCase().includes(q)
       );
       setData(filtered);
     }
@@ -86,14 +84,12 @@ const InformasiSekolahPage = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const isEdit = !!formData.ID; // Ensure ID is available for edit
+    const isEdit = !!formData.ID;
     const url = isEdit
-      ? `${API_URL}/informasi-sekolah/${formData.ID}` // Updated endpoint to use ID
-      : `${API_URL}/informasi-sekolah`;
+      ? `${API_URL}/master-waktu-pelajaran/${formData.ID}`
+      : `${API_URL}/master-waktu-pelajaran`;
 
     try {
-      console.log("Submitting form data:", formData); // Debugging line
-
       if (isEdit) {
         await axios.put(url, formData);
         toastRef.current?.showToast("00", "Data berhasil diperbarui");
@@ -101,7 +97,7 @@ const InformasiSekolahPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchInformasiSekolah();
+      fetchWaktuPelajaran();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -111,23 +107,21 @@ const InformasiSekolahPage = () => {
   };
 
   const handleEdit = (row) => {
-    console.log("Editing row with ID:", row.ID); // Debugging line to ensure ID is passed
     setFormData({ ...row });
     setDialogVisible(true);
   };
 
   const handleDelete = (row) => {
-    console.log("Deleting row with ID:", row.ID); // Debugging line to ensure ID is passed
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus informasi sekolah ${row.NAMA_SEKOLAH}?`,
+      message: `Apakah Anda yakin ingin menghapus waktu pelajaran ${row.MATA_PELAJARAN} - ${row.KELAS}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/informasi-sekolah/${row.ID}`); // Ensure ID is used in delete request
-          fetchInformasiSekolah();
+          await axios.delete(`${API_URL}/master-waktu-pelajaran/${row.ID}`);
+          fetchWaktuPelajaran();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
           console.error("Gagal menghapus data:", err);
@@ -139,12 +133,15 @@ const InformasiSekolahPage = () => {
 
   const resetForm = () => {
     setFormData({
-      ID: "", // Ensure ID is handled correctly
-      NAMA_SEKOLAH: "",
-      ALAMAT: "",
-      JENJANG_AKREDITASI: "",
-      TANGGAL_AKREDITASI: null,  // Reset to null
-      NPSN: "",
+      ID: 0,
+      HARI: "",
+      JAM_MULAI: "",
+      JAM_SELESAI: "",
+      DURASI: "",
+      MATA_PELAJARAN: "",
+      KELAS: "",
+      RUANGAN: "",
+      GURU_PENGAJAR: "",
       STATUS: "",
     });
     setErrors({});
@@ -155,12 +152,12 @@ const InformasiSekolahPage = () => {
       <ToastNotifier ref={toastRef} />
       <ConfirmDialog />
 
-      <h3 className="text-xl font-semibold mb-3">Master Informasi Sekolah</h3>
+      <h3 className="text-xl font-semibold mb-3">Master Waktu Pelajaran</h3>
 
       <div className="flex items-center justify-end">
         <HeaderBar
           title=""
-          placeholder="Cari Sekolah"
+          placeholder="Cari Hari/Mapel/Kelas/Guru"
           onSearch={handleSearch}
           onAddClick={() => {
             resetForm();
@@ -169,14 +166,14 @@ const InformasiSekolahPage = () => {
         />
       </div>
 
-      <TabelInformasiSekolah
+      <TabelWaktuPelajaran
         data={data}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
-      <FormInformasiSekolah
+      <FormWaktuPelajaran
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -191,4 +188,4 @@ const InformasiSekolahPage = () => {
   );
 };
 
-export default InformasiSekolahPage;
+export default WaktuPelajaranPage;

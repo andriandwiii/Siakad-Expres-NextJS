@@ -1,21 +1,23 @@
+
 import { Router } from "express";
 import * as MasterWilayahController from "../controllers/masterWilayahController.js"; // Konsisten dengan penamaan
 
+
 const router = Router();
 
-// GET all wilayah
+// GET all guru
 router.get("/", MasterWilayahController.getAllWilayah);
 
-// GET wilayah by ID
+// GET guru by ID
 router.get("/:id", MasterWilayahController.getWilayahById);
 
-// POST new wilayah
+// POST new guru
 router.post("/", MasterWilayahController.createWilayah);
 
-// PUT update wilayah
+// PUT update guru
 router.put("/:id", MasterWilayahController.updateWilayah);
 
-// DELETE wilayah
+// DELETE guru
 router.delete("/:id", MasterWilayahController.deleteWilayah);
 
 export default router;

@@ -77,4 +77,4 @@ const TabelGuru = ({ data, loading, onEdit, onDelete }) => {
   );
 };
 
-export default TabelGuru;
+export default TabelWilayah;

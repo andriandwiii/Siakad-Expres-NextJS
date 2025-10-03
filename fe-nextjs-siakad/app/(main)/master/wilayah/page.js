@@ -4,47 +4,49 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelInformasiSekolah from "./components/tabelInformasiSekolah"; // Ensure the path is correct
-import FormInformasiSekolah from "./components/formDialogInformasiSekolah"; // Ensure the path is correct
+import TabelWilayah from "./components/tabelWilayah"; // Make sure path is correct
+import FormWilayah from "./components/formDialogWilayah"; // Make sure path is correct
 import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/ToastNotifier";
+import ToastNotifier from "/app/components/toastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 // API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const InformasiSekolahPage = () => {
+const WilayahPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    ID: "", // Ensure ID is handled as a string or number
-    NAMA_SEKOLAH: "",
-    ALAMAT: "",
-    JENJANG_AKREDITASI: "",
-    TANGGAL_AKREDITASI: null, // Updated to Date type
-    NPSN: "",
-    STATUS: "",
+    ID: "", // Ensure ID is handled as string or number
+    PROVINSI: "",
+    KABUPATEN: "",
+    KECAMATAN: "",
+    DESA_KELURAHAN: "",
+    KODEPOS: "",
+    RT: "",
+    RW: "",
+    JALAN: "",
+    STATUS: "Aktif",
   });
 
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchInformasiSekolah();
+    fetchWilayah();
   }, []);
 
-  const fetchInformasiSekolah = async () => {
+  const fetchWilayah = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/informasi-sekolah`);
-      console.log("Fetched data:", res.data); // Debugging line to ensure ID is in the response
+      const res = await axios.get(`${API_URL}/master-wilayah`);
       setData(res.data);
       setOriginalData(res.data);
     } catch (err) {
-      console.error("Failed to fetch data:", err);
+      console.error("Gagal mengambil data:", err);
     } finally {
       setLoading(false);
     }
@@ -52,19 +54,14 @@ const InformasiSekolahPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate text fields
-    if (!formData.NAMA_SEKOLAH?.trim()) newErrors.NAMA_SEKOLAH = "Nama Sekolah wajib diisi";
-    if (!formData.ALAMAT?.trim()) newErrors.ALAMAT = "Alamat wajib diisi";
-    if (!formData.JENJANG_AKREDITASI?.trim()) newErrors.JENJANG_AKREDITASI = "Jenjang Akreditasi wajib diisi";
-
-    // Validate Date (TANGGAL_AKREDITASI)
-    if (!(formData.TANGGAL_AKREDITASI instanceof Date) || isNaN(formData.TANGGAL_AKREDITASI)) {
-      newErrors.TANGGAL_AKREDITASI = "Tanggal Akreditasi wajib diisi";
-    }
-
-    if (!formData.NPSN?.trim()) newErrors.NPSN = "NPSN wajib diisi";
-    if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
+    if (!formData.PROVINSI?.trim()) newErrors.PROVINSI = "Provinsi wajib diisi";
+    if (!formData.KABUPATEN?.trim()) newErrors.KABUPATEN = "Kabupaten wajib diisi";
+    if (!formData.KECAMATAN?.trim()) newErrors.KECAMATAN = "Kecamatan wajib diisi";
+    if (!formData.DESA_KELURAHAN?.trim()) newErrors.DESA_KELURAHAN = "Desa/Kelurahan wajib diisi";
+    if (!formData.KODEPOS?.trim()) newErrors.KODEPOS = "Kode Pos wajib diisi";
+    if (!formData.RT?.trim()) newErrors.RT = "RT wajib diisi";
+    if (!formData.RW?.trim()) newErrors.RW = "RW wajib diisi";
+    if (!formData.JALAN?.trim()) newErrors.JALAN = "Jalan wajib diisi";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -76,8 +73,9 @@ const InformasiSekolahPage = () => {
     } else {
       const filtered = originalData.filter(
         (item) =>
-          item.NAMA_SEKOLAH.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.ALAMAT.toLowerCase().includes(keyword.toLowerCase())
+          item.PROVINSI.toLowerCase().includes(keyword.toLowerCase()) ||
+          item.KABUPATEN.toLowerCase().includes(keyword.toLowerCase()) ||
+          item.KECAMATAN.toLowerCase().includes(keyword.toLowerCase())
       );
       setData(filtered);
     }
@@ -86,14 +84,12 @@ const InformasiSekolahPage = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const isEdit = !!formData.ID; // Ensure ID is available for edit
+    const isEdit = !!formData.ID;
     const url = isEdit
-      ? `${API_URL}/informasi-sekolah/${formData.ID}` // Updated endpoint to use ID
-      : `${API_URL}/informasi-sekolah`;
+      ? `${API_URL}/master-wilayah/${formData.ID}`
+      : `${API_URL}/master-wilayah`;
 
     try {
-      console.log("Submitting form data:", formData); // Debugging line
-
       if (isEdit) {
         await axios.put(url, formData);
         toastRef.current?.showToast("00", "Data berhasil diperbarui");
@@ -101,7 +97,7 @@ const InformasiSekolahPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchInformasiSekolah();
+      fetchWilayah();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -111,23 +107,21 @@ const InformasiSekolahPage = () => {
   };
 
   const handleEdit = (row) => {
-    console.log("Editing row with ID:", row.ID); // Debugging line to ensure ID is passed
     setFormData({ ...row });
     setDialogVisible(true);
   };
 
   const handleDelete = (row) => {
-    console.log("Deleting row with ID:", row.ID); // Debugging line to ensure ID is passed
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus informasi sekolah ${row.NAMA_SEKOLAH}?`,
+      message: `Apakah Anda yakin ingin menghapus wilayah ${row.PROVINSI}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/informasi-sekolah/${row.ID}`); // Ensure ID is used in delete request
-          fetchInformasiSekolah();
+          await axios.delete(`${API_URL}/master-wilayah/${row.ID}`);
+          fetchWilayah();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
           console.error("Gagal menghapus data:", err);
@@ -139,13 +133,16 @@ const InformasiSekolahPage = () => {
 
   const resetForm = () => {
     setFormData({
-      ID: "", // Ensure ID is handled correctly
-      NAMA_SEKOLAH: "",
-      ALAMAT: "",
-      JENJANG_AKREDITASI: "",
-      TANGGAL_AKREDITASI: null,  // Reset to null
-      NPSN: "",
-      STATUS: "",
+      ID: "",
+      PROVINSI: "",
+      KABUPATEN: "",
+      KECAMATAN: "",
+      DESA_KELURAHAN: "",
+      KODEPOS: "",
+      RT: "",
+      RW: "",
+      JALAN: "",
+      STATUS: "Aktif",
     });
     setErrors({});
   };
@@ -155,12 +152,12 @@ const InformasiSekolahPage = () => {
       <ToastNotifier ref={toastRef} />
       <ConfirmDialog />
 
-      <h3 className="text-xl font-semibold mb-3">Master Informasi Sekolah</h3>
+      <h3 className="text-xl font-semibold mb-3">Master Wilayah</h3>
 
       <div className="flex items-center justify-end">
         <HeaderBar
           title=""
-          placeholder="Cari Sekolah"
+          placeholder="Cari Wilayah"
           onSearch={handleSearch}
           onAddClick={() => {
             resetForm();
@@ -169,14 +166,14 @@ const InformasiSekolahPage = () => {
         />
       </div>
 
-      <TabelInformasiSekolah
+      <TabelWilayah
         data={data}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
-      <FormInformasiSekolah
+      <FormWilayah
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -191,4 +188,4 @@ const InformasiSekolahPage = () => {
   );
 };
 
-export default InformasiSekolahPage;
+export default WilayahPage;
