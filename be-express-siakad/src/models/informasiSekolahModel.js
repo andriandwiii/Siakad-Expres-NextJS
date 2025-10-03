@@ -47,20 +47,11 @@ export const createInformasiSekolah = async ({
     NAMA_SEKOLAH,
     ALAMAT,
     JENJANG_AKREDITASI,
-<<<<<<< HEAD
-    TANGGAL_AKREDITASI: formattedDate, // Menggunakan tanggal yang diformat
-=======
     TANGGAL_AKREDITASI: formatDate(TANGGAL_AKREDITASI),
->>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
     NPSN,
     STATUS: finalStatus,
   });
 
-<<<<<<< HEAD
-  // Mengambil data yang baru disimpan
-=======
-
->>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
   return getInformasiSekolahById(id);
 };
 
@@ -87,11 +78,7 @@ export const updateInformasiSekolah = async (
       NAMA_SEKOLAH,
       ALAMAT,
       JENJANG_AKREDITASI,
-<<<<<<< HEAD
-      TANGGAL_AKREDITASI: formattedDate, // Menggunakan tanggal yang diformat
-=======
       TANGGAL_AKREDITASI: formatDate(TANGGAL_AKREDITASI),
->>>>>>> 85d5a36d030c05121d3dbcd4a8dc0b44af86b7dd
       NPSN,
       STATUS,
     });

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "primereact/button";
 import CustomDataTable from "../../../../components/DataTable";
@@ -29,7 +28,6 @@ const TabelGuru = ({ data, loading, onEdit, onDelete }) => {
     }
   };
 
-  
   const actionTemplate = (row) => (
     <div className="flex gap-2">
       <Button
@@ -56,10 +54,18 @@ const TabelGuru = ({ data, loading, onEdit, onDelete }) => {
   const columns = [
     { field: "GURU_ID", header: "ID", style: { minWidth: "70px" } },
     { field: "NIP", header: "NIP", style: { minWidth: "140px" } },
-    { header: "Nama Lengkap", body: namaLengkapTemplate, style: { minWidth: "200px" } },
+    {
+      header: "Nama Lengkap",
+      body: namaLengkapTemplate,
+      style: { minWidth: "200px" },
+    },
     { field: "PANGKAT", header: "Pangkat", style: { minWidth: "120px" } },
     { field: "JABATAN", header: "Jabatan", style: { minWidth: "150px" } },
-    { field: "STATUS_KEPEGAWAIAN", header: "Status", style: { minWidth: "120px" } },
+    {
+      field: "STATUS_KEPEGAWAIAN",
+      header: "Status",
+      style: { minWidth: "120px" },
+    },
     { field: "EMAIL", header: "Email", style: { minWidth: "200px" } },
     { field: "NO_TELP", header: "No. Telp", style: { minWidth: "130px" } },
     { header: "Aksi", body: actionTemplate, style: { width: "150px" } },
@@ -77,4 +83,4 @@ const TabelGuru = ({ data, loading, onEdit, onDelete }) => {
   );
 };
 
-export default TabelWilayah;
+export default TabelGuru;

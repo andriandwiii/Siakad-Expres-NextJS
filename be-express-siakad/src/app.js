@@ -62,7 +62,7 @@ app.get("/", [setResponseHeader], (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/siswa", siswaRoutes);
 app.use("/api/kelas", kelasRoutes);
-app.use("/api/guru", masterGuruRoutes);
+app.use("/api/master-guru", masterGuruRoutes);
 app.use("/api/mapel", mapelRoutes);
 app.use("/api/kurikulum", masterKurikulumRoutes);
 app.use("/api/agama", masterAgamaRoutes);

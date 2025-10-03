@@ -1,23 +1,21 @@
 "use client";
-
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelGuru from "./components/tabelGuru"; 
-import FormGuru from "./components/formDialogGuru"; 
+import TabelGuru from "./components/tabelGuru";
+import FormGuru from "./components/formDialogGuru";
 import HeaderBar from "@/app/components/headerbar";
 import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const WilayahPage = () => {
+const GuruPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-
   const [formData, setFormData] = useState({
     GURU_ID: 0,
     user_id: "",
@@ -35,15 +33,14 @@ const WilayahPage = () => {
     ALAMAT: "",
     NO_TELP: "",
   });
-
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchWilayah();
+    fetchGuru();
   }, []);
 
-  const fetchWilayah = async () => {
+  const fetchGuru = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_URL}/master-guru`);
@@ -69,7 +66,6 @@ const WilayahPage = () => {
     if (!formData.JABATAN?.trim()) newErrors.JABATAN = "Jabatan wajib diisi";
     if (!formData.STATUS_KEPEGAWAIAN?.trim()) newErrors.STATUS_KEPEGAWAIAN = "Status wajib diisi";
     if (!formData.EMAIL?.trim()) newErrors.EMAIL = "Email wajib diisi";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -89,12 +85,10 @@ const WilayahPage = () => {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-
-    const isEdit = !!formData.ID;
+    const isEdit = !!formData.GURU_ID;
     const url = isEdit
       ? `${API_URL}/master-guru/${formData.GURU_ID}`
       : `${API_URL}/master-guru`;
-
     try {
       if (isEdit) {
         await axios.put(url, formData);
@@ -103,7 +97,7 @@ const WilayahPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchWilayah();
+      fetchGuru();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -119,7 +113,7 @@ const WilayahPage = () => {
 
   const handleDelete = (row) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus wilayah ${row.PROVINSI}?`,
+      message: `Apakah Anda yakin ingin menghapus guru ${row.NAMA}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
@@ -162,13 +156,11 @@ const WilayahPage = () => {
     <div className="card">
       <ToastNotifier ref={toastRef} />
       <ConfirmDialog />
-
-      <h3 className="text-xl font-semibold mb-3">Master Wilayah</h3>
-
+      <h3 className="text-xl font-semibold mb-3">Master Guru</h3>
       <div className="flex items-center justify-end">
         <HeaderBar
           title=""
-          placeholder="Cari Wilayah"
+          placeholder="Cari Guru"
           onSearch={handleSearch}
           onAddClick={() => {
             resetForm();
@@ -176,15 +168,13 @@ const WilayahPage = () => {
           }}
         />
       </div>
-
-      <TabelWilayah
+      <TabelGuru
         data={data}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-
-      <FormWilayah
+      <FormGuru
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -199,4 +189,4 @@ const WilayahPage = () => {
   );
 };
 
-export default WilayahPage;
+export default GuruPage;
