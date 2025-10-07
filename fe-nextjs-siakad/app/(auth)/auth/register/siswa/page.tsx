@@ -5,6 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link'; // Import Link untuk konsistensi
 import ToastNotifier from '../../../../components/ToastNotifier';
 import '@/styles/gradient.css';
 import axios from 'axios';
@@ -36,6 +37,7 @@ const RegisterSiswaPage = () => {
 
   const [loading, setLoading] = useState(false);
 
+  // Handler ini hanya untuk InputText
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
@@ -59,21 +61,11 @@ const RegisterSiswaPage = () => {
         status: 'Aktif',
       };
 
-      const res = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/register-siswa`,
         payload,
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { headers: { 'Content-Type': 'application/json' } }
       );
-
-      const data = res.data;
-
-      if (data.status !== '00') {
-        toastRef.current?.showToast(data.status, data.message || 'Register gagal');
-        setLoading(false);
-        return;
-      }
 
       toastRef.current?.showToast('00', 'Siswa berhasil didaftarkan');
 
@@ -94,137 +86,126 @@ const RegisterSiswaPage = () => {
   return (
     <div className="min-h-screen flex justify-content-center align-items-center">
       <ToastNotifier ref={toastRef} />
-      {/* Container utama dengan background gradient */}
       <div className="animated-gradient-bg w-full h-full flex justify-content-center align-items-center p-4">
-        
-        {/* Card Container Utama: Menggunakan styling untuk tampilan seperti kartu besar */}
-        <div className="card surface-card w-full md:w-8 lg:w-7 xl:w-6 p-0 shadow-6 rounded-lg overflow-hidden">
-          {/* Grid Konten: Form (col-6) dan Gambar (col-6) */}
-          <div className="grid h-auto m-0"> 
-
-            {/* Kolom Kiri: Form Registrasi */}
-            <div className="col-12 md:col-6 flex flex-col justify-content-center p-5">
-              <div className="w-full">
+        {/* Card disamakan dengan halaman register guru */}
+        <div className="card w-full md:w-8 lg:w-7 h-auto p-5 shadow-3 rounded-lg">
+          {/* Layout Flexbox untuk centering vertikal */}
+          <div className="flex flex-column md:flex-row items-center">
+            
+            {/* Kolom Form (Kiri) */}
+            <div className="w-full md:w-6/12 p-fluid px-4">
+              <h3 className="text-2xl text-center font-semibold mb-5">
+                Registrasi Akun Siswa
+              </h3>
+              
+              <form className="grid formgrid" onSubmit={handleSubmit}>
                 
-                {/* Judul Registrasi yang Jelas dan Menonjol */}
-                <h1 className="text-3xl font-bold mb-2 text-900">
-                  Register Siswa
-                </h1>
-                <p className="text-color-secondary mb-5">
-                  Lengkapi data diri untuk membuat akun siswa baru.
-                </p>
+                {/* BARIS 1: NIS dan NISN */}
+                <div className="field col-12 md:col-6">
+                  <label htmlFor="nis" className="block text-900 font-medium mb-2">NIS</label>
+                  <InputText 
+                    id="nis" 
+                    value={form.nis} 
+                    onChange={handleChange} 
+                    placeholder="Contoh: 231234" 
+                    required 
+                  />
+                </div>
+                <div className="field col-12 md:col-6">
+                  <label htmlFor="nisn" className="block text-900 font-medium mb-2">NISN</label>
+                  <InputText 
+                    id="nisn" 
+                    value={form.nisn} 
+                    onChange={handleChange} 
+                    placeholder="Contoh: 1234567890" 
+                    required 
+                  />
+                </div>
 
-                <form className="grid p-fluid" onSubmit={handleSubmit}>
-                  
-                  {/* BARIS 1: NIS dan NISN */}
-                  <div className="col-12 md:col-6 mb-3">
-                    <label htmlFor="nis" className="block text-900 font-medium mb-2">NIS</label>
-                    <InputText 
-                      id="nis" 
-                      value={form.nis} 
-                      onChange={handleChange} 
-                      placeholder="SIS123456" 
-                      required 
-                    />
-                  </div>
-                  <div className="col-12 md:col-6 mb-3">
-                    <label htmlFor="nisn" className="block text-900 font-medium mb-2">NISN</label>
-                    <InputText 
-                      id="nisn" 
-                      value={form.nisn} 
-                      onChange={handleChange} 
-                      placeholder="1234567890" 
-                      required 
-                    />
-                  </div>
+                {/* BARIS 2: Nama Lengkap */}
+                <div className="field col-12">
+                  <label htmlFor="nama" className="block text-900 font-medium mb-2">Nama Lengkap</label>
+                  <InputText 
+                    id="nama" 
+                    value={form.nama} 
+                    onChange={handleChange} 
+                    placeholder="Masukkan nama lengkap" 
+                    required 
+                  />
+                </div>
+                
+                {/* BARIS 3: Email dan Password */}
+                <div className="field col-12 md:col-6">
+                  <label htmlFor="email" className="block text-900 font-medium mb-2">Email</label>
+                  <InputText 
+                    id="email" 
+                    value={form.email} 
+                    onChange={handleChange} 
+                    placeholder="email@anda.com" 
+                    type="email" 
+                    required 
+                  />
+                </div>
+                <div className="field col-12 md:col-6">
+                  <label htmlFor="password" className="block text-900 font-medium mb-2">Password</label>
+                  <InputText 
+                    id="password" 
+                    value={form.password} 
+                    onChange={handleChange} 
+                    placeholder="Min. 8 karakter" 
+                    type="password" 
+                    required 
+                  />
+                </div>
 
-                  {/* BARIS 2: Nama Lengkap dan Email */}
-                  <div className="col-12 md:col-6 mb-3">
-                    <label htmlFor="nama" className="block text-900 font-medium mb-2">Nama Lengkap</label>
-                    <InputText 
-                      id="nama" 
-                      value={form.nama} 
-                      onChange={handleChange} 
-                      placeholder="Andrian Dwi" 
-                      required 
-                    />
-                  </div>
-                  <div className="col-12 md:col-6 mb-3">
-                    <label htmlFor="email" className="block text-900 font-medium mb-2">Email</label>
-                    <InputText 
-                      id="email" 
-                      value={form.email} 
-                      onChange={handleChange} 
-                      placeholder="andrian@gmail.com" 
-                      type="email" 
-                      required 
-                    />
-                  </div>
-                  
-                  {/* BARIS 3: Password (Lebar Penuh) */}
-                  <div className="col-12 mb-3"> 
-                      <label htmlFor="password" className="block text-900 font-medium mb-2">Password</label>
-                      <InputText 
-                          id="password" 
-                          value={form.password} 
-                          onChange={handleChange} 
-                          placeholder="Minimal 8 karakter" 
-                          type="password" 
-                          required 
-                      />
-                  </div>
+                {/* BARIS 4: Gender dan Tanggal Lahir */}
+                <div className="field col-12 md:col-6">
+                  <label className="block text-900 font-medium mb-2">Jenis Kelamin</label>
+                  <Dropdown 
+                    value={form.gender} 
+                    options={genderOptions} 
+                    onChange={(e) => setForm((prev) => ({ ...prev, gender: e.value }))} 
+                    placeholder="Pilih Gender" 
+                    required 
+                  />
+                </div>
+                <div className="field col-12 md:col-6">
+                  <label className="block text-900 font-medium mb-2">Tanggal Lahir</label>
+                  <Calendar 
+                    value={form.tgl_lahir} 
+                    onChange={(e) => setForm((prev) => ({ ...prev, tgl_lahir: e.value as Date }))} 
+                    dateFormat="yy-mm-dd" 
+                    showIcon 
+                    placeholder="YYYY-MM-DD" 
+                    required 
+                  />
+                </div>
 
-                  {/* BARIS 4: Gender dan Tanggal Lahir */}
-                  <div className="col-12 md:col-6 mb-3">
-                    <label className="block text-900 font-medium mb-2">Jenis Kelamin</label>
-                    <Dropdown 
-                      value={form.gender} 
-                      options={genderOptions} 
-                      onChange={(e) => setForm((prev) => ({ ...prev, gender: e.value }))} 
-                      placeholder="Pilih Gender" 
-                      required 
-                    />
-                  </div>
-
-                  <div className="col-12 md:col-6 mb-3">
-                    <label className="block text-900 font-medium mb-2">Tanggal Lahir</label>
-                    <Calendar 
-                      value={form.tgl_lahir} 
-                      onChange={(e) => setForm((prev) => ({ ...prev, tgl_lahir: e.value as Date }))} 
-                      dateFormat="yy-mm-dd" 
-                      showIcon 
-                      placeholder="YYYY-MM-DD" 
-                      required 
-                    />
-                  </div>
-
-                  {/* Tombol Register */}
-                  <div className="col-12 mt-3">
-                    <Button 
-                      type="submit" 
-                      label={loading ? 'Loading...' : 'Register'} 
-                      disabled={loading} 
-                      className="w-full p-3 text-lg" 
-                    />
-                  </div>
-                  
-                  {/* Link ke halaman Login */}
-                  <div className="col-12 text-center mt-3">
-                      <Button 
-                          label="Sudah punya akun? Login di sini" 
-                          link 
-                          onClick={() => router.push('/auth/login')}
-                      />
-                  </div>
-                </form>
-              </div>
+                {/* Tombol Register */}
+                <div className="col-12 mt-4">
+                  <Button 
+                    type="submit" 
+                    label={loading ? 'Memproses...' : 'Daftar Sekarang'} 
+                    disabled={loading} 
+                    className="w-full p-3" 
+                  />
+                </div>
+                
+                {/* Link ke halaman Login */}
+                <div className="col-12 text-center mt-3">
+                    <span>Sudah punya akun? </span>
+                    <Link href="/auth/login" className="text-blue-500 hover:underline font-semibold">
+                        Login disini
+                    </Link>
+                </div>
+              </form>
             </div>
 
-            {/* Kolom Kanan: Gambar (Sembunyi di Mobile) */}
-            <div className="hidden md:block md:col-6"> 
+            {/* Kolom Kanan: Gambar */}
+            <div className="hidden md:block md:w-6/12 px-4"> 
               <img
-                src="https://images.unsplash.com/photo-1604311795833-25e1d5c128c6?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8OSUzQTE2fGVufDB8fDB8fHww"
-                className="w-full h-full object-cover" 
+                src="https://www.pinhome.id/info-area/wp-content/uploads/2022/04/Cover-17.jpg"
+                className="w-full h-full object-cover rounded-lg" 
                 alt="Ilustrasi siswa sedang belajar"
               />
             </div>
