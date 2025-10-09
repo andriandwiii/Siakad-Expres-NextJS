@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
+export.up = function(knex) {
   return knex.schema.createTable('master_info_sekolah', function(table) {
     // --- Kunci Utama (Telah diubah) ---
     table.increments('INFO_ID').primary();
@@ -90,6 +90,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+export.down = function(knex) {
   return knex.schema.dropTableIfExists('master_info_sekolah');
 };
