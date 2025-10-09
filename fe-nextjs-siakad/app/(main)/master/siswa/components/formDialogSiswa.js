@@ -23,7 +23,7 @@ const genderOptions = [
   { label: "Perempuan", value: "P" },
 ];
 
-const API_URL = "http://localhost:8100/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
   const [formData, setFormData] = useState({});
@@ -49,10 +49,10 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.nis?.trim()) newErrors.nis = "NIS wajib diisi";
-    if (!formData.nisn?.trim()) newErrors.nisn = "NISN wajib diisi";
-    if (!formData.nama?.trim()) newErrors.nama = "Nama wajib diisi";
-    if (!formData.email?.trim()) newErrors.email = "Email wajib diisi";
+    if (!formData.NIS?.trim()) newErrors.NIS = "NIS wajib diisi";
+    if (!formData.NISN?.trim()) newErrors.NISN = "NISN wajib diisi";
+    if (!formData.NAMA?.trim()) newErrors.NAMA = "Nama wajib diisi";
+    if (!formData.EMAIL?.trim()) newErrors.EMAIL = "Email wajib diisi";
     if (!formData.SISWA_ID && !formData.password?.trim())
       newErrors.password = "Password wajib diisi";
     setErrors(newErrors);
@@ -70,14 +70,14 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
       } else {
         // === TAMBAH SISWA ===
         const payload = {
-          nis: formData.nis,
-          nisn: formData.nisn,
-          nama: formData.nama,
-          gender: formData.gender,
-          tgl_lahir: formData.tgl_lahir,
-          email: formData.email,
+          NIS: formData.NIS,
+          NISN: formData.NISN,
+          NAMA: formData.NAMA,
+          GENDER: formData.GENDER,
+          TGL_LAHIR: formData.TGL_LAHIR,
+          EMAIL: formData.EMAIL,
           password: formData.password,
-          status: formData.status || "Aktif",
+          STATUS: formData.STATUS || "Aktif",
         };
 
         await axios.post(`${API_URL}/auth/register-siswa`, payload);
@@ -124,10 +124,10 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
               NIS
             </label>
             <InputText
-              className={inputClass("nis")}
-              value={formData.nis || ""}
+              className={inputClass("NIS")}
+              value={formData.NIS || ""}
               onChange={(e) =>
-                setFormData({ ...formData, nis: e.target.value })
+                setFormData({ ...formData, NIS: e.target.value })
               }
             />
           </div>
@@ -138,10 +138,10 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
               NISN
             </label>
             <InputText
-              className={inputClass("nisn")}
-              value={formData.nisn || ""}
+              className={inputClass("NISN")}
+              value={formData.NISN || ""}
               onChange={(e) =>
-                setFormData({ ...formData, nisn: e.target.value })
+                setFormData({ ...formData, NISN: e.target.value })
               }
             />
           </div>
@@ -152,10 +152,10 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
               Nama
             </label>
             <InputText
-              className={inputClass("nama")}
-              value={formData.nama || ""}
+              className={inputClass("NAMA")}
+              value={formData.NAMA || ""}
               onChange={(e) =>
-                setFormData({ ...formData, nama: e.target.value })
+                setFormData({ ...formData, NAMA: e.target.value })
               }
             />
           </div>
@@ -166,10 +166,10 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
               Jenis Kelamin
             </label>
             <Dropdown
-              value={formData.gender || ""}
+              value={formData.GENDER || ""}
               options={genderOptions}
               onChange={(e) =>
-                setFormData({ ...formData, gender: e.value })
+                setFormData({ ...formData, GENDER: e.value })
               }
               className="w-full"
               placeholder="Pilih gender"
@@ -182,11 +182,11 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
               Tanggal Lahir
             </label>
             <Calendar
-              value={formData.tgl_lahir ? new Date(formData.tgl_lahir) : null}
+              value={formData.TGL_LAHIR ? new Date(formData.TGL_LAHIR) : null}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  tgl_lahir: e.value
+                  TGL_LAHIR: e.value
                     ? e.value.toISOString().split("T")[0]
                     : "",
                 })
@@ -203,10 +203,10 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
               Email
             </label>
             <InputText
-              className={inputClass("email")}
-              value={formData.email || ""}
+              className={inputClass("EMAIL")}
+              value={formData.EMAIL || ""}
               onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
+                setFormData({ ...formData, EMAIL: e.target.value })
               }
             />
           </div>
@@ -217,9 +217,9 @@ const FormSiswa = ({ visible, onHide, reloadData, siswaData }) => {
               Status
             </label>
             <Dropdown
-              value={formData.status || "Aktif"}
+              value={formData.STATUS || "Aktif"}
               options={statusOptions}
-              onChange={(e) => setFormData({ ...formData, status: e.value })}
+              onChange={(e) => setFormData({ ...formData, STATUS: e.value })}
               className="w-full"
               placeholder="Pilih status"
             />

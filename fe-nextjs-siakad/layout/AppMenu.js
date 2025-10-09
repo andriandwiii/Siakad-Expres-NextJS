@@ -18,7 +18,7 @@ const AppMenu = () => {
 
     if (!userRole) return null;
 
-    let model = []; // Dihapus ": any[]"
+    let model = []; 
 
     // =========================
     // 1. SUPER ADMIN SEKOLAH
@@ -37,9 +37,15 @@ const AppMenu = () => {
                 { label: "Guru", icon: "pi pi-fw pi-users", to: "/master/guru" },
                 { label: "Siswa", icon: "pi pi-fw pi-users", to: "/master/siswa" },
                 { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/master/informasi_sekolah" },
-                { label: "Kelas", icon: "pi pi-fw pi-th-large", to: "/master/kelas" },
+                { label: "Kelas", icon: "pi pi-fw pi-th-large", to: "/master/m.kelas" },
                 { label: "Kurikulum", icon: "pi pi-fw pi-book", to: "/master/kurikulum" },
                 { label: "Mapel", icon: "pi pi-fw pi-bookmark", to: "/master/mapel" },
+                { label: "Mapel Kelas", icon: "pi pi-fw pi-bookmark", to: "/master/mapel-kelas" },
+                { label: "Hari", icon: "pi pi-fw pi-calendar", to: "/master/hari" },
+                { label: "jadwal", icon: "pi pi-fw pi-calendar-times", to: "/master/jadwal" },
+                { label: "Jurusan", icon: "pi pi-fw pi-briefcase", to: "/master/jurusan" },
+                { label: "Gedung", icon: "pi pi-fw pi-building", to: "/master/gedung" },
+                { label: "Transaksi Siswa", icon: "pi pi-fw pi-money-bill", to: "/master/transaksi-siswa" },
                 { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" },
                 ],
             },

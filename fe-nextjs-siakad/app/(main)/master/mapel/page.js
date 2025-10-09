@@ -1,188 +1,148 @@
 "use client";
 
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import TabelMapel from "./components/tabelMapel"; // pastikan path benar
-import FormMapel from "./components/formDialogMapel"; // pastikan path benar
-import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/ToastNotifier";
+import { useEffect, useState, useRef } from "react";
+import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import CustomDataTable from "../../../components/DataTable";
+import ToastNotifier from "../../../components/ToastNotifier";
+import FormMapel from "./components/formDialogMapel";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const MapelPage = () => {
-  const [data, setData] = useState([]);
-  const [originalData, setOriginalData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [dialogVisible, setDialogVisible] = useState(false);
-
-  const [formData, setFormData] = useState({
-    MAPEL_ID: 0,
-    KODE_MAPEL: "",
-    NAMA_MAPEL: "",
-    DESKRIPSI: "",
-    KATEGORI: "",
-    STATUS: "",
-  });
-
-  const [errors, setErrors] = useState({});
+export default function MasterMapelPage() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const toastRef = useRef(null);
+  const isMounted = useRef(true);
 
-  // 🚀 Ambil semua data mapel
+  const [mapelList, setMapelList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedMapel, setSelectedMapel] = useState(null);
+  const [dialogMode, setDialogMode] = useState(null);
+
   useEffect(() => {
     fetchMapel();
+
+    return () => {
+      // cleanup saat halaman unmount
+      isMounted.current = false;
+      toastRef.current = null;
+    };
   }, []);
 
   const fetchMapel = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/master-mapel`);
-      setData(res.data);
-      setOriginalData(res.data);
+      const res = await fetch(`${API_URL}/mapel`);
+      const json = await res.json();
+      if (!isMounted.current) return;
+      setMapelList(json.data || []);
     } catch (err) {
-      console.error("Gagal mengambil data:", err);
-      toastRef.current?.showToast("01", "Gagal mengambil data");
+      console.error(err);
+      toastRef.current?.showToast("01", "Gagal memuat data mata pelajaran");
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
-  // 🚀 Validasi form
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.KODE_MAPEL?.trim())
-      newErrors.KODE_MAPEL = "Kode Mapel wajib diisi";
-    if (!formData.NAMA_MAPEL?.trim())
-      newErrors.NAMA_MAPEL = "Nama Mapel wajib diisi";
-    if (!formData.KATEGORI?.trim())
-      newErrors.KATEGORI = "Kategori wajib diisi";
-    if (!formData.STATUS?.trim())
-      newErrors.STATUS = "Status wajib diisi";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // 🚀 Pencarian
-  const handleSearch = (keyword) => {
-    if (!keyword) {
-      setData(originalData);
-    } else {
-      const filtered = originalData.filter(
-        (item) =>
-          item.KODE_MAPEL.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.NAMA_MAPEL.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.KATEGORI.toLowerCase().includes(keyword.toLowerCase())
-      );
-      setData(filtered);
-    }
-  };
-
-  // 🚀 Simpan form (POST / PUT)
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    const isEdit = !!formData.MAPEL_ID;
-    const url = isEdit
-      ? `${API_URL}/master-mapel/${formData.MAPEL_ID}` // ✅ pakai path param
-      : `${API_URL}/master-mapel`;
-
+  const handleSave = async (data) => {
     try {
-      if (isEdit) {
-        await axios.put(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil diperbarui");
-      } else {
-        await axios.post(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil ditambahkan");
+      if (dialogMode === "add") {
+        await fetch(`${API_URL}/mapel`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        toastRef.current?.showToast("00", "Mapel berhasil ditambahkan");
+      } else if (dialogMode === "edit" && selectedMapel) {
+        await fetch(`${API_URL}/mapel/${selectedMapel.MAPEL_ID}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        toastRef.current?.showToast("00", "Mapel berhasil diperbarui");
       }
-      fetchMapel();
-      setDialogVisible(false);
-      resetForm();
+
+      if (isMounted.current) {
+        await fetchMapel();
+        setDialogMode(null);
+        setSelectedMapel(null);
+      }
     } catch (err) {
-      console.error("Gagal menyimpan data:", err);
-      toastRef.current?.showToast("01", "Gagal menyimpan data");
+      console.error(err);
+      toastRef.current?.showToast("01", "Gagal menyimpan mapel");
     }
   };
 
-  // 🚀 Edit mapel
-  const handleEdit = (row) => {
-    setFormData({ ...row });
-    setDialogVisible(true);
-  };
-
-  // 🚀 Hapus mapel
   const handleDelete = (row) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus Mapel ${row.NAMA_MAPEL}?`,
+      message: `Yakin ingin menghapus mata pelajaran "${row.NAMA_MAPEL}"?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Ya",
-      rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/master-mapel/${row.MAPEL_ID}`); // ✅ pakai path param
-          fetchMapel();
-          toastRef.current?.showToast("00", "Data berhasil dihapus");
+          await fetch(`${API_URL}/mapel/${row.MAPEL_ID}`, { method: "DELETE" });
+          toastRef.current?.showToast("00", "Mapel berhasil dihapus");
+          if (isMounted.current) await fetchMapel();
         } catch (err) {
-          console.error("Gagal menghapus data:", err);
-          toastRef.current?.showToast("01", "Gagal menghapus data");
+          console.error(err);
+          toastRef.current?.showToast("01", "Gagal menghapus mapel");
         }
       },
+      rejectLabel: "Batal",
+      acceptLabel: "Hapus",
+      acceptClassName: "p-button-danger",
     });
   };
 
-  // 🚀 Reset form
-  const resetForm = () => {
-    setFormData({
-      MAPEL_ID: 0,
-      KODE_MAPEL: "",
-      NAMA_MAPEL: "",
-      DESKRIPSI: "",
-      KATEGORI: "",
-      STATUS: "",
-    });
-    setErrors({});
-  };
-
-  return (
-    <div className="card">
-      <ToastNotifier ref={toastRef} />
-      <ConfirmDialog />
-
-      <h3 className="text-xl font-semibold mb-3">Master Mata Pelajaran</h3>
-
-      <div className="flex items-center justify-end mb-2">
-        <HeaderBar
-          title=""
-          placeholder="Cari Mapel"
-          onSearch={handleSearch}
-          onAddClick={() => {
-            resetForm();
-            setDialogVisible(true);
-          }}
-        />
-      </div>
-
-      <TabelMapel
-        data={data}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+  const actionBodyTemplate = (row) => (
+    <div className="flex gap-2">
+      <Button
+        icon="pi pi-pencil"
+        size="small"
+        severity="warning"
+        onClick={() => { setSelectedMapel(row); setDialogMode("edit"); }}
       />
-
-      <FormMapel
-        visible={dialogVisible}
-        onHide={() => {
-          setDialogVisible(false);
-          resetForm();
-        }}
-        onChange={setFormData}
-        onSubmit={handleSubmit}
-        formData={formData}
-        errors={errors}
+      <Button
+        icon="pi pi-trash"
+        size="small"
+        severity="danger"
+        onClick={() => handleDelete(row)}
       />
     </div>
   );
-};
 
-export default MapelPage;
+  const columns = [
+    { field: "MAPEL_ID", header: "ID", style: { width: "60px" } },
+    { field: "KODE_MAPEL", header: "Kode Mapel" },
+    { field: "NAMA_MAPEL", header: "Nama Mapel" },
+    { field: "KATEGORI", header: "Kategori" },
+    { field: "DESKRIPSI", header: "Deskripsi" },
+    { field: "STATUS", header: "Status" },
+    { header: "Actions", body: actionBodyTemplate, style: { width: "120px" } },
+  ];
+
+  return (
+    <div className="card p-4">
+      <h3 className="text-xl font-semibold mb-4">Master Mata Pelajaran</h3>
+
+      <div className="flex justify-content-end mb-3 gap-3">
+        <Button
+          label="Tambah Mapel"
+          icon="pi pi-plus"
+          onClick={() => { setDialogMode("add"); setSelectedMapel(null); }}
+        />
+      </div>
+
+      <CustomDataTable data={mapelList} loading={loading} columns={columns} />
+
+      <ConfirmDialog />
+
+      <FormMapel
+        visible={dialogMode !== null}
+        onHide={() => { setDialogMode(null); setSelectedMapel(null); }}
+        selectedMapel={selectedMapel}
+        onSave={handleSave}
+      />
+
+      <ToastNotifier ref={toastRef} />
+    </div>
+  );
+}

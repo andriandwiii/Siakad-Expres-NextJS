@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "primereact/button";
 import CustomDataTable from "../../../../components/DataTable";
-import SiswaDetailDialog from "./SiswaDetailDialog"; // buat dialog detail mirip GuruDetailDialog
+import SiswaDetailDialog from "./SiswaDetailDialog"; 
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -46,28 +46,31 @@ const TabelSiswa = ({ data, loading, onEdit, onDelete }) => {
     </div>
   );
 
-const columns = [
-  { field: "SISWA_ID", header: "ID", style: { minWidth: "70px" } },
-  { field: "NIS", header: "NIS", style: { minWidth: "120px" } },
-  { field: "NISN", header: "NISN", style: { minWidth: "140px" } },
-  { field: "NAMA", header: "Nama", style: { minWidth: "200px" } },
-  { 
-    field: "GENDER", 
-    header: "Jenis Kelamin", 
-    style: { minWidth: "120px" },
-    body: (row) => (row.GENDER === "L" ? "Laki-laki" : "Perempuan")
-  },
-  { 
-    field: "TGL_LAHIR", 
-    header: "Tanggal Lahir", 
-    style: { minWidth: "120px" },
-    body: (row) => row.TGL_LAHIR ? new Date(row.TGL_LAHIR).toLocaleDateString() : "-"
-  },
-  { field: "EMAIL", header: "Email", style: { minWidth: "200px" } },
-  { field: "STATUS", header: "Status", style: { minWidth: "120px" } },
-  { header: "Aksi", body: actionTemplate, style: { width: "150px" } },
-];
-
+  const columns = [
+    { field: "SISWA_ID", header: "ID", style: { minWidth: "70px" } },
+    { field: "NIS", header: "NIS", style: { minWidth: "120px" } },
+    { field: "NISN", header: "NISN", style: { minWidth: "140px" } },
+    { field: "NAMA", header: "Nama", style: { minWidth: "200px" } },
+    { 
+      field: "GENDER", 
+      header: "Jenis Kelamin", 
+      style: { minWidth: "120px" },
+      body: (row) => (row.GENDER === "L" ? "Laki-laki" : "Perempuan")
+    },
+    { 
+      field: "TGL_LAHIR", 
+      header: "Tanggal Lahir", 
+      style: { minWidth: "120px" },
+      body: (row) => row.TGL_LAHIR ? new Date(row.TGL_LAHIR).toLocaleDateString() : "-"
+    },
+    { field: "EMAIL", header: "Email", style: { minWidth: "200px" } },
+    { field: "STATUS", header: "Status", style: { minWidth: "120px" } },
+    {
+      header: "Aksi",
+      body: actionTemplate,
+      style: { width: "150px" }
+    },
+  ];
 
   return (
     <>

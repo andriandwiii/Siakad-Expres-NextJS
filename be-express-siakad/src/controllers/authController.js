@@ -1,6 +1,7 @@
 import { getUserByEmail, addUser, getUsersByRole } from "../models/userModel.js";
 import { addSiswa } from "../models/siswaModel.js";
 import { addGuru } from "../models/guruModel.js";
+import { addOrtu } from "../models/orangtuaModel.js";
 import { addLoginHistory } from "../models/loginHistoryModel.js";
 import { registerSchema, registerSiswaSchema, loginSchema, registerGuruSchema } from "../scemas/authSchema.js";
 import { comparePassword, hashPassword } from "../utils/hash.js";
@@ -76,10 +77,11 @@ export const registerGuru = async (req, res) => {
 };
 
 /**
- * REGISTER SISWA
+ * REGISTER SISWA + ORANG TUA/WALI (Tanpa Kelas/Jurusan/Tahun Masuk)
  */
 export const registerSiswa = async (req, res) => {
   try {
+    // Validasi request body
     const validation = registerSiswaSchema.safeParse(req.body);
 
     if (!validation.success) {
@@ -87,7 +89,7 @@ export const registerSiswa = async (req, res) => {
         status: status.BAD_REQUEST,
         message: "Validasi gagal",
         datetime: datetime(),
-        errors: validation.error.errors.map(err => ({
+        errors: validation.error.errors.map((err) => ({
           field: err.path[0],
           message: err.message,
         })),
@@ -95,18 +97,28 @@ export const registerSiswa = async (req, res) => {
     }
 
     const {
-      nama,
-      email,
-      password,
       nis,
       nisn,
+      nama,
       gender,
+      tempat_lahir,
       tgl_lahir,
+      email,
       status: statusSiswa,
+      password,
+      gol_darah,
+      tinggi,
+      berat,
+      kebutuhan_khusus,
+      foto,
+      alamat,
+      agama,
+      no_telp,
+      orang_tua, // Array [{jenis, nama, pekerjaan, pendidikan, alamat, no_hp}]
     } = validation.data;
 
-    // Cek email sudah dipakai
-    const existingUser = await getUserByEmail(email);
+    // Cek duplikasi email
+    const existingUser = await db("users").where({ email }).first();
     if (existingUser) {
       return res.status(400).json({
         status: status.BAD_REQUEST,
@@ -115,7 +127,7 @@ export const registerSiswa = async (req, res) => {
       });
     }
 
-    // Cek NIS duplikat
+    // Cek duplikasi NIS
     const existingNis = await db("m_siswa").where({ NIS: nis }).first();
     if (existingNis) {
       return res.status(400).json({
@@ -125,7 +137,7 @@ export const registerSiswa = async (req, res) => {
       });
     }
 
-    // Cek NISN duplikat
+    // Cek duplikasi NISN
     const existingNisn = await db("m_siswa").where({ NISN: nisn }).first();
     if (existingNisn) {
       return res.status(400).json({
@@ -138,45 +150,68 @@ export const registerSiswa = async (req, res) => {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // 1️⃣ Simpan ke tabel users
-    const user = await addUser({
-      name: nama,
-      email,
-      password: hashedPassword,
-      role: "SISWA",
-    });
+    // Transaksi agar siswa + ortu konsisten
+    await db.transaction(async (trx) => {
+      // 1️⃣ Insert user
+      const [userId] = await trx("users").insert({
+        name: nama,
+        email,
+        password: hashedPassword,
+        role: "SISWA",
+      });
 
-    // Format tanggal lahir
-    let tglLahirFormatted = null;
-    if (tgl_lahir) {
-      tglLahirFormatted = new Date(tgl_lahir).toISOString().slice(0, 10); // YYYY-MM-DD
-    }
+      // 2️⃣ Insert siswa (kelas, jurusan, tahun masuk tidak diisi dulu)
+      const [siswaId] = await trx("m_siswa").insert({
+        user_id: userId,
+        NIS: nis,
+        NISN: nisn,
+        NAMA: nama,
+        GENDER: gender,
+        TEMPAT_LAHIR: tempat_lahir || null,
+        TGL_LAHIR: tgl_lahir,
+        AGAMA: agama || null,
+        ALAMAT: alamat || null,
+        NO_TELP: no_telp || null,
+        EMAIL: email,
+        STATUS: statusSiswa,
+        GOL_DARAH: gol_darah || null,
+        TINGGI: tinggi || null,
+        BERAT: berat || null,
+        KEBUTUHAN_KHUSUS: kebutuhan_khusus || null,
+        FOTO: foto || null,
+        // KELAS_ID, JURUSAN_ID, TAHUN_MASUK biarkan NULL
+      });
 
-    // 2️⃣ Simpan ke tabel m_siswa dengan NIS input user
-    const siswa = await addSiswa({
-      user_id: user.id,
-      NIS: nis, // pakai input user
-      NISN: nisn,
-      NAMA: nama,
-      GENDER: gender,
-      TGL_LAHIR: tglLahirFormatted,
-      STATUS: statusSiswa,
-      EMAIL: email,
-    });
+      // 3️⃣ Insert orang tua/wali (jika ada)
+      if (Array.isArray(orang_tua) && orang_tua.length > 0) {
+        for (const ortu of orang_tua) {
+          await trx("m_orangtua_wali").insert({
+            SISWA_ID: siswaId,
+            JENIS: ortu.jenis, // Ayah/Ibu/Wali
+            NAMA: ortu.nama,
+            PEKERJAAN: ortu.pekerjaan || null,
+            PENDIDIKAN: ortu.pendidikan || null,
+            ALAMAT: ortu.alamat || null,
+            NO_HP: ortu.no_hp || null,
+          });
+        }
+      }
 
-    return res.status(201).json({
-      status: status.SUKSES,
-      message: "Siswa berhasil didaftarkan",
-      datetime: datetime(),
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      siswa,
+      return res.status(201).json({
+        status: status.SUKSES,
+        message: "Siswa dan orang tua/wali berhasil didaftarkan",
+        datetime: datetime(),
+        user: {
+          id: userId,
+          name: nama,
+          email,
+          role: "SISWA",
+        },
+        siswa_id: siswaId,
+      });
     });
   } catch (error) {
+    console.error("Error registerSiswa:", error);
     return res.status(500).json({
       status: status.GAGAL,
       message: `Terjadi kesalahan server: ${error.message}`,
