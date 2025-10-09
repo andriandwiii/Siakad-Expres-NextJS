@@ -4,84 +4,85 @@
  */
 exports.up = function(knex) {
   return knex.schema.createTable('master_info_sekolah', function(table) {
-    // --- Kunci Utama ---
-    table.increments('id').primary();
+    // --- Kunci Utama (Telah diubah) ---
+    table.increments('INFO_ID').primary();
 
     // --- Identitas Utama Sekolah ---
-    table.string('nama_sekolah', 255).notNullable();
-    table.string('npsn', 20).notNullable().unique();
-    table.string('nss', 20);
-    table.string('jenjang_pendidikan', 50);
-    table.string('status_sekolah', 50).notNullable();
-    table.text('visi');
-    table.text('misi');
-    table.string('motto', 255);
+    table.string('NAMA_SEKOLAH', 255).notNullable();
+    table.string('NPSN', 20).notNullable().unique();
+    table.string('NSS', 20);
+    table.string('JENJANG_PENDIDIKAN', 50);
+    table.string('STATUS_SEKOLAH', 50).notNullable();
+    table.text('VISI');
+    table.text('MISI');
+    table.string('MOTTO', 255);
 
     // --- Informasi Alamat & Kontak ---
-    table.text('alamat_jalan').notNullable();
-    table.string('rt', 5);
-    table.string('rw', 5);
-    table.string('kelurahan_desa', 100).notNullable();
-    table.string('kecamatan', 100).notNullable();
-    table.string('kabupaten_kota', 100).notNullable();
-    table.string('provinsi', 100).notNullable();
-    table.string('kode_pos', 10);
-    table.string('telepon', 20);
-    table.string('fax', 20);
-    table.string('email', 100);
-    table.string('website', 255);
+    table.text('ALAMAT_JALAN').notNullable();
+    table.string('RT', 5);
+    table.string('RW', 5);
+    table.string('KELURAHAN_DESA', 100).notNullable();
+    table.string('KECAMATAN', 100).notNullable();
+    table.string('KABUPATEN_KOTA', 100).notNullable();
+    table.string('PROVINSI', 100).notNullable();
+    table.string('KODE_POS', 10);
+    table.string('TELEPON', 20);
+    table.string('FAX', 20);
+    table.string('EMAIL', 100);
+    table.string('WEBSITE', 255);
 
     // --- Detail Akreditasi ---
-    table.string('akreditasi', 5);
-    table.string('no_sk_akreditasi', 100);
-    table.date('tanggal_sk_akreditasi');
-    table.date('tanggal_akhir_akreditasi');
+    table.string('AKREDITASI', 5);
+    table.string('NO_SK_AKREDITASI', 100);
+    table.date('TANGGAL_SK_AKREDITASI');
+    table.date('TANGGAL_AKHIR_AKREDITASI');
     
     // --- Informasi Kepala Sekolah ---
-    table.string('nama_kepala_sekolah', 255);
-    table.string('nip_kepala_sekolah', 30);
-    table.string('email_kepala_sekolah', 100);
-    table.string('no_hp_kepala_sekolah', 20);
+    table.string('NAMA_KEPALA_SEKOLAH', 255);
+    table.string('NIP_KEPALA_SEKOLAH', 30);
+    table.string('EMAIL_KEPALA_SEKOLAH', 100);
+    table.string('NO_HP_KEPALA_SEKOLAH', 20);
 
     // --- Data Legal & Tambahan ---
-    table.string('penyelenggara', 150);
-    table.string('no_sk_pendirian', 100);
-    table.date('tanggal_sk_pendirian');
-    table.string('no_sk_izin_operasional', 100);
-    table.date('tanggal_sk_izin_operasional');
-    table.decimal('lintang', 10, 8);
-    table.decimal('bujur', 11, 8);
-    table.string('logo_sekolah_url', 255);
+    table.string('PENYELENGGARA', 150);
+    table.string('NO_SK_PENDIRIAN', 100);
+    table.date('TANGGAL_SK_PENDIRIAN');
+    table.string('NO_SK_IZIN_OPERASIONAL', 100);
+    table.date('TANGGAL_SK_IZIN_OPERASIONAL');
+    table.decimal('LINTANG', 10, 8);
+    table.decimal('BUJUR', 11, 8);
+    table.string('LOGO_SEKOLAH_URL', 255);
 
     // --- Informasi Finansial & Bantuan ---
-    table.string('nama_bank', 100); // Untuk dana BOS
-    table.string('nomor_rekening', 50);
-    table.string('nama_pemilik_rekening', 255);
-    table.string('npwp', 25); // NPWP sekolah atau yayasan
+    table.string('NAMA_BANK', 100);
+    table.string('NOMOR_REKENING', 50);
+    table.string('NAMA_PEMILIK_REKENING', 255);
+    table.string('NPWP', 25);
 
     // --- Detail Operasional & Kurikulum ---
-    table.string('kurikulum_digunakan', 100); // Contoh: Kurikulum Merdeka, K-13
-    table.string('waktu_penyelenggaraan', 100); // Contoh: Pagi, Siang, Kombinasi
-    table.string('sumber_listrik', 50); // Contoh: PLN, Genset
-    table.string('akses_internet', 100); // Contoh: Telkom, Biznet
-    table.integer('kecepatan_internet_mbps');
+    table.string('KURIKULUM_DIGUNAKAN', 100);
+    table.string('WAKTU_PENYELENGGARAAN', 100);
+    table.string('SUMBER_LISTRIK', 50);
+    table.string('AKSES_INTERNET', 100);
+    table.integer('KECEPATAN_INTERNET_MBPS');
 
     // --- Kontak Penting Lainnya ---
-    table.string('nama_operator_dapodik', 255);
-    table.string('email_operator_dapodik', 100);
-    table.string('no_hp_operator_dapodik', 20);
-    table.string('nama_ketua_komite', 255);
+    table.string('NAMA_OPERATOR_DAPODIK', 255);
+    table.string('EMAIL_OPERATOR_DAPODIK', 100);
+    table.string('NO_HP_OPERATOR_DAPODIK', 20);
+    table.string('NAMA_KETUA_KOMITE', 255);
 
     // --- Informasi Digital & Media Sosial ---
-    table.string('facebook_url', 255);
-    table.string('instagram_url', 255);
-    table.string('twitter_x_url', 255);
-    table.string('youtube_url', 255);
+    table.string('FACEBOOK_URL', 255);
+    table.string('INSTAGRAM_URL', 255);
+    table.string('TWITTER_X_URL', 255);
+    table.string('YOUTUBE_URL', 255);
 
     // --- Status & Timestamps ---
-    table.boolean('is_active').defaultTo(true); // Status aktif sekolah
-    table.timestamp('last_sync_dapodik'); // Kapan terakhir sinkron dengan data pusat
-    table.timestamps(true, true);
+    table.boolean('IS_ACTIVE').defaultTo(true);
+    table.timestamp('LAST_SYNC_DAPODIK');
+    table.timestamp('CREATED_AT').defaultTo(knex.fn.now());
+    table.timestamp('UPDATED_AT').defaultTo(knex.fn.now());
   });
 };
 
