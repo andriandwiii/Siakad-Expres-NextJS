@@ -1,57 +1,78 @@
 import { db } from "../core/config/knex.js";
 
-/**
- * Get all kelas
- **/
-export const getAllKelas = async () => db("master_kelas").select("*");
+const KelasTable = "m_kelas";
 
-/**
- * Get kelas by ID
- **/
-export const getKelasById = async (id) =>
-  db("master_kelas").where({ KELAS_ID: id }).first();
+// Ambil semua kelas beserta nama jurusan dan gedung (join)
+export const getAllKelas = async () => {
+  return db(KelasTable)
+    .select(
+      "m_kelas.KELAS_ID",
+      "m_kelas.NAMA_KELAS",
+      "m_kelas.TINGKATAN",
+      "m_kelas.JURUSAN_ID",
+      "master_jurusan.NAMA_JURUSAN",
+      "m_kelas.GEDUNG_ID",
+      "master_gedung.NAMA_GEDUNG",
+      "m_kelas.created_at",
+      "m_kelas.updated_at"
+    )
+    .leftJoin("master_jurusan", "m_kelas.JURUSAN_ID", "master_jurusan.JURUSAN_ID")
+    .leftJoin("master_gedung", "m_kelas.GEDUNG_ID", "master_gedung.GEDUNG_ID")
+    .orderBy("m_kelas.KELAS_ID", "asc");
+};
 
-/**
- * Get kelas by kode
- **/
-export const getKelasByKode = async (kode) =>
-  db("master_kelas").where({ KODE_KELAS: kode }).first();
+// Ambil kelas berdasarkan ID
+export const getKelasById = async (id) => {
+  return db(KelasTable)
+    .select(
+      "m_kelas.KELAS_ID",
+      "m_kelas.NAMA_KELAS",
+      "m_kelas.TINGKATAN",
+      "m_kelas.JURUSAN_ID",
+      "master_jurusan.NAMA_JURUSAN",
+      "m_kelas.GEDUNG_ID",
+      "master_gedung.NAMA_GEDUNG",
+      "m_kelas.created_at",
+      "m_kelas.updated_at"
+    )
+    .leftJoin("master_jurusan", "m_kelas.JURUSAN_ID", "master_jurusan.JURUSAN_ID")
+    .leftJoin("master_gedung", "m_kelas.GEDUNG_ID", "master_gedung.GEDUNG_ID")
+    .where("m_kelas.KELAS_ID", id)
+    .first();
+};
 
-/**
- * Create new kelas
- **/
-export const createKelas = async ({
-  KODE_KELAS,
-  TINGKAT,
-  JURUSAN,
-  NAMA_KELAS,
-  STATUS,
-}) => {
-  const [id] = await db("master_kelas").insert({
-    KODE_KELAS,
-    TINGKAT,
-    JURUSAN,
-    NAMA_KELAS,
-    STATUS,
+// Buat kelas baru
+export const createKelas = async (data) => {
+  const [id] = await db(KelasTable).insert({
+    NAMA_KELAS: data.NAMA_KELAS,
+    JURUSAN_ID: data.JURUSAN_ID,
+    GEDUNG_ID: data.GEDUNG_ID,
+    TINGKATAN: data.TINGKATAN,
   });
-  return db("master_kelas").where({ KELAS_ID: id }).first();
+  return getKelasById(id);
 };
 
-/**
- * Update kelas
- **/
-export const updateKelas = async (
-  id,
-  { KODE_KELAS, TINGKAT, JURUSAN, NAMA_KELAS, STATUS }
-) => {
-  await db("master_kelas")
+// Update kelas
+export const updateKelas = async (id, data) => {
+  const result = await db(KelasTable)
     .where({ KELAS_ID: id })
-    .update({ KODE_KELAS, TINGKAT, JURUSAN, NAMA_KELAS, STATUS });
-  return db("master_kelas").where({ KELAS_ID: id }).first();
+    .update({
+      NAMA_KELAS: data.NAMA_KELAS,
+      JURUSAN_ID: data.JURUSAN_ID,
+      GEDUNG_ID: data.GEDUNG_ID,
+      TINGKATAN: data.TINGKATAN,
+      updated_at: db.fn.now(),
+    });
+
+  if (result) return getKelasById(id);
+  return null;
 };
 
-/**
- * Delete kelas
- **/
-export const deleteKelas = async (id) =>
-  db("master_kelas").where({ KELAS_ID: id }).del();
+// Hapus kelas
+export const deleteKelas = async (id) => {
+  const kelas = await getKelasById(id);
+  if (!kelas) return null;
+
+  await db(KelasTable).where({ KELAS_ID: id }).del();
+  return kelas;
+};

@@ -1,13 +1,18 @@
-import express from "express";
-import * as MasterJurusanController from "../controllers/masterJurusanController.js";
+import express from 'express';
+import {
+  getAllJurusan,
+  getJurusanById,
+  createJurusan,
+  updateJurusan,
+  deleteJurusan
+} from '../controllers/jurusanController.js';
 
 const router = express.Router();
 
-// Semua pakai prefix /master-jurusan
-router.get("/", MasterJurusanController.getAllJurusan);
-router.get("/:id", MasterJurusanController.getJurusanById);
-router.post("/", MasterJurusanController.createJurusan);
-router.put("/:id", MasterJurusanController.updateJurusan);
-router.delete("/:id", MasterJurusanController.deleteJurusan);
+router.get('/', getAllJurusan);
+router.get('/:id', getJurusanById);
+router.post('/', createJurusan);
+router.put('/:id', updateJurusan);
+router.delete('/:id', deleteJurusan);
 
 export default router;

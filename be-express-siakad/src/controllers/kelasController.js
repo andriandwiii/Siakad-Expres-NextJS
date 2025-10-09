@@ -1,14 +1,15 @@
 import * as KelasModel from "../models/kelasModel.js";
 
 /**
- * Ambil semua data kelas
+ * Ambil semua kelas
  */
 export const getAllKelas = async (req, res) => {
   try {
     const kelas = await KelasModel.getAllKelas();
-    res.status(200).json(kelas);
+    res.status(200).json({ status: "success", data: kelas });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
@@ -19,11 +20,12 @@ export const getKelasById = async (req, res) => {
   try {
     const kelas = await KelasModel.getKelasById(req.params.id);
     if (!kelas) {
-      return res.status(404).json({ message: "Kelas tidak ditemukan" });
+      return res.status(404).json({ status: "error", message: "Kelas tidak ditemukan" });
     }
-    res.status(200).json(kelas);
+    res.status(200).json({ status: "success", data: kelas });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
@@ -32,24 +34,17 @@ export const getKelasById = async (req, res) => {
  */
 export const createKelas = async (req, res) => {
   try {
-    const { KODE_KELAS, TINGKAT, JURUSAN, NAMA_KELAS, STATUS } = req.body;
+    const { NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN } = req.body;
 
-    // Validasi sederhana
-    if (!KODE_KELAS || !NAMA_KELAS) {
-      return res.status(400).json({ message: "KODE_KELAS dan NAMA_KELAS wajib diisi" });
+    if (!NAMA_KELAS || !JURUSAN_ID || !GEDUNG_ID) {
+      return res.status(400).json({ status: "error", message: "NAMA_KELAS, JURUSAN_ID dan GEDUNG_ID wajib diisi" });
     }
 
-    const newKelas = await KelasModel.createKelas({
-      KODE_KELAS,
-      TINGKAT,
-      JURUSAN,
-      NAMA_KELAS,
-      STATUS,
-    });
-
-    res.status(201).json(newKelas);
+    const newKelas = await KelasModel.createKelas({ NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN });
+    res.status(201).json({ status: "success", data: newKelas });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
@@ -58,23 +53,18 @@ export const createKelas = async (req, res) => {
  */
 export const updateKelas = async (req, res) => {
   try {
-    const { KODE_KELAS, TINGKAT, JURUSAN, NAMA_KELAS, STATUS } = req.body;
+    const { NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN } = req.body;
 
-    const updatedKelas = await KelasModel.updateKelas(req.params.id, {
-      KODE_KELAS,
-      TINGKAT,
-      JURUSAN,
-      NAMA_KELAS,
-      STATUS,
-    });
+    const updatedKelas = await KelasModel.updateKelas(req.params.id, { NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN });
 
     if (!updatedKelas) {
-      return res.status(404).json({ message: "Kelas tidak ditemukan" });
+      return res.status(404).json({ status: "error", message: "Kelas tidak ditemukan" });
     }
 
-    res.status(200).json(updatedKelas);
+    res.status(200).json({ status: "success", data: updatedKelas });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
@@ -84,13 +74,12 @@ export const updateKelas = async (req, res) => {
 export const deleteKelas = async (req, res) => {
   try {
     const deleted = await KelasModel.deleteKelas(req.params.id);
-
     if (!deleted) {
-      return res.status(404).json({ message: "Kelas tidak ditemukan" });
+      return res.status(404).json({ status: "error", message: "Kelas tidak ditemukan" });
     }
-
-    res.status(200).json({ message: "Kelas berhasil dihapus" });
+    res.status(200).json({ status: "success", message: "Kelas berhasil dihapus", data: deleted });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };

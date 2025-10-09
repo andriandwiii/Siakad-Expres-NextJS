@@ -22,10 +22,26 @@ const SiswaPage = () => {
     nisn: "",
     nama: "",
     gender: "",
+    tempat_lahir: "",
     tgl_lahir: "",
     email: "",
     password: "",
     status: "Aktif",
+    alamat: "",
+    agama: "",
+    no_telp: "",
+    kelas: "",
+    jurusan: "",
+    tahun_masuk: "",
+    gol_darah: "",
+    tinggi: "",
+    berat: "",
+    kebutuhan_khusus: "",
+    foto: "",
+    orang_tua: [
+      { jenis: "Ayah", nama: "", pekerjaan: "", pendidikan: "", alamat: "", no_hp: "" },
+      { jenis: "Ibu", nama: "", pekerjaan: "", pendidikan: "", alamat: "", no_hp: "" },
+    ],
   });
 
   const [errors, setErrors] = useState({});
@@ -55,6 +71,10 @@ const SiswaPage = () => {
     if (!formData.nis?.trim()) newErrors.nis = "NIS wajib diisi";
     if (!formData.nama?.trim()) newErrors.nama = "Nama wajib diisi";
     if (!formData.email?.trim()) newErrors.email = "Email wajib diisi";
+    // Validasi orang tua
+    formData.orang_tua.forEach((ortu, i) => {
+      if (!ortu.nama?.trim()) newErrors[`ortu_${i}_nama`] = `${ortu.jenis} wajib diisi`;
+    });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -63,19 +83,24 @@ const SiswaPage = () => {
     if (!validateForm()) return;
 
     const isEdit = !!formData.SISWA_ID;
-    const url = isEdit
-      ? `${API_URL}/siswa/${formData.SISWA_ID}`
-      : `${API_URL}/auth/register-siswa`;
 
     try {
       if (isEdit) {
-        await axios.put(url, formData);
+        const res = await axios.put(`${API_URL}/siswa/${formData.SISWA_ID}`, formData);
         toastRef.current?.showToast("00", "Data siswa diperbarui");
+        setData((prev) =>
+          prev.map((item) => (item.SISWA_ID === formData.SISWA_ID ? res.data.data : item))
+        );
+        setOriginalData((prev) =>
+          prev.map((item) => (item.SISWA_ID === formData.SISWA_ID ? res.data.data : item))
+        );
       } else {
-        await axios.post(url, formData);
+        const res = await axios.post(`${API_URL}/auth/register-siswa`, formData);
         toastRef.current?.showToast("00", "Siswa berhasil ditambahkan");
+        setData((prev) => [...prev, res.data]);
+        setOriginalData((prev) => [...prev, res.data]);
       }
-      fetchSiswa();
+
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -84,7 +109,12 @@ const SiswaPage = () => {
   };
 
   const handleEdit = (row) => {
-    setFormData({ ...row });
+    // Jika ortu null, isi default
+    const ortuDefault = [
+      { jenis: "Ayah", nama: "", pekerjaan: "", pendidikan: "", alamat: "", no_hp: "" },
+      { jenis: "Ibu", nama: "", pekerjaan: "", pendidikan: "", alamat: "", no_hp: "" },
+    ];
+    setFormData({ ...row, orang_tua: row.orang_tua || ortuDefault });
     setDialogVisible(true);
   };
 
@@ -98,8 +128,9 @@ const SiswaPage = () => {
       accept: async () => {
         try {
           await axios.delete(`${API_URL}/siswa/${row.SISWA_ID}`);
-          fetchSiswa();
           toastRef.current?.showToast("00", "Data siswa dihapus");
+          setData((prev) => prev.filter((item) => item.SISWA_ID !== row.SISWA_ID));
+          setOriginalData((prev) => prev.filter((item) => item.SISWA_ID !== row.SISWA_ID));
         } catch (err) {
           toastRef.current?.showToast("01", "Gagal hapus data siswa");
         }
@@ -114,10 +145,26 @@ const SiswaPage = () => {
       nisn: "",
       nama: "",
       gender: "",
+      tempat_lahir: "",
       tgl_lahir: "",
       email: "",
       password: "",
       status: "Aktif",
+      alamat: "",
+      agama: "",
+      no_telp: "",
+      kelas: "",
+      jurusan: "",
+      tahun_masuk: "",
+      gol_darah: "",
+      tinggi: "",
+      berat: "",
+      kebutuhan_khusus: "",
+      foto: "",
+      orang_tua: [
+        { jenis: "Ayah", nama: "", pekerjaan: "", pendidikan: "", alamat: "", no_hp: "" },
+        { jenis: "Ibu", nama: "", pekerjaan: "", pendidikan: "", alamat: "", no_hp: "" },
+      ],
     });
     setErrors({});
   };
@@ -137,9 +184,11 @@ const SiswaPage = () => {
             if (!keyword) {
               setData(originalData);
             } else {
-              setData(originalData.filter((item) =>
-                item.NAMA.toLowerCase().includes(keyword.toLowerCase())
-              ));
+              setData(
+                originalData.filter((item) =>
+                  item.NAMA.toLowerCase().includes(keyword.toLowerCase())
+                )
+              );
             }
           }}
           onAddClick={() => {
@@ -166,6 +215,7 @@ const SiswaPage = () => {
         onSubmit={handleSubmit}
         formData={formData}
         errors={errors}
+        reloadData={fetchSiswa}
       />
     </div>
   );

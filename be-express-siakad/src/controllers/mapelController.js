@@ -1,97 +1,87 @@
-import * as MapelModel from "../models/masterMapelModel.js";
+import * as MapelModel from "../models/mapelModel.js";
 
-/**
- * Ambil semua data mapel
- */
+/** Ambil semua mapel */
 export const getAllMapel = async (req, res) => {
   try {
-    const mapel = await MapelModel.getAllMapel();
-    res.status(200).json(mapel);
+    const data = await MapelModel.getAllMapel();
+    res.status(200).json({ status: "success", data });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-/**
- * Ambil mapel berdasarkan ID
- */
+/** Ambil mapel by ID */
 export const getMapelById = async (req, res) => {
   try {
-    const mapel = await MapelModel.getMapelById(req.params.id);
-    if (!mapel) {
-      return res.status(404).json({ message: "Mapel tidak ditemukan" });
-    }
-    res.status(200).json(mapel);
+    const data = await MapelModel.getMapelById(req.params.id);
+    if (!data) return res.status(404).json({ status: "error", message: "Mapel tidak ditemukan" });
+    res.status(200).json({ status: "success", data });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-/**
- * Tambah mapel baru
- */
+/** Tambah mapel */
 export const createMapel = async (req, res) => {
   try {
     const { KODE_MAPEL, NAMA_MAPEL, KATEGORI, DESKRIPSI, STATUS } = req.body;
 
-    if (!KODE_MAPEL || !NAMA_MAPEL) {
-      return res
-        .status(400)
-        .json({ message: "KODE_MAPEL dan NAMA_MAPEL wajib diisi" });
+    if (!KODE_MAPEL || !NAMA_MAPEL || !KATEGORI) {
+      return res.status(400).json({ status: "error", message: "Field wajib diisi" });
     }
 
-    const newMapel = await MapelModel.createMapel({
+    const mapel = await MapelModel.createMapel({
       KODE_MAPEL,
       NAMA_MAPEL,
       KATEGORI,
-      DESKRIPSI, // ✅ tambahkan deskripsi
-      STATUS,
+      DESKRIPSI,
+      STATUS
     });
 
-    res.status(201).json(newMapel);
+    res.status(201).json({ status: "success", data: mapel });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-/**
- * Update mapel berdasarkan ID
- */
+/** Update mapel */
 export const updateMapel = async (req, res) => {
   try {
     const { KODE_MAPEL, NAMA_MAPEL, KATEGORI, DESKRIPSI, STATUS } = req.body;
+    const { id } = req.params;
 
-    const updatedMapel = await MapelModel.updateMapel(req.params.id, {
+    if (!KODE_MAPEL || !NAMA_MAPEL || !KATEGORI) {
+      return res.status(400).json({ status: "error", message: "Field wajib diisi" });
+    }
+
+    const mapel = await MapelModel.updateMapel(id, {
       KODE_MAPEL,
       NAMA_MAPEL,
       KATEGORI,
-      DESKRIPSI, // ✅ tambahkan deskripsi
-      STATUS,
+      DESKRIPSI,
+      STATUS
     });
 
-    if (!updatedMapel) {
-      return res.status(404).json({ message: "Mapel tidak ditemukan" });
-    }
+    if (!mapel) return res.status(404).json({ status: "error", message: "Mapel tidak ditemukan" });
 
-    res.status(200).json(updatedMapel);
+    res.status(200).json({ status: "success", data: mapel });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-/**
- * Hapus mapel berdasarkan ID
- */
+/** Hapus mapel */
 export const deleteMapel = async (req, res) => {
   try {
     const deleted = await MapelModel.deleteMapel(req.params.id);
-
-    if (!deleted) {
-      return res.status(404).json({ message: "Mapel tidak ditemukan" });
-    }
-
-    res.status(200).json({ message: "Mapel berhasil dihapus" });
+    if (!deleted) return res.status(404).json({ status: "error", message: "Mapel tidak ditemukan" });
+    res.status(200).json({ status: "success", message: "Mapel berhasil dihapus" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };

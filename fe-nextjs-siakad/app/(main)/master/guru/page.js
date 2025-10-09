@@ -1,8 +1,6 @@
 "use client";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 import TabelGuru from "./components/tabelGuru";
 import FormGuru from "./components/formDialogGuru";
 import HeaderBar from "@/app/components/headerbar";
@@ -45,8 +43,9 @@ const GuruPage = () => {
     try {
       const res = await axios.get(`${API_URL}/master-guru`);
       if (res.data.status === "00") {
-        setData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
-        setOriginalData(Array.isArray(res.data.data) ? res.data.data : [res.data.data]);
+        const guruData = Array.isArray(res.data.data) ? res.data.data : [res.data.data];
+        setData(guruData);
+        setOriginalData(guruData);
       } else {
         toastRef.current?.showToast("01", res.data.message || "Gagal mengambil data");
       }
@@ -83,29 +82,6 @@ const GuruPage = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-    const isEdit = !!formData.GURU_ID;
-    const url = isEdit
-      ? `${API_URL}/master-guru/${formData.GURU_ID}`
-      : `${API_URL}/master-guru`;
-    try {
-      if (isEdit) {
-        await axios.put(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil diperbarui");
-      } else {
-        await axios.post(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil ditambahkan");
-      }
-      fetchGuru();
-      setDialogVisible(false);
-      resetForm();
-    } catch (err) {
-      console.error("Gagal menyimpan data:", err);
-      toastRef.current?.showToast("01", "Gagal menyimpan data");
-    }
-  };
-
   const handleEdit = (row) => {
     setFormData({ ...row });
     setDialogVisible(true);
@@ -121,7 +97,7 @@ const GuruPage = () => {
       accept: async () => {
         try {
           await axios.delete(`${API_URL}/master-guru/${row.GURU_ID}`);
-          fetchGuru();
+          fetchGuru(); // refresh tabel otomatis
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
           console.error("Gagal menghapus data:", err);
@@ -181,9 +157,9 @@ const GuruPage = () => {
           resetForm();
         }}
         onChange={setFormData}
-        onSubmit={handleSubmit}
         formData={formData}
         errors={errors}
+        reloadData={fetchGuru} 
       />
     </div>
   );
