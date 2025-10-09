@@ -2,11 +2,9 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  // Menggunakan Knex Schema Builder untuk membuat tabel
-  return knex.schema.createTable('master_infosekolah', function(table) {
-    // Kunci Utama
-    table.increments('ID').primary();
+export async function up(knex) {
+  return knex.schema.createTable("master_infosekolah", (table) => {
+       table.increments('INFO_ID').primary();
 
     // Identitas Utama Sekolah
     table.string('NAMA_SEKOLAH', 255).notNullable();
@@ -85,10 +83,7 @@ exports.up = function(knex) {
   });
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
+
 export async function down(knex) {
   return knex.schema.dropTableIfExists("master_infosekolah");
-};
+}
