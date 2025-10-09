@@ -64,10 +64,10 @@ const AppMenu = () => {
             {
                 label: "Akademik",
                 items: [
-                    { label: "Pengaturan Jadwal Pelajaran", icon: "pi pi-fw pi-calendar", to: "/kurikulum/menu/jadwal" },
-                    { label: "Ujian", icon: "pi pi-fw pi-pencil", to: "/kurikulum/menu/ujian" },
-                    { label: "Cetak Rapor", icon: "pi pi-fw pi-file", to: "/kurikulum/menu/rapor" },
-                    { label: "Perencanaan Kegiatan Belajar", icon: "pi pi-fw pi-book", to: "/kurikulum/menu/rencana" },
+                        { label: "Pengaturan Jadwal Pelajaran", icon: "pi pi-fw pi-calendar", to: "/kurikulum/menu/jadwal" },
+                        { label: "Ujian", icon: "pi pi-fw pi-pencil", to: "/kurikulum/menu/ujian" },
+                        { label: "Cetak Rapor", icon: "pi pi-fw pi-file", to: "/kurikulum/menu/rapor" },
+                        { label: "Perencanaan Kegiatan Belajar", icon: "pi pi-fw pi-book", to: "/kurikulum/menu/rencana" },
                 ],
             },
         ];
@@ -85,8 +85,8 @@ const AppMenu = () => {
             {
                 label: "Data Siswa",
                 items: [
-                    { label: "Manajemen Data Siswa", icon: "pi pi-fw pi-users", to: "/kesiswaan/menu/data-siswa" },
-                    { label: "Profil Siswa", icon: "pi pi-fw pi-id-card", to: "/kesiswaan/profil-siswa" },
+                        { label: "Manajemen Data Siswa", icon: "pi pi-fw pi-users", to: "/kesiswaan/menu/data-siswa" },
+                        { label: "Profil Siswa", icon: "pi pi-fw pi-id-card", to: "/kesiswaan/profil-siswa" },
                 ],
             },
         ];
@@ -104,8 +104,8 @@ const AppMenu = () => {
             {
                 label: "Keuangan",
                 items: [
-                    { label: "Manajemen Keuangan", icon: "pi pi-fw pi-wallet", to: "/keuangan/menu/manajemen" },
-                    { label: "Laporan Keuangan", icon: "pi pi-fw pi-file", to: "/keuangan/menu/laporan" },
+                        { label: "Manajemen Keuangan", icon: "pi pi-fw pi-wallet", to: "/keuangan/menu/manajemen" },
+                        { label: "Laporan Keuangan", icon: "pi pi-fw pi-file", to: "/keuangan/menu/laporan" },
                 ],
             },
         ];
@@ -123,9 +123,9 @@ const AppMenu = () => {
             {
                 label: "Kehadiran",
                 items: [
-                    { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/tu/absensi-siswa" },
-                    { label: "Absensi Kelas", icon: "pi pi-fw pi-users", to: "/tu/absensi-kelas" },
-                    { label: "Agenda Guru", icon: "pi pi-fw pi-calendar", to: "/tu/agenda-guru" },
+                        { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/tu/absensi-siswa" },
+                        { label: "Absensi Kelas", icon: "pi pi-fw pi-users", to: "/tu/absensi-kelas" },
+                        { label: "Agenda Guru", icon: "pi pi-fw pi-calendar", to: "/tu/agenda-guru" },
                 ],
             },
         ];
@@ -143,8 +143,8 @@ const AppMenu = () => {
             {
                 label: "Bimbingan Konseling",
                 items: [
-                    { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/bpbkm/absensi" },
-                    { label: "Catatan BK", icon: "pi pi-fw pi-file-edit", to: "/bpbkm/menu/catatan" },
+                        { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/bpbkm/absensi" },
+                        { label: "Catatan BK", icon: "pi pi-fw pi-file-edit", to: "/bpbkm/menu/catatan" },
                 ],
             },
         ];
@@ -162,8 +162,8 @@ const AppMenu = () => {
             {
                 label: "Pengelolaan Website",
                 items: [
-                    { label: "Website Sekolah", icon: "pi pi-fw pi-globe", to: "/adminweb/website" },
-                    { label: "Media Sosial", icon: "pi pi-fw pi-share-alt", to: "/adminweb/sosial" },
+                        { label: "Website Sekolah", icon: "pi pi-fw pi-globe", to: "/adminweb/website" },
+                        { label: "Media Sosial", icon: "pi pi-fw pi-share-alt", to: "/adminweb/sosial" },
                 ],
             },
         ];
@@ -181,9 +181,9 @@ const AppMenu = () => {
             {
                 label: "Kehadiran & Mengajar",
                 items: [
-                    { label: "Absensi Guru", icon: "pi pi-fw pi-user", to: "/guru/menu/absensi" },
-                    { label: "Absensi Kelas", icon: "pi pi-fw pi-box", to: "/guru/menu/absen-kelas" },
-                    { label: "Agenda Mengajar", icon: "pi pi-fw pi-calendar", to: "/guru/menu/agenda" },
+                        { label: "Absensi Guru", icon: "pi pi-fw pi-user", to: "/guru/menu/absensi" },
+                        { label: "Absensi Kelas", icon: "pi pi-fw pi-box", to: "/guru/menu/absen-kelas" },
+                        { label: "Agenda Mengajar", icon: "pi pi-fw pi-calendar", to: "/guru/menu/agenda" },
                 ],
             },
             {
@@ -205,16 +205,16 @@ const AppMenu = () => {
             {
                 label: "Akademik",
                 items: [
-                    { label: "Absensi Siswa", icon: "pi pi-fw pi-user-check", to: "/siswa/menu/absensi" },
-                    { label: "Nilai & Rapor", icon: "pi pi-fw pi-book", to: "/siswa/menu/nilai" },
-                    { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/siswa/menu/informasi" },
+                        { label: "Absensi Siswa", icon: "pi pi-fw pi-user-edit", to: "/siswa/menu/absensi" },
+                        { label: "Nilai & Rapor", icon: "pi pi-fw pi-book", to: "/siswa/menu/nilai" },
+                        { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/siswa/menu/informasi" },
                 ],
             },
             {
                 label: "Komunikasi",
                 items: [
-                    { label: "Rumah - Sekolah", icon: "pi pi-fw pi-comments", to: "/siswa/komunikasi/rumah-sekolah" },
-                    { label: "Guru/Karyawan", icon: "pi pi-fw pi-users", to: "/siswa/komunikasi/guru" },
+                        { label: "Rumah - Sekolah", icon: "pi pi-fw pi-comments", to: "/siswa/komunikasi/rumah-sekolah" },
+                        { label: "Guru/Karyawan", icon: "pi pi-fw pi-users", to: "/siswa/komunikasi/guru" },
                 ],
             },
         ];

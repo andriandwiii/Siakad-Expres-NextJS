@@ -4,47 +4,92 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import TabelInformasiSekolah from "./components/tabelInformasiSekolah"; // Ensure the path is correct
-import FormInformasiSekolah from "./components/formDialogInformasiSekolah"; // Ensure the path is correct
+import TabelInformasiSekolah from "./components/tabelInformasiSekolah";
+import FormDialogSekolah from "./components/formDialogInformasiSekolah";
 import HeaderBar from "@/app/components/headerbar";
 import ToastNotifier from "@/app/components/ToastNotifier";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
-// API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const InformasiSekolahPage = () => {
+const InfoSekolahPage = () => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    ID: "", // Ensure ID is handled as a string or number
+    INFO_ID: 0,
     NAMA_SEKOLAH: "",
-    ALAMAT: "",
-    JENJANG_AKREDITASI: "",
-    TANGGAL_AKREDITASI: null, // Updated to Date type
     NPSN: "",
-    STATUS: "",
+    NSS: "",
+    JENJANG_PENDIDIKAN: "",
+    STATUS_SEKOLAH: "",
+    VISI: "",
+    MISI: "",
+    MOTTO: "",
+    ALAMAT_JALAN: "",
+    RT: "",
+    RW: "",
+    KELURAHAN_DESA: "",
+    KECAMATAN: "",
+    KABUPATEN_KOTA: "",
+    PROVINSI: "",
+    KODE_POS: "",
+    TELEPON: "",
+    FAX: "",
+    EMAIL: "",
+    WEBSITE: "",
+    AKREDITASI: "",
+    NO_SK_AKREDITASI: "",
+    TANGGAL_SK_AKREDITASI: "",
+    TANGGAL_AKHIR_AKREDITASI: "",
+    NAMA_KEPALA_SEKOLAH: "",
+    NIP_KEPALA_SEKOLAH: "",
+    EMAIL_KEPALA_SEKOLAH: "",
+    NO_HP_KEPALA_SEKOLAH: "",
+    PENYELENGGARA: "",
+    NO_SK_PENDIRIAN: "",
+    TANGGAL_SK_PENDIRIAN: "",
+    NO_SK_IZIN_OPERASIONAL: "",
+    TANGGAL_SK_IZIN_OPERASIONAL: "",
+    LINTANG: "",
+    BUJUR: "",
+    LOGO_SEKOLAH_URL: "",
+    NAMA_BANK: "",
+    NOMOR_REKENING: "",
+    NAMA_PEMILIK_REKENING: "",
+    NPWP: "",
+    KURIKULUM_DIGUNAKAN: "",
+    WAKTU_PENYELENGGARAAN: "",
+    SUMBER_LISTRIK: "",
+    AKSES_INTERNET: "",
+    NAMA_OPERATOR_DAPODIK: "",
+    EMAIL_OPERATOR_DAPODIK: "",
+    NO_HP_OPERATOR_DAPODIK: "",
+    NAMA_KETUA_KOMITE: "",
+    FACEBOOK_URL: "",
+    INSTAGRAM_URL: "",
+    TWITTER_X_URL: "",
+    YOUTUBE_URL: "",
+    IS_ACTIVE: true,
   });
 
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
   useEffect(() => {
-    fetchInformasiSekolah();
+    fetchSekolah();
   }, []);
 
-  const fetchInformasiSekolah = async () => {
+  const fetchSekolah = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/informasi-sekolah`);
-      console.log("Fetched data:", res.data); // Debugging line to ensure ID is in the response
+      const res = await axios.get(`${API_URL}/master-infosekolah`);
       setData(res.data);
       setOriginalData(res.data);
     } catch (err) {
-      console.error("Failed to fetch data:", err);
+      console.error("Gagal mengambil data:", err);
     } finally {
       setLoading(false);
     }
@@ -52,32 +97,23 @@ const InformasiSekolahPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate text fields
     if (!formData.NAMA_SEKOLAH?.trim()) newErrors.NAMA_SEKOLAH = "Nama Sekolah wajib diisi";
-    if (!formData.ALAMAT?.trim()) newErrors.ALAMAT = "Alamat wajib diisi";
-    if (!formData.JENJANG_AKREDITASI?.trim()) newErrors.JENJANG_AKREDITASI = "Jenjang Akreditasi wajib diisi";
-
-    // Validate Date (TANGGAL_AKREDITASI)
-    if (!(formData.TANGGAL_AKREDITASI instanceof Date) || isNaN(formData.TANGGAL_AKREDITASI)) {
-      newErrors.TANGGAL_AKREDITASI = "Tanggal Akreditasi wajib diisi";
-    }
-
     if (!formData.NPSN?.trim()) newErrors.NPSN = "NPSN wajib diisi";
-    if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
-
+    if (!formData.STATUS_SEKOLAH?.trim()) newErrors.STATUS_SEKOLAH = "Status Sekolah wajib diisi";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSearch = (keyword) => {
+    const lowercasedKeyword = keyword.toLowerCase();
     if (!keyword) {
       setData(originalData);
     } else {
       const filtered = originalData.filter(
         (item) =>
-          item.NAMA_SEKOLAH.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.ALAMAT.toLowerCase().includes(keyword.toLowerCase())
+          item.NAMA_SEKOLAH.toLowerCase().includes(lowercasedKeyword) ||
+          item.NPSN.toLowerCase().includes(lowercasedKeyword) ||
+          item.STATUS_SEKOLAH.toLowerCase().includes(lowercasedKeyword)
       );
       setData(filtered);
     }
@@ -86,14 +122,12 @@ const InformasiSekolahPage = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const isEdit = !!formData.ID; // Ensure ID is available for edit
+    const isEdit = !!formData.INFO_ID;
     const url = isEdit
-      ? `${API_URL}/informasi-sekolah/${formData.ID}` // Updated endpoint to use ID
-      : `${API_URL}/informasi-sekolah`;
+      ? `${API_URL}/master-infosekolah/${formData.INFO_ID}`
+      : `${API_URL}/master-infosekolah`;
 
     try {
-      console.log("Submitting form data:", formData); // Debugging line
-
       if (isEdit) {
         await axios.put(url, formData);
         toastRef.current?.showToast("00", "Data berhasil diperbarui");
@@ -101,7 +135,7 @@ const InformasiSekolahPage = () => {
         await axios.post(url, formData);
         toastRef.current?.showToast("00", "Data berhasil ditambahkan");
       }
-      fetchInformasiSekolah();
+      fetchSekolah();
       setDialogVisible(false);
       resetForm();
     } catch (err) {
@@ -111,23 +145,21 @@ const InformasiSekolahPage = () => {
   };
 
   const handleEdit = (row) => {
-    console.log("Editing row with ID:", row.ID); // Debugging line to ensure ID is passed
     setFormData({ ...row });
     setDialogVisible(true);
   };
 
   const handleDelete = (row) => {
-    console.log("Deleting row with ID:", row.ID); // Debugging line to ensure ID is passed
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus informasi sekolah ${row.NAMA_SEKOLAH}?`,
+      message: `Apakah Anda yakin ingin menghapus informasi sekolah ${row.NAMA_KURIKULUM}?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Ya",
       rejectLabel: "Batal",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/informasi-sekolah/${row.ID}`); // Ensure ID is used in delete request
-          fetchInformasiSekolah();
+          await axios.delete(`${API_URL}/master-infosekolah/${row.INFO_ID}`);
+          fetchSekolah();
           toastRef.current?.showToast("00", "Data berhasil dihapus");
         } catch (err) {
           console.error("Gagal menghapus data:", err);
@@ -139,13 +171,60 @@ const InformasiSekolahPage = () => {
 
   const resetForm = () => {
     setFormData({
-      ID: "", // Ensure ID is handled correctly
+      INFO_ID: 0,
       NAMA_SEKOLAH: "",
-      ALAMAT: "",
-      JENJANG_AKREDITASI: "",
-      TANGGAL_AKREDITASI: null,  // Reset to null
       NPSN: "",
-      STATUS: "",
+      NSS: "",
+      JENJANG_PENDIDIKAN: "",
+      STATUS_SEKOLAH: "",
+      VISI: "",
+      MISI: "",
+      MOTTO: "",
+      ALAMAT_JALAN: "",
+      RT: "",
+      RW: "",
+      KELURAHAN_DESA: "",
+      KECAMATAN: "",
+      KABUPATEN_KOTA: "",
+      PROVINSI: "",
+      KODE_POS: "",
+      TELEPON: "",
+      FAX: "",
+      EMAIL: "",
+      WEBSITE: "",
+      AKREDITASI: "",
+      NO_SK_AKREDITASI: "",
+      TANGGAL_SK_AKREDITASI: "",
+      TANGGAL_AKHIR_AKREDITASI: "",
+      NAMA_KEPALA_SEKOLAH: "",
+      NIP_KEPALA_SEKOLAH: "",
+      EMAIL_KEPALA_SEKOLAH: "",
+      NO_HP_KEPALA_SEKOLAH: "",
+      PENYELENGGARA: "",
+      NO_SK_PENDIRIAN: "",
+      TANGGAL_SK_PENDIRIAN: "",
+      NO_SK_IZIN_OPERASIONAL: "",
+      TANGGAL_SK_IZIN_OPERASIONAL: "",
+      LINTANG: "",
+      BUJUR: "",
+      LOGO_SEKOLAH_URL: "",
+      NAMA_BANK: "",
+      NOMOR_REKENING: "",
+      NAMA_PEMILIK_REKENING: "",
+      NPWP: "",
+      KURIKULUM_DIGUNAKAN: "",
+      WAKTU_PENYELENGGARAAN: "",
+      SUMBER_LISTRIK: "",
+      AKSES_INTERNET: "",
+      NAMA_OPERATOR_DAPODIK: "",
+      EMAIL_OPERATOR_DAPODIK: "",
+      NO_HP_OPERATOR_DAPODIK: "",
+      NAMA_KETUA_KOMITE: "",
+      FACEBOOK_URL: "",
+      INSTAGRAM_URL: "",
+      TWITTER_X_URL: "",
+      YOUTUBE_URL: "",
+      IS_ACTIVE: true,
     });
     setErrors({});
   };
@@ -176,7 +255,7 @@ const InformasiSekolahPage = () => {
         onDelete={handleDelete}
       />
 
-      <FormInformasiSekolah
+      <FormDialogSekolah
         visible={dialogVisible}
         onHide={() => {
           setDialogVisible(false);
@@ -191,4 +270,4 @@ const InformasiSekolahPage = () => {
   );
 };
 
-export default InformasiSekolahPage;
+export default InfoSekolahPage;

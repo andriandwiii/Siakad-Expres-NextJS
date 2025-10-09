@@ -10,7 +10,6 @@ import masterGuruRoutes from "./routes/masterGuruRoutes.js";
 import mapelRoutes from "./routes/mapelRoutes.js";
 import masterKurikulumRoutes from "./routes/masterKurikulumRoutes.js";
 import masterAgamaRoutes from "./routes/masterAgamaRoutes.js";
-import informasiSekolahRoutes from "./routes/informasiSekolahRoutes.js";
 import masterMapelRoutes from "./routes/masterMapelRoutes.js";
 import masterAsetSekolahRoutes from "./routes/masterAsetSekolahRoutes.js";
 import dashboardRoutes from './routes/dashboardRoutes.js';
@@ -33,7 +32,6 @@ const app = express();
 
 const allowedOrigins = ["http://localhost:3000"];
 
-// CORS middleware configuration
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -55,17 +53,14 @@ app.use(
   })
 );
 
-// Use morgan logger and set response headers
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Root endpoint
 app.get("/", [setResponseHeader], (req, res) => {
   return res.status(200).json(`Welcome to the server! ${new Date().toLocaleString()}`);
 });
 
-// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/siswa", siswaRoutes);
 app.use("/api/kelas", kelasRoutes);
@@ -73,7 +68,6 @@ app.use("/api/master-guru", masterGuruRoutes);
 app.use("/api/mapel", mapelRoutes);
 app.use("/api/kurikulum", masterKurikulumRoutes);
 app.use("/api/agama", masterAgamaRoutes);
-app.use("/api/informasi-sekolah", informasiSekolahRoutes);
 app.use("/api/master-mapel", masterMapelRoutes);
 app.use("/api/master-aset-sekolah", masterAsetSekolahRoutes);
 app.use('/api/dashboard', dashboardRoutes);
