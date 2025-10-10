@@ -2,9 +2,9 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-export.up = function(knex) {
-  return knex.schema.createTable('master_info_sekolah', function(table) {
-    // --- Kunci Utama (Telah diubah) ---
+export function up(knex) {
+  return knex.schema.createTable('master_info_sekolah', function (table) {
+    // --- Kunci Utama ---
     table.increments('INFO_ID').primary();
 
     // --- Identitas Utama Sekolah ---
@@ -36,7 +36,7 @@ export.up = function(knex) {
     table.string('NO_SK_AKREDITASI', 100);
     table.date('TANGGAL_SK_AKREDITASI');
     table.date('TANGGAL_AKHIR_AKREDITASI');
-    
+
     // --- Informasi Kepala Sekolah ---
     table.string('NAMA_KEPALA_SEKOLAH', 255);
     table.string('NIP_KEPALA_SEKOLAH', 30);
@@ -84,12 +84,12 @@ export.up = function(knex) {
     table.timestamp('CREATED_AT').defaultTo(knex.fn.now());
     table.timestamp('UPDATED_AT').defaultTo(knex.fn.now());
   });
-};
+}
 
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-export.down = function(knex) {
+export function down(knex) {
   return knex.schema.dropTableIfExists('master_info_sekolah');
-};
+}

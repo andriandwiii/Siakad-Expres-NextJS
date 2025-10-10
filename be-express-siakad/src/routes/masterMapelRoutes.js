@@ -1,21 +1,21 @@
 import { Router } from "express";
-import * as MapelController from "../controllers/mapelController.js";
+import * as MasterMapelController from "../controllers/masterMapelController.js";
 
 const router = Router();
 
-// GET all mata pelajaran
-router.get("/", MapelController.getAllMapel);
+// GET all mapel
+router.get("/", MasterMapelController.getAllMapel);
 
-// GET mata pelajaran by ID
-router.get("/:id", MapelController.getMapelById);
+// GET mapel by ID
+router.get("/:id", MasterMapelController.getMapelById);
 
-// POST new mata pelajaran
-router.post("/", MapelController.createMapel);
+// POST new mapel
+router.post("/", MasterMapelController.createMapel);
 
-// PUT update mata pelajaran
-router.put("/:id", MapelController.updateMapel);
+// PUT update mapel
+router.put("/:id", MasterMapelController.updateMapel);
 
-// DELETE mata pelajaran
-router.delete("/:id", MapelController.deleteMapel);
+// DELETE mapel
+router.delete("/:id", MasterMapelController.deleteMapel);
 
 export default router;

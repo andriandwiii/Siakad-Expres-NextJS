@@ -4,7 +4,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 
-const TabelMapelStyles = {
+const TabelJurusanStyles = {
   datatable: {
     backgroundColor: "#f4f4f9",
     borderRadius: "8px",
@@ -26,21 +26,21 @@ const TabelMapelStyles = {
   },
 };
 
-const TabelMapel = ({ data, loading, onEdit, onDelete }) => {
+const TabelJurusan = ({ data, loading, onEdit, onDelete }) => {
   // 🔹 Template tombol aksi Edit & Hapus
   const actionTemplate = (rowData) => (
     <div className="flex gap-2 justify-center">
       <Button
         icon="pi pi-pencil"
         size="small"
-        style={TabelMapelStyles.buttonWarning}
+        style={TabelJurusanStyles.buttonWarning}
         onMouseEnter={(e) =>
           (e.target.style.backgroundColor =
-            TabelMapelStyles.buttonWarningHover.backgroundColor)
+            TabelJurusanStyles.buttonWarningHover.backgroundColor)
         }
         onMouseLeave={(e) =>
           (e.target.style.backgroundColor =
-            TabelMapelStyles.buttonWarning.backgroundColor)
+            TabelJurusanStyles.buttonWarning.backgroundColor)
         }
         onClick={() => onEdit(rowData)}
         tooltip="Edit"
@@ -49,14 +49,14 @@ const TabelMapel = ({ data, loading, onEdit, onDelete }) => {
       <Button
         icon="pi pi-trash"
         size="small"
-        style={TabelMapelStyles.buttonDanger}
+        style={TabelJurusanStyles.buttonDanger}
         onMouseEnter={(e) =>
           (e.target.style.backgroundColor =
-            TabelMapelStyles.buttonDangerHover.backgroundColor)
+            TabelJurusanStyles.buttonDangerHover.backgroundColor)
         }
         onMouseLeave={(e) =>
           (e.target.style.backgroundColor =
-            TabelMapelStyles.buttonDanger.backgroundColor)
+            TabelJurusanStyles.buttonDanger.backgroundColor)
         }
         onClick={() => onDelete(rowData)}
         tooltip="Hapus"
@@ -74,22 +74,13 @@ const TabelMapel = ({ data, loading, onEdit, onDelete }) => {
         loading={loading}
         size="small"
         scrollable
-        style={TabelMapelStyles.datatable}
-        tableStyle={{ minWidth: "90rem" }}
-        emptyMessage="Tidak ada data mata pelajaran ditemukan."
+        style={TabelJurusanStyles.datatable}
+        tableStyle={{ minWidth: "50rem" }}
+        emptyMessage="Tidak ada data jurusan ditemukan."
       >
-        <Column field="MAPEL_ID" header="ID Mapel" sortable />
-        <Column field="KODE_MAPEL" header="Kode Mapel" sortable />
-        <Column field="NAMA_MAPEL" header="Nama Mapel" sortable />
-        <Column field="TINGKAT" header="Tingkat" sortable />
-
-        {/* 🔹 Tambahkan kolom Jurusan di sini */}
-        <Column field="JURUSAN" header="Jurusan" sortable />
-
-        <Column field="JUMLAH_JAM" header="Jumlah Jam" sortable />
-        <Column field="KATEGORI" header="Kategori" sortable />
+        <Column field="JURUSAN_ID" header="ID Jurusan" sortable />
+        <Column field="KODE_JURUSAN" header="Kode Jurusan" sortable />
         <Column field="KETERANGAN" header="Keterangan" sortable />
-        <Column field="STATUS" header="Status" sortable />
         <Column
           header="Aksi"
           body={actionTemplate}
@@ -100,4 +91,4 @@ const TabelMapel = ({ data, loading, onEdit, onDelete }) => {
   );
 };
 
-export default TabelMapel;
+export default TabelJurusan;
