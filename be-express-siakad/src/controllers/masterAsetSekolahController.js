@@ -1,108 +1,158 @@
-import * as MasterAsetSekolahModel from "../models/masterAsetSekolahModel.js";
+import * as MasterAsetModel from "../models/masterAsetSekolahModel.js";
 
-/**
- * GET semua aset sekolah
- */
+/** Ambil semua data aset sekolah */
 export const getAllAset = async (req, res) => {
   try {
-    const data = await MasterAsetSekolahModel.getAllAset();
-    res.status(200).json(data);
+    const data = await MasterAsetModel.getAllAset();
+    res.status(200).json({ status: "success", data });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-/**
- * GET aset sekolah berdasarkan ID
- */
-export const getAsetById = async (req, res) => {
-  try {
-    const data = await MasterAsetSekolahModel.getAsetById(req.params.id);
-    if (!data) return res.status(404).json({ message: "Aset sekolah tidak ditemukan" });
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-/**
- * POST tambah aset sekolah
- */
+/** Tambah data aset sekolah */
 export const createAset = async (req, res) => {
   try {
     const {
-      NAMA_BARANG,
-      MERK_TYPE,
-      JUMLAH_BARANG,
-      ASAL_USUL_PEROLEHAN,
-      PERIODE,
+      KODE_ASET,
+      NAMA_ASET,
+      JENIS_ASET,
+      JUMLAH,
+      KONDISI,
+      GEDUNG_ID,
+      SUMBER_DANA,
+      TANGGAL_PEMBELIAN,
+      HARGA_SATUAN,
+      TOTAL_HARGA,
       KETERANGAN,
-      STATUS, // ✅ ikutkan status
+      STATUS,
     } = req.body;
 
-    if (!NAMA_BARANG || !JUMLAH_BARANG) {
-      return res.status(400).json({ message: "NAMA_BARANG dan JUMLAH_BARANG wajib diisi" });
+    // Validasi field wajib
+    if (!KODE_ASET || !NAMA_ASET || !JENIS_ASET) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Field wajib diisi" });
     }
 
-    const newData = await MasterAsetSekolahModel.createAset({
-      NAMA_BARANG,
-      MERK_TYPE,
-      JUMLAH_BARANG,
-      ASAL_USUL_PEROLEHAN,
-      PERIODE,
+    const aset = await MasterAsetModel.createAset({
+      KODE_ASET,
+      NAMA_ASET,
+      JENIS_ASET,
+      JUMLAH,
+      KONDISI,
+      GEDUNG_ID,
+      SUMBER_DANA,
+      TANGGAL_PEMBELIAN,
+      HARGA_SATUAN,
+      TOTAL_HARGA,
       KETERANGAN,
-      STATUS, // ✅ ikutkan status
+      STATUS,
     });
 
-    res.status(201).json(newData);
+    res.status(201).json({
+      status: "success",
+      message: "Data aset berhasil ditambahkan",
+      data: aset,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-/**
- * PUT update aset sekolah
- */
+/** Update data aset sekolah */
 export const updateAset = async (req, res) => {
   try {
+    const { id } = req.params;
     const {
-      NAMA_BARANG,
-      MERK_TYPE,
-      JUMLAH_BARANG,
-      ASAL_USUL_PEROLEHAN,
-      PERIODE,
+      KODE_ASET,
+      NAMA_ASET,
+      JENIS_ASET,
+      JUMLAH,
+      KONDISI,
+      GEDUNG_ID,
+      SUMBER_DANA,
+      TANGGAL_PEMBELIAN,
+      HARGA_SATUAN,
+      TOTAL_HARGA,
       KETERANGAN,
-      STATUS, // ✅ ikutkan status
+      STATUS,
     } = req.body;
 
-    const updated = await MasterAsetSekolahModel.updateAset(req.params.id, {
-      NAMA_BARANG,
-      MERK_TYPE,
-      JUMLAH_BARANG,
-      ASAL_USUL_PEROLEHAN,
-      PERIODE,
+    // Validasi field wajib
+    if (!KODE_ASET || !NAMA_ASET || !JENIS_ASET) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Field wajib diisi" });
+    }
+
+    const aset = await MasterAsetModel.updateAset(id, {
+      KODE_ASET,
+      NAMA_ASET,
+      JENIS_ASET,
+      JUMLAH,
+      KONDISI,
+      GEDUNG_ID,
+      SUMBER_DANA,
+      TANGGAL_PEMBELIAN,
+      HARGA_SATUAN,
+      TOTAL_HARGA,
       KETERANGAN,
-      STATUS, // ✅ ikutkan status
+      STATUS,
     });
 
-    if (!updated) return res.status(404).json({ message: "Aset sekolah tidak ditemukan" });
+    if (!aset)
+      return res
+        .status(404)
+        .json({ status: "error", message: "Data aset tidak ditemukan" });
 
-    res.status(200).json(updated);
+    res.status(200).json({
+      status: "success",
+      message: "Data aset berhasil diperbarui",
+      data: aset,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-/**
- * DELETE aset sekolah
- */
+/** Ambil aset sekolah berdasarkan ID */
+export const getAsetById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await MasterAsetModel.getAsetById(id);
+
+    if (!data) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Data aset tidak ditemukan" });
+    }
+
+    res.status(200).json({ status: "success", data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+/** Hapus data aset sekolah */
 export const deleteAset = async (req, res) => {
   try {
-    const deleted = await MasterAsetSekolahModel.deleteAset(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Aset sekolah tidak ditemukan" });
+    const deleted = await MasterAsetModel.deleteAset(req.params.id);
+    if (!deleted)
+      return res
+        .status(404)
+        .json({ status: "error", message: "Data aset tidak ditemukan" });
 
-    res.status(200).json({ message: "Aset sekolah berhasil dihapus" });
+    res.status(200).json({
+      status: "success",
+      message: "Data aset berhasil dihapus",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };

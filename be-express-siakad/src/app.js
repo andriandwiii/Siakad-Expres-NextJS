@@ -28,6 +28,7 @@ import jadwalRoutes from "./routes/jadwalRoutes.js";
 
 
 
+
 const app = express();
 
 const allowedOrigins = ["http://localhost:3000"];
@@ -68,7 +69,7 @@ app.use("/api/master-guru", masterGuruRoutes);
 app.use("/api/master-mapel", mapelRoutes);
 app.use("/api/kurikulum", masterKurikulumRoutes);
 app.use("/api/agama", masterAgamaRoutes);
-app.use("/api/informasi-sekolah", informasiSekolahRoutes);
+
 app.use("/api/master-mapel", masterMapelRoutes);
 app.use("/api/master-aset-sekolah", masterAsetSekolahRoutes);
 app.use('/api/dashboard', dashboardRoutes);

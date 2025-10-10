@@ -1,75 +1,69 @@
 import { db } from "../core/config/knex.js";
 
-/**
- * Get all aset sekolah
- **/
-export const getAllAset = async () =>
-  db("master_aset_sekolah").select("*");
+const table = "master_aset_sekolah";
 
-/**
- * Get aset sekolah by ID
- **/
-export const getAsetById = async (id) =>
-  db("master_aset_sekolah").where({ ID: id }).first();
+// Ambil semua aset
+export const getAllAset = async () => {
+  const rows = await db(table)
+    .select(
+      `${table}.*`,
+      "master_gedung.NAMA_GEDUNG",
+      "master_gedung.GEDUNG_ID"
+    )
+    .leftJoin("master_gedung", `${table}.GEDUNG_ID`, "master_gedung.GEDUNG_ID")
+    .orderBy(`${table}.ASET_ID`, "desc");
 
-/**
- * Create new aset sekolah
- **/
-export const createAset = async ({
-  NAMA_BARANG,
-  MERK_TYPE,
-  JUMLAH_BARANG,
-  ASAL_USUL_PEROLEHAN,
-  PERIODE,
-  KETERANGAN,
-  STATUS, // ✅ tambahkan STATUS
-}) => {
-  const [id] = await db("master_aset_sekolah").insert({
-    NAMA_BARANG,
-    MERK_TYPE,
-    JUMLAH_BARANG,
-    ASAL_USUL_PEROLEHAN,
-    PERIODE,
-    KETERANGAN,
-    STATUS, // ✅ ikut tersimpan
-  });
-
-  return db("master_aset_sekolah").where({ ID: id }).first();
+  // Buat nested object untuk frontend
+  return rows.map((r) => ({
+    ...r,
+    gedung: {
+      GEDUNG_ID: r.GEDUNG_ID,
+      NAMA_GEDUNG: r.NAMA_GEDUNG,
+    },
+  }));
 };
 
-/**
- * Update aset sekolah
- **/
-export const updateAset = async (
-  id,
-  {
-    NAMA_BARANG,
-    MERK_TYPE,
-    JUMLAH_BARANG,
-    ASAL_USUL_PEROLEHAN,
-    PERIODE,
-    KETERANGAN,
-    STATUS, // ✅ tambahkan STATUS
-  }
-) => {
-  await db("master_aset_sekolah")
-    .where({ ID: id })
-    .update({
-      NAMA_BARANG,
-      MERK_TYPE,
-      JUMLAH_BARANG,
-      ASAL_USUL_PEROLEHAN,
-      PERIODE,
-      KETERANGAN,
-      STATUS, // ✅ ikut diupdate
-      UPDATED_AT: db.fn.now(), // biar kolom updated_at ke-refresh
-    });
-
-  return db("master_aset_sekolah").where({ ID: id }).first();
+// Tambah aset baru
+export const createAset = async (data) => {
+  const [id] = await db(table).insert(data);
+  return db(table).where({ ASET_ID: id }).first();
 };
 
-/**
- * Delete aset sekolah
- **/
-export const deleteAset = async (id) =>
-  db("master_aset_sekolah").where({ ID: id }).del();
+// Update aset
+export const updateAset = async (id, data) => {
+  const aset = await db(table).where({ ASET_ID: id }).first();
+  if (!aset) return null;
+  await db(table).where({ ASET_ID: id }).update(data);
+  return db(table).where({ ASET_ID: id }).first();
+};
+
+// Hapus aset
+export const deleteAset = async (id) => {
+  const aset = await db(table).where({ ASET_ID: id }).first();
+  if (!aset) return null;
+  await db(table).where({ ASET_ID: id }).del();
+  return aset;
+};
+
+// Ambil aset by ID
+export const getAsetById = async (id) => {
+  const aset = await db(table)
+    .select(
+      `${table}.*`,
+      "master_gedung.NAMA_GEDUNG",
+      "master_gedung.GEDUNG_ID"
+    )
+    .leftJoin("master_gedung", `${table}.GEDUNG_ID`, "master_gedung.GEDUNG_ID")
+    .where(`${table}.ASET_ID`, id)
+    .first();
+
+  if (!aset) return null;
+
+  return {
+    ...aset,
+    gedung: {
+      GEDUNG_ID: aset.GEDUNG_ID,
+      NAMA_GEDUNG: aset.NAMA_GEDUNG,
+    },
+  };
+};
