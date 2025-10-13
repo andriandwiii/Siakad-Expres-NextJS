@@ -29,41 +29,33 @@ if (userRole === "SUPER_ADMIN") {
             items: [{ label: "Dashboard Utama", icon: "pi pi-fw pi-home", to: "/superadmin/dashboard" }],
         },
         {
-            label: "Manajemen Sekolah", // Renamed "Manajemen SIM" to "Manajemen Sekolah"
+            label: "Manajemen Sekolah", // Renamed for better clarity
             items: [
                 // Section for Master Data related to school management
                 {
-                    label: "Manajemen Data Sekolah", // Grouping all Master Data items
+                    label: "Master Data Sekolah",
                     items: [
-                        { label: "Master Kelas", icon: "pi pi-fw pi-th-large", to: "/master/m.kelas" },
-                        { label: "Master Kurikulum", icon: "pi pi-fw pi-book", to: "/master/kurikulum" },
-                        { label: "Master Jurusan", icon: "pi pi-fw pi-briefcase", to: "/master/jurusan" },
-                        { label: "Master Gedung", icon: "pi pi-fw pi-building", to: "/master/gedung" },
-                        { label: "Master Tingkatan", icon: "pi pi-fw pi-list", to: "/master/tingkatan" },
                         { label: "Master Agama", icon: "pi pi-user-plus", to: "/master/agama" },
                         { label: "Master Wilayah", icon: "pi pi-fw pi-building", to: "/master/wilayah" },
                         { label: "Master Aset Sekolah", icon: "pi pi-tags", to: "/master/aset_sekolah" },
-                        { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" }
+                        { label: "Master Kelas", icon: "pi pi-fw pi-th-large", to: "/master/m.kelas" },
+                        { label: "Master Kurikulum", icon: "pi pi-fw pi-book", to: "/master/kurikulum" },
+                        { label: "Master Mapel", icon: "pi pi-fw pi-bookmark", to: "/master/mapel" },
+                        { label: "Master Mapel Kelas", icon: "pi pi-fw pi-bookmark", to: "/master/mapel-kelas" },
+                        { label: "Master Jurusan", icon: "pi pi-fw pi-briefcase", to: "/master/jurusan" },
+                        { label: "Master Gedung", icon: "pi pi-fw pi-building", to: "/master/gedung" },
+                        { label: "Master Tingkatan", icon: "pi pi-fw pi-list", to: "/master/tingkatan" },
                     ]
                 },
 
-                // Section for scheduling-related data (Jadwal & Hari)
+                // Section for Managing students and user-related items
                 {
-                    label: "Manajemen Jadwal", // Grouping scheduling-related items
-                    items: [
-                        { label: "Master Hari", icon: "pi pi-fw pi-calendar", to: "/master/hari" },
-                        { label: "Master Jadwal", icon: "pi pi-fw pi-calendar-times", to: "/master/jadwal" },
-                        { label: "Master Mapel", icon: "pi pi-fw pi-bookmark", to: "/master/mapel" }, // Moved here
-                        { label: "Master Mapel Kelas", icon: "pi pi-fw pi-bookmark", to: "/master/mapel-kelas" } // Moved here
-                    ]
-                },
-                // Section for Managing students and users
-                {
-                    label: "Manajemen Siswa",
+                    label: "Manajemen Siswa & User",
                     items: [
                         { label: "Manajemen Siswa", icon: "pi pi-fw pi-users", to: "/master/siswa" },
                         { label: "Informasi Sekolah", icon: "pi pi-fw pi-info-circle", to: "/master/informasi_sekolah" },
                         { label: "Transaksi Siswa", icon: "pi pi-fw pi-money-bill", to: "/master/transaksi-siswa" },
+                        { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" },
                     ]
                 },
 
@@ -72,15 +64,23 @@ if (userRole === "SUPER_ADMIN") {
                     label: "Manajemen Guru",
                     items: [
                         { label: "Guru", icon: "pi pi-fw pi-users", to: "/master/guru" },
-                        { label: "Transaksi Guru", icon: "pi pi-fw pi-money-bill", to: "/master/transaksi-guru" }
+                        { label: "Transaksi Guru", icon: "pi pi-fw pi-money-bill", to: "/master/transaksi-guru" },
+                    ]
+                },
+
+                // Section for managing Absensi (Attendance)
+                {
+                    label: "Manajemen Absensi",
+                    items: [
+                        { label: "Absensi Siswa", icon: "pi pi-fw pi-check-square", to: "/superadmin/menu/absensi-siswa" },
+                        { label: "Absensi Guru", icon: "pi pi-fw pi-user", to: "/superadmin/menu/absensi-guru" },
                     ]
                 }
             ]
         }
     ];
 }
-
-    // =========================
+  // =========================
     // 2. KURIKULUM
     // =========================
     else if (userRole === "KURIKULUM") {
