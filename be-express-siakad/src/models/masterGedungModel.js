@@ -35,16 +35,8 @@ export const createGedung = async (data) => {
     LUAS_BANGUNAN,
     LETAK,
     KETERANGAN,
-    STATUS = true,
+    STATUS = "Aktif",
   } = data;
-
-  if (!KODE_GEDUNG || !NAMA_GEDUNG) {
-    throw new Error("KODE_GEDUNG dan NAMA_GEDUNG wajib diisi");
-  }
-
-  // Konversi status string jadi boolean jika dikirim dari frontend
-  const statusValue =
-    STATUS === "Tidak Aktif" ? false : STATUS === "Aktif" ? true : !!STATUS;
 
   const [id] = await db("master_gedung").insert({
     KODE_GEDUNG,
@@ -56,7 +48,9 @@ export const createGedung = async (data) => {
     LUAS_BANGUNAN: LUAS_BANGUNAN ?? null,
     LETAK: LETAK ?? null,
     KETERANGAN: KETERANGAN ?? null,
-    STATUS: statusValue,
+    STATUS: STATUS === "Tidak Aktif" ? "Tidak Aktif" : "Aktif",
+    CREATED_AT: db.fn.now(),
+    UPDATED_AT: db.fn.now(),
   });
 
   return db("master_gedung").where({ GEDUNG_ID: id }).first();
@@ -79,14 +73,6 @@ export const updateGedung = async (id, data) => {
     STATUS,
   } = data;
 
-  if (!KODE_GEDUNG || !NAMA_GEDUNG) {
-    throw new Error("KODE_GEDUNG dan NAMA_GEDUNG wajib diisi");
-  }
-
-  // Konversi status string ke boolean
-  const statusValue =
-    STATUS === "Tidak Aktif" ? false : STATUS === "Aktif" ? true : !!STATUS;
-
   await db("master_gedung")
     .where({ GEDUNG_ID: id })
     .update({
@@ -99,7 +85,7 @@ export const updateGedung = async (id, data) => {
       LUAS_BANGUNAN,
       LETAK,
       KETERANGAN,
-      STATUS: statusValue,
+      STATUS: STATUS === "Tidak Aktif" ? "Tidak Aktif" : "Aktif",
       UPDATED_AT: db.fn.now(),
     });
 

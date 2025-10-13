@@ -29,6 +29,7 @@ import jadwalRoutes from "./routes/jadwalRoutes.js";
 import masterinfosekolahRoutes from "./routes/masterInfoSekolahRoutes.js";
 import masterTingkatanRoutes from "./routes/masterTingkatanRoutes.js";
 
+
 const app = express();
 
 const allowedOrigins = ["http://localhost:3000"];
@@ -66,9 +67,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/siswa", siswaRoutes);
 app.use("/api/kelas", kelasRoutes);
 app.use("/api/master-guru", masterGuruRoutes);
-app.use("/api/mapel", mapelRoutes);
+app.use("/api/master-mapel", mapelRoutes);
 app.use("/api/kurikulum", masterKurikulumRoutes);
 app.use("/api/agama", masterAgamaRoutes);
+
 app.use("/api/master-mapel", masterMapelRoutes);
 app.use("/api/master-aset-sekolah", masterAsetSekolahRoutes);
 app.use("/api/dashboard", dashboardRoutes);

@@ -47,6 +47,8 @@ const AppMenu = () => {
                 { label: "Jurusan", icon: "pi pi-fw pi-briefcase", to: "/master/jurusan" },
                 { label: "Gedung", icon: "pi pi-fw pi-building", to: "/master/gedung" },
                 { label: "Transaksi Siswa", icon: "pi pi-fw pi-money-bill", to: "/master/transaksi-siswa" },
+               
+
                 { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" },
                 { label: "Tingkatan", icon: "pi pi-fw pi-list", to: "/master/tingkatan" }, // Added Tingkatan
                 ]
