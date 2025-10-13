@@ -4,105 +4,145 @@ import { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Button } from "primereact/button";
 
-const FormMapel = ({ visible, onHide, onSave, selectedMapel }) => {
-  const [kodeMapel, setKodeMapel] = useState("");
-  const [namaMapel, setNamaMapel] = useState("");
-  const [kategori, setKategori] = useState("Wajib");
-  const [deskripsi, setDeskripsi] = useState("");
-  const [status, setStatus] = useState("Aktif");
+const FormMapelStyles = {
+  dialog: {
+    width: "30vw",
+    borderRadius: "8px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+  },
+  formLabel: {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#333",
+  },
+  inputText: {
+    width: "100%",
+    padding: "8px",
+    marginTop: "8px",
+    borderRadius: "4px",
+    border: "1px solid #ddd",
+    fontSize: "14px",
+  },
+  invalidInput: {
+    borderColor: "#f44336",
+  },
+  errorMessage: {
+    color: "#f44336",
+    fontSize: "12px",
+    marginTop: "4px",
+  },
+  submitButton: {
+    marginTop: "16px",
+    padding: "8px 16px",
+    fontSize: "14px",
+    backgroundColor: "#007ad9",
+    border: "none",
+    color: "#fff",
+    borderRadius: "4px",
+    transition: "all 0.3s ease-in-out",
+  },
+  submitButtonHover: {
+    backgroundColor: "#005bb5",
+  },
+};
 
-  useEffect(() => {
-    if (selectedMapel) {
-      setKodeMapel(selectedMapel.KODE_MAPEL || "");
-      setNamaMapel(selectedMapel.NAMA_MAPEL || "");
-      setKategori(selectedMapel.KATEGORI || "Wajib");
-      setDeskripsi(selectedMapel.DESKRIPSI || "");
-      setStatus(selectedMapel.STATUS || "Aktif");
-    } else {
-      setKodeMapel("");
-      setNamaMapel("");
-      setKategori("Wajib");
-      setDeskripsi("");
-      setStatus("Aktif");
-    }
-  }, [selectedMapel, visible]);
+const FormMapel = ({ visible, formData, onHide, onChange, onSubmit, errors }) => {
+  const inputClass = (field) =>
+    errors[field]
+      ? { ...FormMapelStyles.inputText, ...FormMapelStyles.invalidInput }
+      : FormMapelStyles.inputText;
 
-  const handleSubmit = () => {
-    if (!kodeMapel || !namaMapel || !kategori) return alert("Lengkapi semua field wajib!");
-    onSave({ KODE_MAPEL: kodeMapel, NAMA_MAPEL: namaMapel, KATEGORI: kategori, DESKRIPSI: deskripsi, STATUS: status });
-  };
+  const statusOptions = [
+    { label: "Aktif", value: "Aktif" },
+    { label: "Tidak Aktif", value: "Tidak Aktif" },
+  ];
+
+  const kategoriOptions = [
+    { label: "Umum", value: "Umum" },
+    { label: "Wajib", value: "Wajib" },
+    { label: "Pilihan", value: "Pilihan" },
+  ];
 
   return (
     <Dialog
-      header={selectedMapel ? "Edit Mata Pelajaran" : "Tambah Mata Pelajaran"}
+      header={formData.MAPEL_ID ? "Edit Mata Pelajaran" : "Tambah Mata Pelajaran"}
       visible={visible}
-      style={{ width: "40vw" }}
-      modal
       onHide={onHide}
+      style={FormMapelStyles.dialog}
     >
-      <div className="p-fluid">
-        <div className="field">
-          <label htmlFor="kodeMapel">Kode Mapel</label>
+      <form
+        className="space-y-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+      >
+        <div>
+          <label style={FormMapelStyles.formLabel}>Kode Mapel</label>
           <InputText
-            id="kodeMapel"
-            value={kodeMapel}
-            onChange={(e) => setKodeMapel(e.target.value)}
-            placeholder="Contoh: BIO-01"
+            style={inputClass("KODE_MAPEL")}
+            value={formData.KODE_MAPEL}
+            onChange={(e) => onChange({ ...formData, KODE_MAPEL: e.target.value })}
           />
+          {errors.KODE_MAPEL && <small style={FormMapelStyles.errorMessage}>{errors.KODE_MAPEL}</small>}
         </div>
 
-        <div className="field">
-          <label htmlFor="namaMapel">Nama Mapel</label>
+        <div>
+          <label style={FormMapelStyles.formLabel}>Nama Mapel</label>
           <InputText
-            id="namaMapel"
-            value={namaMapel}
-            onChange={(e) => setNamaMapel(e.target.value)}
-            placeholder="Contoh: Biologi"
+            style={inputClass("NAMA_MAPEL")}
+            value={formData.NAMA_MAPEL}
+            onChange={(e) => onChange({ ...formData, NAMA_MAPEL: e.target.value })}
           />
+          {errors.NAMA_MAPEL && <small style={FormMapelStyles.errorMessage}>{errors.NAMA_MAPEL}</small>}
         </div>
 
-        <div className="field">
-          <label htmlFor="kategori">Kategori</label>
+        <div>
+          <label style={FormMapelStyles.formLabel}>Deskripsi</label>
+          <InputText
+            style={inputClass("DESKRIPSI")}
+            value={formData.DESKRIPSI}
+            onChange={(e) => onChange({ ...formData, DESKRIPSI: e.target.value })}
+          />
+          {errors.DESKRIPSI && <small style={FormMapelStyles.errorMessage}>{errors.DESKRIPSI}</small>}
+        </div>
+
+        <div>
+          <label style={FormMapelStyles.formLabel}>Kategori</label>
           <Dropdown
-            id="kategori"
-            value={kategori}
-            options={["Wajib", "Peminatan", "Muatan Lokal"].map((k) => ({ label: k, value: k }))}
-            onChange={(e) => setKategori(e.value)}
+            value={formData.KATEGORI}
+            options={kategoriOptions}
+            onChange={(e) => onChange({ ...formData, KATEGORI: e.value })}
             placeholder="Pilih Kategori"
+            style={inputClass("KATEGORI")}
           />
+          {errors.KATEGORI && <small style={FormMapelStyles.errorMessage}>{errors.KATEGORI}</small>}
         </div>
 
-        <div className="field">
-          <label htmlFor="deskripsi">Deskripsi</label>
-          <InputTextarea
-            id="deskripsi"
-            value={deskripsi}
-            onChange={(e) => setDeskripsi(e.target.value)}
-            rows={3}
-            placeholder="Deskripsi mata pelajaran (opsional)"
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="status">Status</label>
+        <div>
+          <label style={FormMapelStyles.formLabel}>Status</label>
           <Dropdown
-            id="status"
-            value={status}
-            options={["Aktif", "Tidak Aktif"].map((s) => ({ label: s, value: s }))}
-            onChange={(e) => setStatus(e.value)}
+            value={formData.STATUS}
+            options={statusOptions}
+            onChange={(e) => onChange({ ...formData, STATUS: e.value })}
+            placeholder="Pilih Status"
+            style={inputClass("STATUS")}
           />
+          {errors.STATUS && <small style={FormMapelStyles.errorMessage}>{errors.STATUS}</small>}
         </div>
 
-        <div className="flex justify-content-end gap-2 mt-3">
-          <Button label="Batal" icon="pi pi-times" className="p-button-text" onClick={onHide} />
-          <Button label="Simpan" icon="pi pi-check" onClick={handleSubmit} />
+        <div className="text-right pt-3">
+          <Button
+            type="submit"
+            label="Simpan"
+            icon="pi pi-save"
+            style={FormMapelStyles.submitButton}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = FormMapelStyles.submitButtonHover.backgroundColor)}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = FormMapelStyles.submitButton.backgroundColor)}
+          />
         </div>
-      </div>
+      </form>
     </Dialog>
   );
-};
-
-export default FormMapel;
+}

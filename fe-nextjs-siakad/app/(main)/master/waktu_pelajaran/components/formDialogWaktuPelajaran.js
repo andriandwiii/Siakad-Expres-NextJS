@@ -5,9 +5,9 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 
-const FormUjianStyles = {
+const FormWaktuPelajaranStyles = {
   dialog: {
-    width: "30vw",
+    width: "40vw",
     borderRadius: "8px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
   },
@@ -47,25 +47,28 @@ const FormUjianStyles = {
   },
 };
 
-const FormUjian = ({ visible, formData, onHide, onChange, onSubmit, errors, mapelOptions }) => {
+const FormWaktuPelajaran = ({
+  visible,
+  formData,
+  onHide,
+  onChange,
+  onSubmit,
+  errors,
+  mapelOptions,
+  kelasOptions,  // Tambahkan kelasOptions untuk dropdown Kelas
+  ruanganOptions,  // Tambahkan ruanganOptions untuk dropdown Ruangan
+}) => {
   const inputClass = (field) =>
     errors[field]
-      ? { ...FormUjianStyles.inputText, ...FormUjianStyles.invalidInput }
-      : FormUjianStyles.inputText;
-
-  const jenisUjianOptions = [
-    { label: "UTS", value: "UTS" },
-    { label: "UAS", value: "UAS" },
-    { label: "Tugas", value: "Tugas" },
-    { label: "Praktikum", value: "Praktikum" },
-  ];
+      ? { ...FormWaktuPelajaranStyles.inputText, ...FormWaktuPelajaranStyles.invalidInput }
+      : FormWaktuPelajaranStyles.inputText;
 
   return (
     <Dialog
-      header={formData.UJIAN_ID ? "Edit Ujian" : "Tambah Ujian"}
+      header={formData.ID ? "Edit Waktu Pelajaran" : "Tambah Waktu Pelajaran"}
       visible={visible}
       onHide={onHide}
-      style={FormUjianStyles.dialog}
+      style={FormWaktuPelajaranStyles.dialog}
     >
       <form
         className="space-y-3"
@@ -74,61 +77,126 @@ const FormUjian = ({ visible, formData, onHide, onChange, onSubmit, errors, mape
           onSubmit();
         }}
       >
+        {/* HARI */}
         <div>
-          <label style={FormUjianStyles.formLabel}>Nama Ujian</label>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Hari</label>
           <InputText
-            style={inputClass("NAMA_UJIAN")}
-            value={formData.NAMA_UJIAN}
-            onChange={(e) => onChange({ ...formData, NAMA_UJIAN: e.target.value })}
+            style={inputClass("HARI")}
+            value={formData.HARI}
+            onChange={(e) => onChange({ ...formData, HARI: e.target.value })}
           />
-          {errors.NAMA_UJIAN && <small style={FormUjianStyles.errorMessage}>{errors.NAMA_UJIAN}</small>}
+          {errors.HARI && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.HARI}</small>}
         </div>
 
+        {/* JAM MULAI */}
         <div>
-          <label style={FormUjianStyles.formLabel}>Jenis Ujian</label>
-          <Dropdown
-            value={formData.JENIS_UJIAN}
-            options={jenisUjianOptions}
-            onChange={(e) => onChange({ ...formData, JENIS_UJIAN: e.value })}
-            optionLabel="label"
-            placeholder="Pilih Jenis Ujian"
-            style={inputClass("JENIS_UJIAN")}
-          />
-          {errors.JENIS_UJIAN && <small style={FormUjianStyles.errorMessage}>{errors.JENIS_UJIAN}</small>}
-        </div>
-
-        <div>
-          <label style={FormUjianStyles.formLabel}>Tanggal Ujian</label>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Jam Mulai</label>
           <InputText
-            type="date"
-            style={inputClass("TANGGAL_UJIAN")}
-            value={formData.TANGGAL_UJIAN}
-            onChange={(e) => onChange({ ...formData, TANGGAL_UJIAN: e.target.value })}
+            type="time"
+            style={inputClass("JAM_MULAI")}
+            value={formData.JAM_MULAI}
+            onChange={(e) => onChange({ ...formData, JAM_MULAI: e.target.value })}
           />
-          {errors.TANGGAL_UJIAN && <small style={FormUjianStyles.errorMessage}>{errors.TANGGAL_UJIAN}</small>}
+          {errors.JAM_MULAI && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.JAM_MULAI}</small>}
         </div>
 
+        {/* JAM SELESAI */}
         <div>
-          <label style={FormUjianStyles.formLabel}>Mata Pelajaran</label>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Jam Selesai</label>
+          <InputText
+            type="time"
+            style={inputClass("JAM_SELESAI")}
+            value={formData.JAM_SELESAI}
+            onChange={(e) => onChange({ ...formData, JAM_SELESAI: e.target.value })}
+          />
+          {errors.JAM_SELESAI && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.JAM_SELESAI}</small>}
+        </div>
+
+        {/* DURASI */}
+        <div>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Durasi (Menit)</label>
+          <InputText
+            type="number"
+            style={inputClass("DURASI")}
+            value={formData.DURASI}
+            onChange={(e) => onChange({ ...formData, DURASI: e.target.value })}
+          />
+          {errors.DURASI && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.DURASI}</small>}
+        </div>
+
+        {/* MATA PELAJARAN */}
+        <div>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Mata Pelajaran</label>
           <Dropdown
-            value={formData.MAPEL_ID}
+            value={formData.MATA_PELAJARAN}
             options={mapelOptions} // This should be a list of mapel { label, value } pairs
-            onChange={(e) => onChange({ ...formData, MAPEL_ID: e.value })}
+            onChange={(e) => onChange({ ...formData, MATA_PELAJARAN: e.value })}
             optionLabel="label"
             placeholder="Pilih Mata Pelajaran"
-            style={inputClass("MAPEL_ID")}
+            style={inputClass("MATA_PELAJARAN")}
           />
-          {errors.MAPEL_ID && <small style={FormUjianStyles.errorMessage}>{errors.MAPEL_ID}</small>}
+          {errors.MATA_PELAJARAN && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.MATA_PELAJARAN}</small>}
         </div>
 
+        {/* KELAS */}
+        <div>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Kelas</label>
+          <Dropdown
+            value={formData.KELAS}
+            options={kelasOptions} // Dropdown for Kelas
+            onChange={(e) => onChange({ ...formData, KELAS: e.value })}
+            optionLabel="label"
+            placeholder="Pilih Kelas"
+            style={inputClass("KELAS")}
+          />
+          {errors.KELAS && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.KELAS}</small>}
+        </div>
+
+        {/* RUANGAN */}
+        <div>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Ruangan</label>
+          <Dropdown
+            value={formData.RUANGAN}
+            options={ruanganOptions} // Dropdown for Ruangan
+            onChange={(e) => onChange({ ...formData, RUANGAN: e.value })}
+            optionLabel="label"
+            placeholder="Pilih Ruangan"
+            style={inputClass("RUANGAN")}
+          />
+          {errors.RUANGAN && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.RUANGAN}</small>}
+        </div>
+
+        {/* GURU PENGAJAR */}
+        <div>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Guru Pengajar</label>
+          <InputText
+            style={inputClass("GURU_PENGAJAR")}
+            value={formData.GURU_PENGAJAR}
+            onChange={(e) => onChange({ ...formData, GURU_PENGAJAR: e.target.value })}
+          />
+          {errors.GURU_PENGAJAR && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.GURU_PENGAJAR}</small>}
+        </div>
+
+        {/* STATUS */}
+        <div>
+          <label style={FormWaktuPelajaranStyles.formLabel}>Status</label>
+          <InputText
+            style={inputClass("STATUS")}
+            value={formData.STATUS}
+            onChange={(e) => onChange({ ...formData, STATUS: e.target.value })}
+          />
+          {errors.STATUS && <small style={FormWaktuPelajaranStyles.errorMessage}>{errors.STATUS}</small>}
+        </div>
+
+        {/* Submit Button */}
         <div className="text-right pt-3">
           <Button
             type="submit"
             label="Simpan"
             icon="pi pi-save"
-            style={FormUjianStyles.submitButton}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = FormUjianStyles.submitButtonHover.backgroundColor)}
-            onMouseLeave={(e) => (e.target.style.backgroundColor = FormUjianStyles.submitButton.backgroundColor)}
+            style={FormWaktuPelajaranStyles.submitButton}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = FormWaktuPelajaranStyles.submitButtonHover.backgroundColor)}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = FormWaktuPelajaranStyles.submitButton.backgroundColor)}
           />
         </div>
       </form>
@@ -136,4 +204,4 @@ const FormUjian = ({ visible, formData, onHide, onChange, onSubmit, errors, mape
   );
 };
 
-export default FormUjian;
+export default FormWaktuPelajaran;

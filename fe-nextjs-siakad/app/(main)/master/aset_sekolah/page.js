@@ -1,179 +1,216 @@
 "use client";
 
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import TabelAset from "./components/tabelAset"; 
-import FormAset from "./components/formDialogAset"; 
-import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/ToastNotifier";
+import { useEffect, useState, useRef } from "react";
+import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { Dropdown } from "primereact/dropdown";
+import ToastNotifier from "../../../components/ToastNotifier";
+import CustomDataTable from "../../../components/DataTable";
+import FormAset from "./components/formDialogAset";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const AsetPage = () => {
-  const [data, setData] = useState([]);
-  const [originalData, setOriginalData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [dialogVisible, setDialogVisible] = useState(false);
-
-  const [formData, setFormData] = useState({
-    ID: 0,
-    NAMA_BARANG: "",
-    MERK_TYPE: "",
-    JUMLAH_BARANG: 1,
-    ASAL_USUL_PEROLEHAN: "",
-    PERIODE: "",
-    KETERANGAN: "",
-    STATUS: "Aktif",
-  });
-
-  const [errors, setErrors] = useState({});
+export default function AsetPage() {
   const toastRef = useRef(null);
+  const isMounted = useRef(true);
 
+  const [aset, setAset] = useState([]);
+  const [filteredAset, setFilteredAset] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedAset, setSelectedAset] = useState(null);
+  const [dialogMode, setDialogMode] = useState(null);
+  const [token, setToken] = useState("");
+  const [statusFilter, setStatusFilter] = useState(null);
+
+  const statusOptions = [
+    { label: "Aktif", value: "Aktif" },
+    { label: "Tidak Aktif", value: "Tidak Aktif" },
+  ];
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  // Ambil token login
   useEffect(() => {
-    fetchAset();
+    const t = localStorage.getItem("token");
+    if (!t) window.location.href = "/";
+    else setToken(t);
+
+    return () => {
+      isMounted.current = false;
+      toastRef.current = null;
+    };
   }, []);
 
+  // Fetch data aset
+  useEffect(() => {
+    if (token) fetchAset();
+  }, [token]);
+
   const fetchAset = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/master-aset-sekolah`);
-      setData(res.data);
-      setOriginalData(res.data);
+      const res = await fetch(`${API_URL}/master-aset-sekolah`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!isMounted.current) return;
+
+      const data = json.data || [];
+      setAset(data);
+      setFilteredAset(data);
     } catch (err) {
-      console.error("Gagal mengambil data:", err);
+      console.error(err);
+      toastRef.current?.showToast("01", "Gagal memuat data aset");
     } finally {
-      setLoading(false);
+      if (isMounted.current) setIsLoading(false);
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.NAMA_BARANG?.trim()) newErrors.NAMA_BARANG = "Nama Barang wajib diisi";
-    if (!formData.JUMLAH_BARANG || formData.JUMLAH_BARANG <= 0) newErrors.JUMLAH_BARANG = "Jumlah harus lebih dari 0";
-    if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSearch = (keyword) => {
-    if (!keyword) {
-      setData(originalData);
+  // Filter berdasarkan status
+  useEffect(() => {
+    if (!statusFilter) {
+      setFilteredAset(aset);
     } else {
-      const filtered = originalData.filter(
-        (item) =>
-          item.NAMA_BARANG.toLowerCase().includes(keyword.toLowerCase()) ||
-          (item.MERK_TYPE?.toLowerCase().includes(keyword.toLowerCase())) ||
-          (item.ASAL_USUL_PEROLEHAN?.toLowerCase().includes(keyword.toLowerCase()))
-      );
-      setData(filtered);
+      setFilteredAset(aset.filter((a) => a.STATUS === statusFilter));
     }
-  };
+  }, [statusFilter, aset]);
 
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    const isEdit = !!formData.ID;
-    const url = isEdit
-      ? `${API_URL}/master-aset-sekolah/${formData.ID}`
-      : `${API_URL}/master-aset-sekolah`;
+  // Simpan (Tambah/Edit)
+  const handleSubmit = async (data) => {
+    if (!dialogMode) return;
 
     try {
-      if (isEdit) {
-        await axios.put(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil diperbarui");
-      } else {
-        await axios.post(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil ditambahkan");
+      if (dialogMode === "add") {
+        await fetch(`${API_URL}/master-aset-sekolah`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify(data),
+        });
+        toastRef.current?.showToast("00", "Aset berhasil ditambahkan");
+      } else if (dialogMode === "edit" && selectedAset) {
+        await fetch(`${API_URL}/master-aset-sekolah/${selectedAset.ASET_ID}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify(data),
+        });
+        toastRef.current?.showToast("00", "Aset berhasil diperbarui");
       }
-      fetchAset();
-      setDialogVisible(false);
-      resetForm();
+
+      if (isMounted.current) {
+        await fetchAset();
+        setDialogMode(null);
+        setSelectedAset(null);
+      }
     } catch (err) {
-      console.error("Gagal menyimpan data:", err);
-      toastRef.current?.showToast("01", "Gagal menyimpan data");
+      console.error(err);
+      toastRef.current?.showToast("01", "Gagal menyimpan aset");
     }
   };
 
-  const handleEdit = (row) => {
-    setFormData({ ...row });
-    setDialogVisible(true);
-  };
-
-  const handleDelete = (row) => {
+  // Hapus aset
+  const handleDelete = (rowData) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus aset ${row.NAMA_BARANG}?`,
+      message: `Yakin ingin menghapus aset "${rowData.NAMA_ASET}"?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Ya",
+      acceptLabel: "Hapus",
       rejectLabel: "Batal",
+      acceptClassName: "p-button-danger",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/master-aset-sekolah/${row.ID}`);
-          fetchAset();
-          toastRef.current?.showToast("00", "Data berhasil dihapus");
+          await fetch(`${API_URL}/master-aset-sekolah/${rowData.ASET_ID}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          toastRef.current?.showToast("00", "Aset berhasil dihapus");
+          if (isMounted.current) await fetchAset();
         } catch (err) {
-          console.error("Gagal menghapus data:", err);
-          toastRef.current?.showToast("01", "Gagal menghapus data");
+          console.error(err);
+          toastRef.current?.showToast("01", "Gagal menghapus aset");
         }
       },
     });
   };
 
-  const resetForm = () => {
-    setFormData({
-      ID: 0,
-      NAMA_BARANG: "",
-      MERK_TYPE: "",
-      JUMLAH_BARANG: 1,
-      ASAL_USUL_PEROLEHAN: "",
-      PERIODE: "",
-      KETERANGAN: "",
-      STATUS: "Aktif",
-    });
-    setErrors({});
-  };
+  // Tombol edit + hapus
+  const actionBodyTemplate = (rowData) => (
+    <div className="flex gap-2">
+      <Button icon="pi pi-pencil" size="small" severity="warning" onClick={() => { setSelectedAset(rowData); setDialogMode("edit"); }} />
+      <Button icon="pi pi-trash" size="small" severity="danger" onClick={() => handleDelete(rowData)} />
+    </div>
+  );
+
+  // Kolom tabel aset
+const asetColumns = [
+   { field: "ASET_ID", header: "ID" },
+  { field: "KODE_ASET", header: "Kode Aset" },
+  { field: "NAMA_ASET", header: "Nama Aset" },
+  { field: "JENIS_ASET", header: "Jenis" },
+  { field: "JUMLAH", header: "Jumlah" },
+  { field: "KONDISI", header: "Kondisi" },
+  { field: "SUMBER_DANA", header: "Sumber Dana" },
+  {
+    field: "TANGGAL_PEMBELIAN",
+    header: "Tanggal Pembelian",
+    body: (row) =>
+      row.TANGGAL_PEMBELIAN
+        ? new Date(row.TANGGAL_PEMBELIAN).toLocaleDateString("id-ID")
+        : "-",
+  },
+  {
+    field: "HARGA_SATUAN",
+    header: "Harga Satuan",
+    body: (row) => row.HARGA_SATUAN?.toLocaleString("id-ID"),
+  },
+  {
+    field: "TOTAL_HARGA",
+    header: "Total Harga",
+    body: (row) => row.TOTAL_HARGA?.toLocaleString("id-ID"),
+  },
+  {
+    field: "KETERANGAN",
+    header: "Keterangan",
+    body: (row) => row.KETERANGAN || "-",
+  },
+ {
+    field: "GEDUNG_ID",
+    header: "Gedung",
+    body: (row) => row.gedung?.NAMA_GEDUNG || "-", // kalau ada relasi
+  },
+ {
+    field: "STATUS",
+    header: "Status",
+    body: (row) => row.STATUS || "-",
+  },
+ 
+  { header: "Actions", body: actionBodyTemplate, style: { width: "120px" } },
+];
+
 
   return (
-    <div className="card">
-      <ToastNotifier ref={toastRef} />
-      <ConfirmDialog />
+    <div className="card p-4">
+      <h3 className="text-xl font-semibold mb-4">Master Aset Sekolah</h3>
 
-      <h3 className="text-xl font-semibold mb-3">Master Aset Sekolah</h3>
+      <div className="flex justify-content-end mb-3 gap-3">
 
-      <div className="flex items-center justify-end">
-        <HeaderBar
-          title=""
-          placeholder="Cari Aset"
-          onSearch={handleSearch}
-          onAddClick={() => {
-            resetForm();
-            setDialogVisible(true);
-          }}
+        <Button
+          label="Tambah Aset"
+          icon="pi pi-plus"
+          onClick={() => { setDialogMode("add"); setSelectedAset(null); }}
         />
       </div>
 
-      <TabelAset
-        data={data}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <CustomDataTable data={filteredAset} loading={isLoading} columns={asetColumns} />
+
+      <ConfirmDialog />
 
       <FormAset
-        visible={dialogVisible}
-        onHide={() => {
-          setDialogVisible(false);
-          resetForm();
-        }}
-        onChange={setFormData}
-        onSubmit={handleSubmit}
-        formData={formData}
-        errors={errors}
+        visible={dialogMode !== null}
+        onHide={() => { setDialogMode(null); setSelectedAset(null); }}
+        selectedAset={selectedAset}
+        onSave={handleSubmit}
+        token={token}
       />
+
+      <ToastNotifier ref={toastRef} />
     </div>
   );
-};
-
-export default AsetPage;
+}

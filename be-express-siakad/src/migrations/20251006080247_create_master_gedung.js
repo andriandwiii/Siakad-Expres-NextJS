@@ -5,11 +5,11 @@
  */
 export async function up(knex) {
   return knex.schema.createTable('master_gedung', (table) => {
-    table.increments('GEDUNG_ID').primary();
-    table.string('NAMA_GEDUNG', 100).notNullable();
-    table.string('LOKASI', 255).nullable();
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.increments('GEDUNG_ID').primary();  // Primary key
+    table.string('NAMA_GEDUNG', 100).notNullable();  // Nama gedung
+    table.string('LOKASI', 255).nullable();  // Lokasi gedung
+    table.timestamp('created_at').defaultTo(knex.fn.now());  // Waktu dibuat
+    table.timestamp('updated_at').defaultTo(knex.fn.now());  // Waktu diupdate
   });
 }
 
@@ -18,5 +18,5 @@ export async function up(knex) {
  * @returns { Promise<void> }
  */
 export async function down(knex) {
-  return knex.schema.dropTableIfExists('master_gedung');
+  return knex.schema.dropTableIfExists('master_gedung');  // Menghapus tabel jika rollback
 }

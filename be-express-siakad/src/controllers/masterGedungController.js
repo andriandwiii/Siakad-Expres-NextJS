@@ -63,18 +63,7 @@ export const getGedungById = async (req, res) => {
  */
 export const createGedung = async (req, res) => {
   try {
-    const {
-      KODE_GEDUNG,
-      NAMA_GEDUNG,
-      JUMLAH_LANTAI,
-      KAPASITAS,
-      KONDISI,
-      TAHUN_DIBANGUN,
-      LUAS_BANGUNAN,
-      LETAK,
-      KETERANGAN,
-      STATUS,
-    } = req.body;
+    const { KODE_GEDUNG, NAMA_GEDUNG } = req.body;
 
     if (!KODE_GEDUNG || !NAMA_GEDUNG) {
       return res.status(400).json({
@@ -83,7 +72,6 @@ export const createGedung = async (req, res) => {
       });
     }
 
-    // Cek apakah kode gedung sudah ada
     const existing = await MasterGedungModel.getGedungByKode(KODE_GEDUNG);
     if (existing) {
       return res.status(409).json({
@@ -92,18 +80,7 @@ export const createGedung = async (req, res) => {
       });
     }
 
-    const newGedung = await MasterGedungModel.createGedung({
-      KODE_GEDUNG,
-      NAMA_GEDUNG,
-      JUMLAH_LANTAI,
-      KAPASITAS,
-      KONDISI,
-      TAHUN_DIBANGUN,
-      LUAS_BANGUNAN,
-      LETAK,
-      KETERANGAN,
-      STATUS,
-    });
+    const newGedung = await MasterGedungModel.createGedung(req.body);
 
     res.status(201).json({
       status: "00",
@@ -125,27 +102,8 @@ export const createGedung = async (req, res) => {
 export const updateGedung = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      KODE_GEDUNG,
-      NAMA_GEDUNG,
-      JUMLAH_LANTAI,
-      KAPASITAS,
-      KONDISI,
-      TAHUN_DIBANGUN,
-      LUAS_BANGUNAN,
-      LETAK,
-      KETERANGAN,
-      STATUS,
-    } = req.body;
-
-    if (!KODE_GEDUNG || !NAMA_GEDUNG) {
-      return res.status(400).json({
-        status: "01",
-        message: "KODE_GEDUNG dan NAMA_GEDUNG wajib diisi",
-      });
-    }
-
     const existing = await MasterGedungModel.getGedungById(id);
+
     if (!existing) {
       return res.status(404).json({
         status: "04",
@@ -153,23 +111,12 @@ export const updateGedung = async (req, res) => {
       });
     }
 
-    const updatedGedung = await MasterGedungModel.updateGedung(id, {
-      KODE_GEDUNG,
-      NAMA_GEDUNG,
-      JUMLAH_LANTAI,
-      KAPASITAS,
-      KONDISI,
-      TAHUN_DIBANGUN,
-      LUAS_BANGUNAN,
-      LETAK,
-      KETERANGAN,
-      STATUS,
-    });
+    const updated = await MasterGedungModel.updateGedung(id, req.body);
 
     res.status(200).json({
       status: "00",
       message: "Gedung berhasil diperbarui",
-      data: updatedGedung,
+      data: updated,
     });
   } catch (err) {
     res.status(500).json({
