@@ -19,6 +19,8 @@ router.get("/kelas/:kelasId", JadwalController.getJadwalByKelas);
 router.get("/guru/:guruId", JadwalController.getJadwalByGuru);
 router.get("/hari/:hariId", JadwalController.getJadwalByHari);
 
+router.get("/:id/siswa", JadwalController.getSiswaByJadwal); // ⬅️ tambahkan ini
+
 // ✅ Hapus jadwal
 router.delete("/:id", JadwalController.deleteJadwal);
 

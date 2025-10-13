@@ -46,6 +46,8 @@ const AppMenu = () => {
                 { label: "Jurusan", icon: "pi pi-fw pi-briefcase", to: "/master/jurusan" },
                 { label: "Gedung", icon: "pi pi-fw pi-building", to: "/master/gedung" },
                 { label: "Transaksi Siswa", icon: "pi pi-fw pi-money-bill", to: "/master/transaksi-siswa" },
+                { label: "Absensi Siswa", icon: "pi pi-fw pi-check-square", to: "/superadmin/menu/absensi-siswa" },
+                { label: "Absensi Guru", icon: "pi pi-fw pi-user", to: "/superadmin/menu/absensi-guru" },
                 { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" },
                 ],
             },

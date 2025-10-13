@@ -1,21 +1,18 @@
-import { Router } from "express";
+import express from "express";
 import * as AbsensiController from "../controllers/absensiController.js";
 
-const router = Router();
+const router = express.Router();
 
-// GET all absensi + guru
-router.get("/", AbsensiController.getAllAbsensi);
+// ABSENSI SISWA
+router.get("/siswa", AbsensiController.getAllAbsensiSiswa);
+router.post("/siswa", AbsensiController.createAbsensiSiswa);
+router.put("/siswa/:id", AbsensiController.updateAbsensiSiswa);
+router.delete("/siswa/:id", AbsensiController.deleteAbsensiSiswa);
 
-// GET absensi by ID
-router.get("/:id", AbsensiController.getAbsensiById);
-
-// POST new absensi
-router.post("/", AbsensiController.addAbsensi);
-
-// PUT update absensi
-router.put("/:id", AbsensiController.updateAbsensi);
-
-// DELETE absensi
-router.delete("/:id", AbsensiController.deleteAbsensi);
+// ABSENSI GURU
+router.get("/guru", AbsensiController.getAllAbsensiGuru);
+router.post("/guru", AbsensiController.createAbsensiGuru);
+router.put("/guru/:id", AbsensiController.updateAbsensiGuru);
+router.delete("/guru/:id", AbsensiController.deleteAbsensiGuru);
 
 export default router;
