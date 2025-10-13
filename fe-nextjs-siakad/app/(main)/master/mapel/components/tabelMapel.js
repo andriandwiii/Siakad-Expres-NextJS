@@ -59,6 +59,8 @@ const TabelMapel = ({ data, loading, onEdit, onDelete }) => {
       size="small"
       scrollable
       style={TabelMapelStyles.datatable}
+      sortField="MAPEL_ID"  // Sort by MAPEL_ID
+      sortOrder={1}  // Ascending order (1 for ascending, -1 for descending)
     >
       <Column field="MAPEL_ID" header="ID Mapel" />
       <Column field="KODE_MAPEL" header="Kode Mapel" />

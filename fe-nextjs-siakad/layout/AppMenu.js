@@ -33,6 +33,7 @@ const AppMenu = () => {
                 label: "Manajemen SIM",
                 items: [
                 { label: "Agama", icon: "pi pi-user-plus", to: "/master/agama" },
+                { label: "Wilayah", icon: "pi pi-fw pi-building", to: "/master/wilayah" },
                 { label: "Aset Sekolah", icon: "pi pi-tags", to: "/master/aset_sekolah" },
                 { label: "Guru", icon: "pi pi-fw pi-users", to: "/master/guru" },
                 { label: "Siswa", icon: "pi pi-fw pi-users", to: "/master/siswa" },
@@ -42,12 +43,14 @@ const AppMenu = () => {
                 { label: "Mapel", icon: "pi pi-fw pi-bookmark", to: "/master/mapel" },
                 { label: "Mapel Kelas", icon: "pi pi-fw pi-bookmark", to: "/master/mapel-kelas" },
                 { label: "Hari", icon: "pi pi-fw pi-calendar", to: "/master/hari" },
-                { label: "jadwal", icon: "pi pi-fw pi-calendar-times", to: "/master/jadwal" },
+                { label: "Jadwal", icon: "pi pi-fw pi-calendar-times", to: "/master/jadwal" },
                 { label: "Jurusan", icon: "pi pi-fw pi-briefcase", to: "/master/jurusan" },
                 { label: "Gedung", icon: "pi pi-fw pi-building", to: "/master/gedung" },
                 { label: "Transaksi Siswa", icon: "pi pi-fw pi-money-bill", to: "/master/transaksi-siswa" },
                 { label: "User", icon: "pi pi-fw pi-user", to: "/superadmin/menu/users" },
-                ],
+                { label: "Tingkatan", icon: "pi pi-fw pi-list", to: "/master/tingkatan" }, // Added Tingkatan
+                ]
+
             },
         ];
     }

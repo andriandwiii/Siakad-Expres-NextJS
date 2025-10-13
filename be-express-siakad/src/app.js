@@ -13,6 +13,7 @@ import masterAgamaRoutes from "./routes/masterAgamaRoutes.js";
 import masterMapelRoutes from "./routes/masterMapelRoutes.js";
 import masterAsetSekolahRoutes from "./routes/masterAsetSekolahRoutes.js";
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import dashboardGuruRoutes from "./routes/dashboardGuruRoutes.js"; 
 import userRoutes from "./routes/userRoutes.js";
 import masterKelasRoutes from "./routes/masterKelasRoutes.js";
 import masterWilayahRoutes from "./routes/masterWilayahRoutes.js"; 
@@ -25,8 +26,8 @@ import transaksiSiswaRoutes from "./routes/transaksiSiswaRoutes.js";
 import masterHariRoutes from "./routes/masterHariRoutes.js";
 import mapelKelasRoutes from "./routes/mapelKelasRoutes.js";
 import jadwalRoutes from "./routes/jadwalRoutes.js";
-
-
+import masterinfosekolahRoutes from "./routes/masterInfoSekolahRoutes.js";
+import masterTingkatanRoutes from "./routes/masterTingkatanRoutes.js";
 
 const app = express();
 
@@ -70,7 +71,8 @@ app.use("/api/kurikulum", masterKurikulumRoutes);
 app.use("/api/agama", masterAgamaRoutes);
 app.use("/api/master-mapel", masterMapelRoutes);
 app.use("/api/master-aset-sekolah", masterAsetSekolahRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/dashboard-guru", dashboardGuruRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/master-kelas", masterKelasRoutes);
 app.use("/api/master-wilayah", masterWilayahRoutes);  
@@ -83,5 +85,7 @@ app.use("/api/transaksi-siswa", transaksiSiswaRoutes);
 app.use("/api/master-hari", masterHariRoutes);
 app.use("/api/mapel-kelas", mapelKelasRoutes);
 app.use("/api/jadwal", jadwalRoutes);
+app.use("/api/master-infosekolah", masterinfosekolahRoutes);
+app.use("/api/master-tingkatan", masterTingkatanRoutes);
 
 export default app;
