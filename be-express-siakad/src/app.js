@@ -26,6 +26,7 @@ import transaksiSiswaRoutes from "./routes/transaksiSiswaRoutes.js";
 import masterHariRoutes from "./routes/masterHariRoutes.js";
 import mapelKelasRoutes from "./routes/mapelKelasRoutes.js";
 import jadwalRoutes from "./routes/jadwalRoutes.js";
+import absensiRoutes from "./routes/absensiRoutes.js";
 import masterinfosekolahRoutes from "./routes/masterInfoSekolahRoutes.js";
 import masterTingkatanRoutes from "./routes/masterTingkatanRoutes.js";
 
@@ -87,6 +88,7 @@ app.use("/api/transaksi-siswa", transaksiSiswaRoutes);
 app.use("/api/master-hari", masterHariRoutes);
 app.use("/api/mapel-kelas", mapelKelasRoutes);
 app.use("/api/jadwal", jadwalRoutes);
+app.use("/api/absensi", absensiRoutes);
 app.use("/api/master-infosekolah", masterinfosekolahRoutes);
 app.use("/api/master-tingkatan", masterTingkatanRoutes);
 

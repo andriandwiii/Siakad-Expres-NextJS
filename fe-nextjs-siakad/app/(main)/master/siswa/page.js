@@ -6,7 +6,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import HeaderBar from "../../../components/headerbar";
 import ToastNotifier from "../../../components/ToastNotifier";
 import TabelSiswa from "./components/tabelSiswa";
-import FormSiswa from "./components/formDialogSiswa";
+import FormSiswa from "./components/SiswaDetailDialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

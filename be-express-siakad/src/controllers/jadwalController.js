@@ -169,6 +169,30 @@ export const getJadwalByHari = async (req, res) => {
   }
 };
 
+// GET /jadwal/:id/siswa
+export const getSiswaByJadwal = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Ambil KELAS_ID dari jadwal
+    const jadwal = await db("t_jadwal").where({ JADWAL_ID: id }).first();
+    if (!jadwal) {
+      return res.status(404).json({ status: "error", message: "Jadwal tidak ditemukan" });
+    }
+
+    // Ambil semua siswa berdasarkan KELAS_ID dari tabel transaksi_siswa_kelas
+    const siswaList = await db("transaksi_siswa_kelas AS t")
+      .join("m_siswa AS s", "t.SISWA_ID", "s.SISWA_ID")
+      .select("s.SISWA_ID", "s.NAMA", "t.STATUS", "t.TAHUN_AJARAN")
+      .where("t.KELAS_ID", jadwal.KELAS_ID);
+
+    res.status(200).json({ status: "success", data: siswaList });
+  } catch (err) {
+    console.error("Error getSiswaByJadwal:", err);
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
 // Hapus jadwal
 export const deleteJadwal = async (req, res) => {
   try {

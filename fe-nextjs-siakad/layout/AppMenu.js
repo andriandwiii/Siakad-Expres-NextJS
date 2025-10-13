@@ -57,7 +57,6 @@ if (userRole === "SUPER_ADMIN") {
                         { label: "Master Mapel Kelas", icon: "pi pi-fw pi-bookmark", to: "/master/mapel-kelas" } // Moved here
                     ]
                 },
-
                 // Section for Managing students and users
                 {
                     label: "Manajemen Siswa",

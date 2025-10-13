@@ -143,18 +143,7 @@ export default function GedungPage() {
     { field: "GEDUNG_ID", header: "ID", style: { width: "60px" } },
     { field: "NAMA_GEDUNG", header: "Nama Gedung", filter: true },
     { field: "LOKASI", header: "Lokasi", filter: true },
-    {
-      field: "created_at",
-      header: "Created At",
-      body: (row) =>
-        row.created_at ? new Date(row.created_at).toLocaleString() : "-",
-    },
-    {
-      field: "updated_at",
-      header: "Updated At",
-      body: (row) =>
-        row.updated_at ? new Date(row.updated_at).toLocaleString() : "-",
-    },
+    
     {
       header: "Actions",
       body: actionBodyTemplate,
