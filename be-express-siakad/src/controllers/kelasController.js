@@ -1,85 +1,159 @@
-import * as KelasModel from "../models/kelasModel.js";
+import {
+  getAllKelas,
+  getKelasById,
+  addKelas,
+  updateKelas,
+  removeKelas,
+} from "../models/kelasModel.js";
+import { datetime, status } from "../utils/general.js";
 
-/**
- * Ambil semua kelas
- */
-export const getAllKelas = async (req, res) => {
+// =======================
+// Fetch all kelas
+// =======================
+export const fetchAllKelas = async (req, res) => {
   try {
-    const kelas = await KelasModel.getAllKelas();
-    res.status(200).json({ status: "success", data: kelas });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", message: err.message });
+    const kelas = await getAllKelas();
+    if (!kelas.length) {
+      return res.status(404).json({
+        status: status.NOT_FOUND,
+        message: "Data kelas kosong",
+        datetime: datetime(),
+      });
+    }
+    return res.status(200).json({
+      status: status.SUKSES,
+      message: "Data kelas berhasil didapatkan",
+      datetime: datetime(),
+      data: kelas,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: `Terjadi kesalahan pada server: ${error.message}`,
+      datetime: datetime(),
+    });
   }
 };
 
-/**
- * Ambil kelas berdasarkan ID
- */
-export const getKelasById = async (req, res) => {
+// =======================
+// Get kelas by ID
+// =======================
+export const getKelasByIdController = async (req, res) => {
   try {
-    const kelas = await KelasModel.getKelasById(req.params.id);
+    const { id } = req.params;
+    const kelas = await getKelasById(id);
     if (!kelas) {
-      return res.status(404).json({ status: "error", message: "Kelas tidak ditemukan" });
+      return res.status(404).json({
+        status: status.NOT_FOUND,
+        message: "Data kelas tidak ditemukan",
+        datetime: datetime(),
+      });
     }
-    res.status(200).json({ status: "success", data: kelas });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", message: err.message });
+    return res.status(200).json({
+      status: status.SUKSES,
+      message: "Data kelas berhasil didapatkan",
+      datetime: datetime(),
+      data: kelas,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: `Terjadi kesalahan pada server: ${error.message}`,
+      datetime: datetime(),
+    });
   }
 };
 
-/**
- * Tambah kelas baru
- */
-export const createKelas = async (req, res) => {
+// =======================
+// Create new kelas
+// =======================
+export const createNewKelas = async (req, res) => {
   try {
-    const { NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN } = req.body;
-
-    if (!NAMA_KELAS || !JURUSAN_ID || !GEDUNG_ID) {
-      return res.status(400).json({ status: "error", message: "NAMA_KELAS, JURUSAN_ID dan GEDUNG_ID wajib diisi" });
+    const { jurusan_id, gedung_id, tingkatan_id, ruang_id } = req.body || {};
+    if (!jurusan_id || !gedung_id || !tingkatan_id || !ruang_id) {
+      return res.status(400).json({
+        status: status.BAD_REQUEST,
+        message: "Jurusan, Gedung, Tingkatan, dan Ruang wajib diisi",
+        datetime: datetime(),
+      });
     }
-
-    const newKelas = await KelasModel.createKelas({ NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN });
-    res.status(201).json({ status: "success", data: newKelas });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", message: err.message });
+    const kelas = await addKelas({ jurusan_id, gedung_id, tingkatan_id, ruang_id });
+    return res.status(201).json({
+      status: status.SUKSES,
+      message: "Kelas berhasil ditambahkan",
+      datetime: datetime(),
+      data: kelas,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: `Terjadi kesalahan pada server: ${error.message}`,
+      datetime: datetime(),
+    });
   }
 };
 
-/**
- * Update kelas berdasarkan ID
- */
-export const updateKelas = async (req, res) => {
+// =======================
+// Update kelas
+// =======================
+export const updateKelasController = async (req, res) => {
   try {
-    const { NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN } = req.body;
-
-    const updatedKelas = await KelasModel.updateKelas(req.params.id, { NAMA_KELAS, JURUSAN_ID, GEDUNG_ID, TINGKATAN });
-
-    if (!updatedKelas) {
-      return res.status(404).json({ status: "error", message: "Kelas tidak ditemukan" });
+    const { id } = req.params;
+    const { jurusan_id, gedung_id, tingkatan_id, ruang_id } = req.body || {};
+    if (!jurusan_id || !gedung_id || !tingkatan_id || !ruang_id) {
+      return res.status(400).json({
+        status: status.BAD_REQUEST,
+        message: "Jurusan, Gedung, Tingkatan, dan Ruang wajib diisi",
+        datetime: datetime(),
+      });
     }
-
-    res.status(200).json({ status: "success", data: updatedKelas });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", message: err.message });
+    const updated = await updateKelas(id, { jurusan_id, gedung_id, tingkatan_id, ruang_id });
+    if (!updated) {
+      return res.status(404).json({
+        status: status.NOT_FOUND,
+        message: "Kelas tidak ditemukan",
+        datetime: datetime(),
+      });
+    }
+    return res.status(200).json({
+      status: status.SUKSES,
+      message: "Kelas berhasil diupdate",
+      datetime: datetime(),
+      data: updated,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: `Terjadi kesalahan pada server: ${error.message}`,
+      datetime: datetime(),
+    });
   }
 };
 
-/**
- * Hapus kelas berdasarkan ID
- */
-export const deleteKelas = async (req, res) => {
+// =======================
+// Delete kelas
+// =======================
+export const deleteKelasController = async (req, res) => {
   try {
-    const deleted = await KelasModel.deleteKelas(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ status: "error", message: "Kelas tidak ditemukan" });
+    const { id } = req.params;
+    const removed = await removeKelas(id);
+    if (!removed) {
+      return res.status(404).json({
+        status: status.NOT_FOUND,
+        message: "Kelas tidak ditemukan",
+        datetime: datetime(),
+      });
     }
-    res.status(200).json({ status: "success", message: "Kelas berhasil dihapus", data: deleted });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", message: err.message });
+    return res.status(200).json({
+      status: status.SUKSES,
+      message: "Kelas berhasil dihapus",
+      datetime: datetime(),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: `Terjadi kesalahan pada server: ${error.message}`,
+      datetime: datetime(),
+    });
   }
 };

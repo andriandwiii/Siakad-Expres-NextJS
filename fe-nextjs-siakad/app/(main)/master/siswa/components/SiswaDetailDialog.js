@@ -19,8 +19,10 @@ const SiswaDetailDialog = ({ visible, onHide, siswa }) => {
         .get(API_TRANSAKSI)
         .then((res) => {
           const data = res.data.data;
-          // cari transaksi siswa berdasarkan SISWA_ID
-          const transaksiSiswa = data.find((item) => item.SISWA_ID === siswa.SISWA_ID);
+          // cari transaksi berdasarkan SISWA_ID di dalam item.siswa
+          const transaksiSiswa = data.find(
+            (item) => item.siswa && item.siswa.SISWA_ID === siswa.SISWA_ID
+          );
           setTransaksi(transaksiSiswa || null);
         })
         .catch((err) => {
@@ -56,13 +58,14 @@ const SiswaDetailDialog = ({ visible, onHide, siswa }) => {
                 <p><strong>Tanggal Lahir:</strong> {siswa.TGL_LAHIR ? new Date(siswa.TGL_LAHIR).toLocaleDateString() : "-"}</p>
                 <p><strong>Agama:</strong> {siswa.AGAMA || "-"}</p>
               </div>
+
               <div className="col-6">
                 <p><strong>Alamat:</strong> {siswa.ALAMAT || "-"}</p>
                 <p><strong>No Telp:</strong> {siswa.NO_TELP || "-"}</p>
                 <p><strong>Email:</strong> {siswa.EMAIL}</p>
                 <p><strong>Status:</strong> {siswa.STATUS}</p>
 
-                {/* Ambil kelas/jurusan dari transaksi */}
+                {/* Kelas, Jurusan, Tahun Masuk */}
                 {loading ? (
                   <p>Memuat kelas/jurusan...</p>
                 ) : transaksi ? (
@@ -90,7 +93,12 @@ const SiswaDetailDialog = ({ visible, onHide, siswa }) => {
           {siswa.FOTO && (
             <Card className="shadow-md border-round-lg mb-3">
               <div className="text-center">
-                <img src={siswa.FOTO} alt="Foto Siswa" className="border-round-lg" style={{ maxWidth: "200px" }} />
+                <img
+                  src={siswa.FOTO}
+                  alt="Foto Siswa"
+                  className="border-round-lg"
+                  style={{ maxWidth: "200px" }}
+                />
               </div>
             </Card>
           )}

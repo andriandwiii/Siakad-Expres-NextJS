@@ -2,42 +2,58 @@
 
 import { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 
 const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
-  const [namaKelas, setNamaKelas] = useState("");
-  const [tingkatan, setTingkatan] = useState("");
+  const [ruangId, setRuangId] = useState(null);       // Sebagai "Nama Kelas"
+  const [tingkatanId, setTingkatanId] = useState(null);
   const [jurusanId, setJurusanId] = useState(null);
   const [gedungId, setGedungId] = useState(null);
 
   const [jurusanList, setJurusanList] = useState([]);
   const [gedungList, setGedungList] = useState([]);
+  const [tingkatanList, setTingkatanList] = useState([]);
+  const [ruangList, setRuangList] = useState([]);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // Reset form saat dialog visible atau selectedKelas berubah
+  // Reset form saat dialog dibuka atau data berubah
   useEffect(() => {
     if (selectedKelas) {
-      setNamaKelas(selectedKelas.NAMA_KELAS || "");
-      setTingkatan(selectedKelas.TINGKATAN || "");
+      setRuangId(selectedKelas.RUANG_ID || null);
+      setTingkatanId(selectedKelas.TINGKATAN_ID || null);
       setJurusanId(selectedKelas.JURUSAN_ID || null);
       setGedungId(selectedKelas.GEDUNG_ID || null);
     } else if (visible) {
-      setNamaKelas("");
-      setTingkatan("");
+      setRuangId(null);
+      setTingkatanId(null);
       setJurusanId(null);
       setGedungId(null);
     }
   }, [selectedKelas, visible]);
 
+  // Fetch dropdown data
   useEffect(() => {
     if (token) {
+      fetchRuang();
       fetchJurusan();
       fetchGedung();
+      fetchTingkatan();
     }
   }, [token]);
+
+  const fetchRuang = async () => {
+    try {
+      const res = await fetch(`${API_URL}/master-ruang`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      setRuangList(json.data || []);
+    } catch (err) {
+      console.error("Gagal fetch ruang", err);
+    }
+  };
 
   const fetchJurusan = async () => {
     try {
@@ -63,12 +79,24 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
     }
   };
 
+  const fetchTingkatan = async () => {
+    try {
+      const res = await fetch(`${API_URL}/master-tingkatan`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      setTingkatanList(json.data || []);
+    } catch (err) {
+      console.error("Gagal fetch tingkatan", err);
+    }
+  };
+
   const handleSubmit = () => {
     const data = {
-      NAMA_KELAS: namaKelas,
-      JURUSAN_ID: jurusanId,
-      GEDUNG_ID: gedungId,
-      TINGKATAN: tingkatan,
+      ruang_id: ruangId,
+      jurusan_id: jurusanId,
+      gedung_id: gedungId,
+      tingkatan_id: tingkatanId,
     };
     onSave(data);
   };
@@ -82,15 +110,22 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
       onHide={onHide}
     >
       <div className="p-fluid">
+        {/* Nama Kelas (dari master_ruang_kelas) */}
         <div className="field">
-          <label htmlFor="namaKelas">Nama Kelas</label>
-          <InputText
-            id="namaKelas"
-            value={namaKelas}
-            onChange={(e) => setNamaKelas(e.target.value)}
+          <label htmlFor="ruang">Nama Kelas</label>
+          <Dropdown
+            id="ruang"
+            value={ruangId}
+            options={ruangList.map((r) => ({
+              label: r.NAMA_RUANG,
+              value: r.RUANG_ID,
+            }))}
+            onChange={(e) => setRuangId(e.value)}
+            placeholder="Pilih Nama Kelas"
           />
         </div>
 
+        {/* Jurusan */}
         <div className="field">
           <label htmlFor="jurusan">Jurusan</label>
           <Dropdown
@@ -105,6 +140,7 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
           />
         </div>
 
+        {/* Gedung */}
         <div className="field">
           <label htmlFor="gedung">Gedung</label>
           <Dropdown
@@ -119,12 +155,18 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
           />
         </div>
 
+        {/* Tingkatan */}
         <div className="field">
           <label htmlFor="tingkatan">Tingkatan</label>
-          <InputText
+          <Dropdown
             id="tingkatan"
-            value={tingkatan}
-            onChange={(e) => setTingkatan(e.target.value)}
+            value={tingkatanId}
+            options={tingkatanList.map((t) => ({
+              label: t.TINGKATAN,
+              value: t.TINGKATAN_ID,
+            }))}
+            onChange={(e) => setTingkatanId(e.value)}
+            placeholder="Pilih Tingkatan"
           />
         </div>
 

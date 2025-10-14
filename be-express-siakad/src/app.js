@@ -29,6 +29,8 @@ import jadwalRoutes from "./routes/jadwalRoutes.js";
 import absensiRoutes from "./routes/absensiRoutes.js";
 import masterinfosekolahRoutes from "./routes/masterInfoSekolahRoutes.js";
 import masterTingkatanRoutes from "./routes/masterTingkatanRoutes.js";
+import masterRuangRouter from "./routes/masterRuangKelasRoutes.js";
+
 
 
 const app = express();
@@ -91,5 +93,6 @@ app.use("/api/jadwal", jadwalRoutes);
 app.use("/api/absensi", absensiRoutes);
 app.use("/api/master-infosekolah", masterinfosekolahRoutes);
 app.use("/api/master-tingkatan", masterTingkatanRoutes);
+app.use("/api/master-ruang", masterRuangRouter);
 
 export default app;

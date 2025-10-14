@@ -27,6 +27,7 @@ export default function MasterJadwalPage() {
     fetchHari();
   }, []);
 
+  // 🔹 Fetch semua jadwal
   const fetchJadwal = async () => {
     setLoading(true);
     try {
@@ -41,13 +42,16 @@ export default function MasterJadwalPage() {
     }
   };
 
+  // 🔹 Fetch daftar kelas dengan nama ruang
   const fetchKelas = async () => {
     try {
       const res = await fetch(`${API_URL}/kelas`);
       const json = await res.json();
       setKelasOptions(
         json.data?.map((k) => ({
-          label: `${k.TINGKATAN} ${k.NAMA_JURUSAN} ${k.NAMA_KELAS}`,
+          label: `${k.TINGKATAN || "-"} ${k.NAMA_JURUSAN || "-"} - ${
+            k.ruang?.NAMA_RUANG || "-"
+          }`,
           value: k.KELAS_ID,
         })) || []
       );
@@ -56,13 +60,16 @@ export default function MasterJadwalPage() {
     }
   };
 
+  // 🔹 Fetch daftar mapel + guru
   const fetchMapelKelas = async () => {
     try {
       const res = await fetch(`${API_URL}/mapel-kelas`);
       const json = await res.json();
       setMapelKelasOptions(
         json.data?.map((m) => ({
-          label: `${m.mapel?.KODE_MAPEL} - ${m.mapel?.NAMA_MAPEL} (${m.guru?.NAMA_GURU})`,
+          label: `${m.mapel?.KODE_MAPEL || "-"} - ${
+            m.mapel?.NAMA_MAPEL || "-"
+          } (${m.guru?.NAMA_GURU || "-"})`,
           value: m.MAPEL_KELAS_ID,
         })) || []
       );
@@ -71,6 +78,7 @@ export default function MasterJadwalPage() {
     }
   };
 
+  // 🔹 Fetch daftar hari
   const fetchHari = async () => {
     try {
       const res = await fetch(`${API_URL}/master-hari`);
@@ -86,6 +94,7 @@ export default function MasterJadwalPage() {
     }
   };
 
+  // 🔹 Simpan data jadwal
   const handleSave = async (data) => {
     try {
       if (dialogMode === "add") {
@@ -112,6 +121,7 @@ export default function MasterJadwalPage() {
     }
   };
 
+  // 🔹 Hapus data jadwal
   const handleDelete = (row) => {
     confirmDialog({
       message: `Yakin ingin menghapus jadwal "${row.mapel?.NAMA_MAPEL}"?`,
@@ -133,6 +143,7 @@ export default function MasterJadwalPage() {
     });
   };
 
+  // 🔹 Tombol aksi edit/hapus
   const actionBodyTemplate = (row) => (
     <div className="flex gap-2">
       <Button
@@ -153,19 +164,23 @@ export default function MasterJadwalPage() {
     </div>
   );
 
+  // 🔹 Kolom DataTable
   const columns = [
     { field: "JADWAL_ID", header: "ID", style: { width: "60px" } },
     {
       header: "Kelas",
       body: (row) =>
-        `${row.kelas?.TINGKATAN} ${row.kelas?.NAMA_JURUSAN} ${row.kelas?.NAMA_KELAS}`,
+        `${row.kelas?.TINGKATAN || "-"} ${row.kelas?.NAMA_JURUSAN || "-"} ${row.kelas?.NAMA_KELAS || "-"}`,
     },
+
     {
       header: "Mata Pelajaran",
       body: (row) =>
-        `${row.mapel?.KODE_MAPEL} - ${row.mapel?.NAMA_MAPEL} (${row.guru?.NAMA_GURU})`,
+        `${row.mapel?.KODE_MAPEL || "-"} - ${
+          row.mapel?.NAMA_MAPEL || "-"
+        } (${row.guru?.NAMA_GURU || "-"})`,
     },
-    { header: "Hari", body: (row) => row.hari?.NAMA_HARI },
+    { header: "Hari", body: (row) => row.hari?.NAMA_HARI || "-" },
     { field: "JAM_MULAI", header: "Jam Mulai" },
     { field: "JAM_SELESAI", header: "Jam Selesai" },
     { header: "Actions", body: actionBodyTemplate, style: { width: "120px" } },

@@ -1,21 +1,27 @@
-import express from "express";
-import * as KelasController from "../controllers/kelasController.js";
+import { Router } from "express";
+import {
+  fetchAllKelas,
+  getKelasByIdController,
+  createNewKelas,
+  updateKelasController,
+  deleteKelasController,
+} from "../controllers/kelasController.js";
 
-const router = express.Router();
+const router = Router();
 
-// GET semua kelas
-router.get("/", KelasController.getAllKelas);
+// GET all kelas
+router.get("/", fetchAllKelas);
 
-// GET kelas berdasarkan ID
-router.get("/:id", KelasController.getKelasById);
+// GET kelas by ID
+router.get("/:id", getKelasByIdController);
 
-// POST tambah kelas baru
-router.post("/", KelasController.createKelas);
+// POST new kelas
+router.post("/", createNewKelas);
 
-// PUT update kelas berdasarkan ID
-router.put("/:id", KelasController.updateKelas);
+// PUT update kelas
+router.put("/:id", updateKelasController);
 
-// DELETE hapus kelas berdasarkan ID
-router.delete("/:id", KelasController.deleteKelas);
+// DELETE kelas
+router.delete("/:id", deleteKelasController);
 
 export default router;

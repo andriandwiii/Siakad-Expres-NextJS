@@ -29,7 +29,7 @@ export default function TransaksiPage() {
     else setToken(t);
 
     return () => {
-      isMounted.current = false; // cleanup
+      isMounted.current = false;
       toastRef.current = null;
     };
   }, []);
@@ -48,16 +48,19 @@ export default function TransaksiPage() {
       if (!isMounted.current) return;
 
       const data = json.data || [];
-      setTransaksi(data);
-      setFilteredTransaksi(data);
 
+      // Ambil fullName dari backend
       const kelasSet = new Set();
-      data.forEach((t) => {
-        if (t.kelas) {
-          const kelasFull = `${t.kelas.TINGKATAN || ""} ${t.kelas.NAMA_JURUSAN || ""} ${t.kelas.NAMA_KELAS || ""}`.trim();
-          kelasSet.add(kelasFull);
-        }
+      const processedData = data.map((t) => {
+        const kelasLabel = t.kelas?.fullName || "-";
+        if (kelasLabel !== "-") kelasSet.add(kelasLabel);
+        return { ...t, kelasLabel };
       });
+
+      setTransaksi(processedData);
+      setFilteredTransaksi(processedData);
+
+      // Dropdown filter kelas
       setKelasOptions(Array.from(kelasSet).map((k) => ({ label: k, value: k })));
     } catch (err) {
       console.error(err);
@@ -68,17 +71,8 @@ export default function TransaksiPage() {
   };
 
   useEffect(() => {
-    if (!kelasFilter) {
-      setFilteredTransaksi(transaksi);
-    } else {
-      setFilteredTransaksi(
-        transaksi.filter((t) => {
-          if (!t.kelas) return false;
-          const kelasFull = `${t.kelas.TINGKATAN || ""} ${t.kelas.NAMA_JURUSAN || ""} ${t.kelas.NAMA_KELAS || ""}`.trim();
-          return kelasFull === kelasFilter;
-        })
-      );
-    }
+    if (!kelasFilter) setFilteredTransaksi(transaksi);
+    else setFilteredTransaksi(transaksi.filter((t) => t.kelasLabel === kelasFilter));
   }, [kelasFilter, transaksi]);
 
   const handleSubmit = async (data) => {
@@ -88,14 +82,20 @@ export default function TransaksiPage() {
       if (dialogMode === "add") {
         await fetch(`${API_URL}/transaksi-siswa`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(data),
         });
         toastRef.current?.showToast("00", "Transaksi berhasil ditambahkan");
       } else if (dialogMode === "edit" && selectedTransaksi) {
         await fetch(`${API_URL}/transaksi-siswa/${selectedTransaksi.ID}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(data),
         });
         toastRef.current?.showToast("00", "Transaksi berhasil diperbarui");
@@ -136,43 +136,59 @@ export default function TransaksiPage() {
     });
   };
 
-  const actionBodyTemplate = (rowData) => (
-    <div className="flex gap-2">
-      <Button icon="pi pi-pencil" size="small" severity="warning" onClick={() => { setSelectedTransaksi(rowData); setDialogMode("edit"); }} />
-      <Button icon="pi pi-trash" size="small" severity="danger" onClick={() => handleDelete(rowData)} />
-    </div>
-  );
-
   const transaksiColumns = [
     { field: "ID", header: "ID", style: { width: "60px" } },
     {
       field: "siswa.NAMA",
-      header: "Siswa",
-      style: { minWidth: "150px" },
+      header: "Nama Siswa",
+      style: { minWidth: "160px" },
       body: (row) => row.siswa?.NAMA || "-",
     },
     {
-      field: "kelas.NAMA_KELAS",
+      field: "siswa.NIS",
+      header: "NIS",
+      style: { minWidth: "120px" },
+      body: (row) => row.siswa?.NIS || "-",
+    },
+    {
+      field: "kelasLabel",
       header: "Kelas",
       style: { minWidth: "180px" },
-      body: (row) => {
-        if (!row.kelas) return "-";
-        return `${row.kelas.TINGKATAN || ""} ${row.kelas.NAMA_JURUSAN || ""} ${row.kelas.NAMA_KELAS || ""}`.trim();
-      },
-    },
-    { field: "TAHUN_AJARAN", header: "Tahun Ajaran" },
-    { field: "STATUS", header: "Status" },
-    {
-      field: "created_at",
-      header: "Created At",
-      body: (row) => (row.created_at ? new Date(row.created_at).toLocaleString() : "-"),
+      body: (row) => row.kelasLabel || "-",
     },
     {
-      field: "updated_at",
-      header: "Updated At",
-      body: (row) => (row.updated_at ? new Date(row.updated_at).toLocaleString() : "-"),
+      field: "TAHUN_AJARAN",
+      header: "Tahun Ajaran",
+      style: { minWidth: "140px" },
     },
-    { header: "Actions", body: actionBodyTemplate, style: { width: "120px" } },
+    {
+      field: "STATUS",
+      header: "Status",
+      style: { minWidth: "100px" },
+    },
+    {
+      header: "Aksi",
+      body: (rowData) => (
+        <div className="flex gap-2">
+          <Button
+            icon="pi pi-pencil"
+            size="small"
+            severity="warning"
+            onClick={() => {
+              setSelectedTransaksi(rowData);
+              setDialogMode("edit");
+            }}
+          />
+          <Button
+            icon="pi pi-trash"
+            size="small"
+            severity="danger"
+            onClick={() => handleDelete(rowData)}
+          />
+        </div>
+      ),
+      style: { width: "120px" },
+    },
   ];
 
   return (
@@ -184,31 +200,37 @@ export default function TransaksiPage() {
           value={kelasFilter}
           options={kelasOptions}
           onChange={(e) => setKelasFilter(e.value)}
-          placeholder="Filter by kelas"
+          placeholder="Filter berdasarkan kelas"
           className="w-60"
           showClear
         />
-
         <Button
           label="Tambah Transaksi"
           icon="pi pi-plus"
-          onClick={() => { setDialogMode("add"); setSelectedTransaksi(null); }}
+          onClick={() => {
+            setDialogMode("add");
+            setSelectedTransaksi(null);
+          }}
         />
       </div>
 
-      <CustomDataTable data={filteredTransaksi} loading={isLoading} columns={transaksiColumns} />
-
+      <CustomDataTable
+        data={filteredTransaksi}
+        loading={isLoading}
+        columns={transaksiColumns}
+      />
       <ConfirmDialog />
-
       <FormTransaksi
         visible={dialogMode !== null}
-        onHide={() => { setDialogMode(null); setSelectedTransaksi(null); }}
+        onHide={() => {
+          setDialogMode(null);
+          setSelectedTransaksi(null);
+        }}
         selectedTransaksi={selectedTransaksi}
         onSave={handleSubmit}
         token={token}
         transaksiList={transaksi}
       />
-
       <ToastNotifier ref={toastRef} />
     </div>
   );

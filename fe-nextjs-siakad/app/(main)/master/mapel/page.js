@@ -30,13 +30,10 @@ export default function MasterMapelPage() {
   const fetchMapel = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/mapel`);
+      const res = await fetch(`${API_URL}/master-mapel`);
       const json = await res.json();
       if (!isMounted.current) return;
-
-      // Sort the mapelList based on MAPEL_ID in ascending order
-      const sortedMapelList = (json.data || []).sort((a, b) => a.MAPEL_ID - b.MAPEL_ID);
-      setMapelList(sortedMapelList);
+      setMapelList(json.data || []);
     } catch (err) {
       console.error(err);
       toastRef.current?.showToast("01", "Gagal memuat data mata pelajaran");

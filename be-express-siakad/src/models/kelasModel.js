@@ -1,78 +1,97 @@
 import { db } from "../core/config/knex.js";
 
-const KelasTable = "m_kelas";
-
-// Ambil semua kelas beserta nama jurusan dan gedung (join)
+// ==========================
+// Ambil semua kelas (JOIN)
+// ==========================
 export const getAllKelas = async () => {
-  return db(KelasTable)
+  return db("m_kelas as k")
+    .leftJoin("master_jurusan as j", "k.JURUSAN_ID", "j.JURUSAN_ID")
+    .leftJoin("master_gedung as g", "k.GEDUNG_ID", "g.GEDUNG_ID")
+    .leftJoin("master_tingkatan as t", "k.TINGKATAN_ID", "t.TINGKATAN_ID")
+    .leftJoin("master_ruang_kelas as r", "k.RUANG_ID", "r.RUANG_ID")
     .select(
-      "m_kelas.KELAS_ID",
-      "m_kelas.NAMA_KELAS",
-      "m_kelas.TINGKATAN",
-      "m_kelas.JURUSAN_ID",
-      "master_jurusan.NAMA_JURUSAN",
-      "m_kelas.GEDUNG_ID",
-      "master_gedung.NAMA_GEDUNG",
-      "m_kelas.created_at",
-      "m_kelas.updated_at"
+      "k.KELAS_ID",
+      "k.JURUSAN_ID",
+      "j.NAMA_JURUSAN",
+      "k.GEDUNG_ID",
+      "g.NAMA_GEDUNG",
+      "k.TINGKATAN_ID",
+      "t.TINGKATAN",
+      "k.RUANG_ID",
+      "r.NAMA_RUANG",
+      "k.created_at",
+      "k.updated_at"
     )
-    .leftJoin("master_jurusan", "m_kelas.JURUSAN_ID", "master_jurusan.JURUSAN_ID")
-    .leftJoin("master_gedung", "m_kelas.GEDUNG_ID", "master_gedung.GEDUNG_ID")
-    .orderBy("m_kelas.KELAS_ID", "asc");
+    .orderBy("k.KELAS_ID", "asc");
 };
 
+// ==========================
 // Ambil kelas berdasarkan ID
+// ==========================
 export const getKelasById = async (id) => {
-  return db(KelasTable)
+  return db("m_kelas as k")
+    .leftJoin("master_jurusan as j", "k.JURUSAN_ID", "j.JURUSAN_ID")
+    .leftJoin("master_gedung as g", "k.GEDUNG_ID", "g.GEDUNG_ID")
+    .leftJoin("master_tingkatan as t", "k.TINGKATAN_ID", "t.TINGKATAN_ID")
+    .leftJoin("master_ruang_kelas as r", "k.RUANG_ID", "r.RUANG_ID")
+    .where("k.KELAS_ID", id)
     .select(
-      "m_kelas.KELAS_ID",
-      "m_kelas.NAMA_KELAS",
-      "m_kelas.TINGKATAN",
-      "m_kelas.JURUSAN_ID",
-      "master_jurusan.NAMA_JURUSAN",
-      "m_kelas.GEDUNG_ID",
-      "master_gedung.NAMA_GEDUNG",
-      "m_kelas.created_at",
-      "m_kelas.updated_at"
+      "k.KELAS_ID",
+      "k.JURUSAN_ID",
+      "j.NAMA_JURUSAN",
+      "k.GEDUNG_ID",
+      "g.NAMA_GEDUNG",
+      "k.TINGKATAN_ID",
+      "t.TINGKATAN",
+      "k.RUANG_ID",
+      "r.NAMA_RUANG",
+      "k.created_at",
+      "k.updated_at"
     )
-    .leftJoin("master_jurusan", "m_kelas.JURUSAN_ID", "master_jurusan.JURUSAN_ID")
-    .leftJoin("master_gedung", "m_kelas.GEDUNG_ID", "master_gedung.GEDUNG_ID")
-    .where("m_kelas.KELAS_ID", id)
     .first();
 };
 
-// Buat kelas baru
-export const createKelas = async (data) => {
-  const [id] = await db(KelasTable).insert({
-    NAMA_KELAS: data.NAMA_KELAS,
-    JURUSAN_ID: data.JURUSAN_ID,
-    GEDUNG_ID: data.GEDUNG_ID,
-    TINGKATAN: data.TINGKATAN,
-  });
-  return getKelasById(id);
+// ==========================
+// Tambah kelas baru 
+// ==========================
+export const addKelas = async ({ jurusan_id, gedung_id, tingkatan_id, ruang_id }) => {
+  try {
+    const [KELAS_ID] = await db("m_kelas").insert({
+      JURUSAN_ID: jurusan_id,
+      GEDUNG_ID: gedung_id,
+      TINGKATAN_ID: tingkatan_id,
+      RUANG_ID: ruang_id,
+    });
+
+    return getKelasById(KELAS_ID);
+  } catch (error) {
+    console.error("Gagal menambahkan kelas:", error);
+    throw new Error("Gagal menambahkan kelas ke database");
+  }
 };
 
+// ==========================
 // Update kelas
-export const updateKelas = async (id, data) => {
-  const result = await db(KelasTable)
+// ==========================
+export const updateKelas = async (id, { jurusan_id, gedung_id, tingkatan_id, ruang_id }) => {
+  const affected = await db("m_kelas")
     .where({ KELAS_ID: id })
     .update({
-      NAMA_KELAS: data.NAMA_KELAS,
-      JURUSAN_ID: data.JURUSAN_ID,
-      GEDUNG_ID: data.GEDUNG_ID,
-      TINGKATAN: data.TINGKATAN,
+      JURUSAN_ID: jurusan_id,
+      GEDUNG_ID: gedung_id,
+      TINGKATAN_ID: tingkatan_id,
+      RUANG_ID: ruang_id,
       updated_at: db.fn.now(),
     });
 
-  if (result) return getKelasById(id);
-  return null;
+  if (!affected) return null;
+  return getKelasById(id);
 };
 
+// ==========================
 // Hapus kelas
-export const deleteKelas = async (id) => {
-  const kelas = await getKelasById(id);
-  if (!kelas) return null;
-
-  await db(KelasTable).where({ KELAS_ID: id }).del();
-  return kelas;
+// ==========================
+export const removeKelas = async (id) => {
+  const affected = await db("m_kelas").where({ KELAS_ID: id }).del();
+  return affected > 0;
 };

@@ -1,4 +1,4 @@
-import { db } from "../core/config/knex.js"; // wajib import db
+import { db } from "../core/config/knex.js";
 import * as JadwalModel from "../models/jadwalModel.js";
 
 // Ambil semua jadwal
@@ -82,12 +82,14 @@ export const getJadwalById = async (req, res) => {
   }
 };
 
-// Get jadwal per kelas
+// Ambil jadwal per kelas
 export const getJadwalByKelas = async (req, res) => {
   try {
     const { kelasId } = req.params;
-    const jadwal = await db("t_jadwal")
+
+    const data = await db("t_jadwal")
       .leftJoin("m_kelas", "t_jadwal.KELAS_ID", "m_kelas.KELAS_ID")
+      .leftJoin("master_tingkatan", "m_kelas.TINGKATAN_ID", "master_tingkatan.TINGKATAN_ID")
       .leftJoin("master_jurusan", "m_kelas.JURUSAN_ID", "master_jurusan.JURUSAN_ID")
       .leftJoin("t_mapel_kelas", "t_jadwal.MAPEL_KELAS_ID", "t_mapel_kelas.MAPEL_KELAS_ID")
       .leftJoin("master_mata_pelajaran", "t_mapel_kelas.MAPEL_ID", "master_mata_pelajaran.MAPEL_ID")
@@ -96,7 +98,7 @@ export const getJadwalByKelas = async (req, res) => {
       .select(
         "t_jadwal.*",
         "m_kelas.NAMA_KELAS",
-        "m_kelas.TINGKATAN",
+        "master_tingkatan.TINGKATAN",
         "master_jurusan.NAMA_JURUSAN",
         "master_mata_pelajaran.NAMA_MAPEL",
         "t_mapel_kelas.KODE_MAPEL",
@@ -105,18 +107,20 @@ export const getJadwalByKelas = async (req, res) => {
       )
       .where("t_jadwal.KELAS_ID", kelasId);
 
-    res.json({ status: "success", data: jadwal });
+    res.status(200).json({ status: "success", data });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-// Get jadwal per guru
+// Ambil jadwal per guru
 export const getJadwalByGuru = async (req, res) => {
   try {
     const { guruId } = req.params;
-    const jadwal = await db("t_jadwal")
+
+    const data = await db("t_jadwal")
       .leftJoin("m_kelas", "t_jadwal.KELAS_ID", "m_kelas.KELAS_ID")
+      .leftJoin("master_tingkatan", "m_kelas.TINGKATAN_ID", "master_tingkatan.TINGKATAN_ID")
       .leftJoin("master_jurusan", "m_kelas.JURUSAN_ID", "master_jurusan.JURUSAN_ID")
       .leftJoin("t_mapel_kelas", "t_jadwal.MAPEL_KELAS_ID", "t_mapel_kelas.MAPEL_KELAS_ID")
       .leftJoin("master_mata_pelajaran", "t_mapel_kelas.MAPEL_ID", "master_mata_pelajaran.MAPEL_ID")
@@ -125,7 +129,7 @@ export const getJadwalByGuru = async (req, res) => {
       .select(
         "t_jadwal.*",
         "m_kelas.NAMA_KELAS",
-        "m_kelas.TINGKATAN",
+        "master_tingkatan.TINGKATAN",
         "master_jurusan.NAMA_JURUSAN",
         "master_mata_pelajaran.NAMA_MAPEL",
         "t_mapel_kelas.KODE_MAPEL",
@@ -134,18 +138,20 @@ export const getJadwalByGuru = async (req, res) => {
       )
       .where("t_mapel_kelas.GURU_ID", guruId);
 
-    res.json({ status: "success", data: jadwal });
+    res.status(200).json({ status: "success", data });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-// Get jadwal per hari
+// Ambil jadwal per hari
 export const getJadwalByHari = async (req, res) => {
   try {
     const { hariId } = req.params;
-    const jadwal = await db("t_jadwal")
+
+    const data = await db("t_jadwal")
       .leftJoin("m_kelas", "t_jadwal.KELAS_ID", "m_kelas.KELAS_ID")
+      .leftJoin("master_tingkatan", "m_kelas.TINGKATAN_ID", "master_tingkatan.TINGKATAN_ID")
       .leftJoin("master_jurusan", "m_kelas.JURUSAN_ID", "master_jurusan.JURUSAN_ID")
       .leftJoin("t_mapel_kelas", "t_jadwal.MAPEL_KELAS_ID", "t_mapel_kelas.MAPEL_KELAS_ID")
       .leftJoin("master_mata_pelajaran", "t_mapel_kelas.MAPEL_ID", "master_mata_pelajaran.MAPEL_ID")
@@ -154,7 +160,7 @@ export const getJadwalByHari = async (req, res) => {
       .select(
         "t_jadwal.*",
         "m_kelas.NAMA_KELAS",
-        "m_kelas.TINGKATAN",
+        "master_tingkatan.TINGKATAN",
         "master_jurusan.NAMA_JURUSAN",
         "master_mata_pelajaran.NAMA_MAPEL",
         "t_mapel_kelas.KODE_MAPEL",
@@ -163,24 +169,20 @@ export const getJadwalByHari = async (req, res) => {
       )
       .where("t_jadwal.HARI_ID", hariId);
 
-    res.json({ status: "success", data: jadwal });
+    res.status(200).json({ status: "success", data });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
 
-// GET /jadwal/:id/siswa
+// Ambil siswa per jadwal
 export const getSiswaByJadwal = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Ambil KELAS_ID dari jadwal
     const jadwal = await db("t_jadwal").where({ JADWAL_ID: id }).first();
-    if (!jadwal) {
-      return res.status(404).json({ status: "error", message: "Jadwal tidak ditemukan" });
-    }
+    if (!jadwal) return res.status(404).json({ status: "error", message: "Jadwal tidak ditemukan" });
 
-    // Ambil semua siswa berdasarkan KELAS_ID dari tabel transaksi_siswa_kelas
     const siswaList = await db("transaksi_siswa_kelas AS t")
       .join("m_siswa AS s", "t.SISWA_ID", "s.SISWA_ID")
       .select("s.SISWA_ID", "s.NAMA", "t.STATUS", "t.TAHUN_AJARAN")
@@ -188,7 +190,6 @@ export const getSiswaByJadwal = async (req, res) => {
 
     res.status(200).json({ status: "success", data: siswaList });
   } catch (err) {
-    console.error("Error getSiswaByJadwal:", err);
     res.status(500).json({ status: "error", message: err.message });
   }
 };
@@ -197,15 +198,9 @@ export const getSiswaByJadwal = async (req, res) => {
 export const deleteJadwal = async (req, res) => {
   try {
     const deleted = await JadwalModel.deleteJadwal(req.params.id);
+    if (!deleted) return res.status(404).json({ status: "error", message: "Jadwal tidak ditemukan" });
 
-    if (!deleted) {
-      return res.status(404).json({ status: "error", message: "Jadwal tidak ditemukan" });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "Jadwal berhasil dihapus",
-    });
+    res.status(200).json({ status: "success", message: "Jadwal berhasil dihapus" });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }

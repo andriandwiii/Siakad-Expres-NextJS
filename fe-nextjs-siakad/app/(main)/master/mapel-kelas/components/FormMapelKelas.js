@@ -12,7 +12,6 @@ const FormMapelKelas = ({ visible, onHide, onSave, selectedItem, kelasOptions, m
   const [guruId, setGuruId] = useState(null);
   const [kodeMapel, setKodeMapel] = useState("");
 
-  // Set data saat edit atau reset saat tambah
   useEffect(() => {
     if (selectedItem) {
       setKelasId(selectedItem.KELAS_ID || null);
@@ -74,7 +73,7 @@ const FormMapelKelas = ({ visible, onHide, onSave, selectedItem, kelasOptions, m
         </div>
 
         <div className="field">
-          <label htmlFor="guru">Guru Pengampu (Opsional)</label>
+          <label htmlFor="guru">Guru Pengampu</label>
           <Dropdown
             id="guru"
             value={guruId}
@@ -86,12 +85,12 @@ const FormMapelKelas = ({ visible, onHide, onSave, selectedItem, kelasOptions, m
         </div>
 
         <div className="field">
-          <label htmlFor="kodeMapel">Kode Mapel</label>
+          <label htmlFor="kodeMapel">Kode / Keterangan</label>
           <InputText
             id="kodeMapel"
             value={kodeMapel}
             onChange={(e) => setKodeMapel(e.target.value)}
-            placeholder="Masukkan Kode Mapel"
+            placeholder="Masukkan Kode/Ket"
           />
         </div>
 

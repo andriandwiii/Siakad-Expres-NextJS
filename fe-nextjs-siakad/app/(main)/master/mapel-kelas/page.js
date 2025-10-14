@@ -17,8 +17,7 @@ export default function MasterMapelKelasPage() {
   const [kelasOptions, setKelasOptions] = useState([]);
   const [mapelOptions, setMapelOptions] = useState([]);
   const [guruOptions, setGuruOptions] = useState([]);
-
-  const [mapelMap, setMapelMap] = useState({}); // <-- untuk lookup kode mapel
+  const [mapelMap, setMapelMap] = useState({}); // lookup kode mapel
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -49,7 +48,7 @@ export default function MasterMapelKelasPage() {
       const json = await res.json();
       setKelasOptions(
         json.data?.map((k) => ({
-          label: `${k.TINGKATAN} ${k.NAMA_JURUSAN} ${k.NAMA_KELAS}`,
+          label: `${k.TINGKATAN} ${k.NAMA_JURUSAN} ${k.NAMA_RUANG || "-"}`,
           value: k.KELAS_ID,
         })) || []
       );
@@ -60,10 +59,9 @@ export default function MasterMapelKelasPage() {
 
   const fetchMapel = async () => {
     try {
-      const res = await fetch(`${API_URL}/mapel`);
+      const res = await fetch(`${API_URL}/master-mapel`);
       const json = await res.json();
 
-      // buat map lookup untuk kode mapel
       const map = {};
       json.data?.forEach((m) => {
         map[m.MAPEL_ID] = m;
@@ -171,25 +169,30 @@ export default function MasterMapelKelasPage() {
     return `${depan}${guruData.NAMA_GURU}${belakang}`;
   };
 
-  const columns = [
-    { field: "MAPEL_KELAS_ID", header: "ID", style: { width: "60px" } },
-    {
-      field: "kelasLabel",
-      header: "Kelas",
-      body: (row) => `${row.kelas?.TINGKATAN} ${row.kelas?.NAMA_JURUSAN} ${row.kelas?.NAMA_KELAS}`,
+const columns = [
+  { field: "MAPEL_KELAS_ID", header: "ID", style: { width: "60px" } },
+  {
+    field: "kelasLabel",
+    header: "Kelas",
+    body: (row) => {
+      // tampilkan label kelas sama seperti di dropdown
+      const kelas = kelasOptions.find(k => k.value === row.KELAS_ID);
+      return kelas ? kelas.label : "-";
     },
-    {
-      field: "mapelLabel",
-      header: "Mata Pelajaran",
-      body: (row) => {
-        const mapelData = mapelMap[row.MAPEL_ID];
-        return mapelData ? `${mapelData.KODE_MAPEL} - ${mapelData.NAMA_MAPEL}` : "-";
-      },
+  },
+  {
+    field: "mapelLabel",
+    header: "Mata Pelajaran",
+    body: (row) => {
+      const mapelData = mapelMap[row.MAPEL_ID];
+      return mapelData ? `${mapelData.KODE_MAPEL} - ${mapelData.NAMA_MAPEL}` : "-";
     },
-    { header: "Guru", body: namaGuruTemplate, style: { minWidth: "200px" } },
-    { field: "KODE_MAPEL", header: "Kode Mapel" },
-    { header: "Actions", body: actionBodyTemplate, style: { width: "120px" } },
-  ];
+  },
+  { header: "Guru", body: namaGuruTemplate, style: { minWidth: "200px" } },
+  { field: "KODE_MAPEL", header: "Kode/ket" },
+  { header: "Actions", body: actionBodyTemplate, style: { width: "120px" } },
+];
+
 
   return (
     <div className="card p-4">
