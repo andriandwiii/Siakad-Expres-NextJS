@@ -143,18 +143,7 @@ export default function JurusanPage() {
     { field: "JURUSAN_ID", header: "ID", style: { width: "60px" } },
     { field: "NAMA_JURUSAN", header: "Nama Jurusan", filter: true },
     { field: "DESKRIPSI", header: "Deskripsi", filter: true },
-    {
-      field: "created_at",
-      header: "Created At",
-      body: (row) =>
-        row.created_at ? new Date(row.created_at).toLocaleString() : "-",
-    },
-    {
-      field: "updated_at",
-      header: "Updated At",
-      body: (row) =>
-        row.updated_at ? new Date(row.updated_at).toLocaleString() : "-",
-    },
+   
     {
       header: "Actions",
       body: actionBodyTemplate,
