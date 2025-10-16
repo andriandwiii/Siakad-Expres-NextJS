@@ -45,14 +45,14 @@ export default function MasterMapelPage() {
   const handleSave = async (data) => {
     try {
       if (dialogMode === "add") {
-        await fetch(`${API_URL}/mapel`, {
+        await fetch(`${API_URL}/master-mapel`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         });
         toastRef.current?.showToast("00", "Mapel berhasil ditambahkan");
       } else if (dialogMode === "edit" && selectedMapel) {
-        await fetch(`${API_URL}/mapel/${selectedMapel.MAPEL_ID}`, {
+        await fetch(`${API_URL}/master-mapel/${selectedMapel.MAPEL_ID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
@@ -78,7 +78,7 @@ export default function MasterMapelPage() {
       icon: "pi pi-exclamation-triangle",
       accept: async () => {
         try {
-          await fetch(`${API_URL}/mapel/${row.MAPEL_ID}`, { method: "DELETE" });
+          await fetch(`${API_URL}/master-mapel/${row.MAPEL_ID}`, { method: "DELETE" });
           toastRef.current?.showToast("00", "Mapel berhasil dihapus");
           if (isMounted.current) await fetchMapel();
         } catch (err) {
