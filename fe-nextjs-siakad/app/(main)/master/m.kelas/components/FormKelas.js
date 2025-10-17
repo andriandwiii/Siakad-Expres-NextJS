@@ -5,20 +5,30 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 
+/**
+ * Komponen FormKelas — digunakan untuk menambah atau mengedit data kelas.
+ * Mengambil data dropdown dari API (ruang, jurusan, gedung, tingkatan).
+ */
 const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
-  const [ruangId, setRuangId] = useState(null);       // Sebagai "Nama Kelas"
+  // State utama form
+  const [ruangId, setRuangId] = useState(null);
   const [tingkatanId, setTingkatanId] = useState(null);
   const [jurusanId, setJurusanId] = useState(null);
   const [gedungId, setGedungId] = useState(null);
 
+  // List dropdown
   const [jurusanList, setJurusanList] = useState([]);
   const [gedungList, setGedungList] = useState([]);
   const [tingkatanList, setTingkatanList] = useState([]);
   const [ruangList, setRuangList] = useState([]);
 
+  // Loading state (biar UX lebih halus)
+  const [loading, setLoading] = useState(false);
+
+  // Ambil URL dari .env.local
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // Reset form saat dialog dibuka atau data berubah
+  // Reset atau isi ulang form saat dialog dibuka
   useEffect(() => {
     if (selectedKelas) {
       setRuangId(selectedKelas.RUANG_ID || null);
@@ -33,64 +43,44 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
     }
   }, [selectedKelas, visible]);
 
-  // Fetch dropdown data
+  // Fetch semua data dropdown saat token tersedia
   useEffect(() => {
     if (token) {
-      fetchRuang();
-      fetchJurusan();
-      fetchGedung();
-      fetchTingkatan();
+      fetchAllDropdowns();
     }
   }, [token]);
 
-  const fetchRuang = async () => {
+  // Fungsi untuk ambil semua data dropdown paralel (lebih cepat)
+  const fetchAllDropdowns = async () => {
     try {
-      const res = await fetch(`${API_URL}/master-ruang`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      setRuangList(json.data || []);
-    } catch (err) {
-      console.error("Gagal fetch ruang", err);
+      setLoading(true);
+
+      const [ruangRes, jurusanRes, gedungRes, tingkatanRes] = await Promise.all([
+        fetch(`${API_URL}/master-ruang`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/master-jurusan`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/master-gedung`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/master-tingkatan`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+
+      const [ruangJson, jurusanJson, gedungJson, tingkatanJson] = await Promise.all([
+        ruangRes.json(),
+        jurusanRes.json(),
+        gedungRes.json(),
+        tingkatanRes.json(),
+      ]);
+
+      setRuangList(ruangJson.data || []);
+      setJurusanList(jurusanJson.data || []);
+      setGedungList(gedungJson.data || []);
+      setTingkatanList(tingkatanJson.data || []);
+    } catch (error) {
+      console.error("Gagal mengambil data dropdown:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchJurusan = async () => {
-    try {
-      const res = await fetch(`${API_URL}/master-jurusan`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      setJurusanList(json.data || []);
-    } catch (err) {
-      console.error("Gagal fetch jurusan", err);
-    }
-  };
-
-  const fetchGedung = async () => {
-    try {
-      const res = await fetch(`${API_URL}/master-gedung`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      setGedungList(json.data || []);
-    } catch (err) {
-      console.error("Gagal fetch gedung", err);
-    }
-  };
-
-  const fetchTingkatan = async () => {
-    try {
-      const res = await fetch(`${API_URL}/master-tingkatan`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      setTingkatanList(json.data || []);
-    } catch (err) {
-      console.error("Gagal fetch tingkatan", err);
-    }
-  };
-
+  // Kirim data ke parent saat simpan
   const handleSubmit = () => {
     const data = {
       ruang_id: ruangId,
@@ -108,9 +98,10 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
       style={{ width: "30vw" }}
       modal
       onHide={onHide}
+      dismissableMask
     >
       <div className="p-fluid">
-        {/* Nama Kelas (dari master_ruang_kelas) */}
+        {/* Nama Kelas */}
         <div className="field">
           <label htmlFor="ruang">Nama Kelas</label>
           <Dropdown
@@ -122,6 +113,9 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
             }))}
             onChange={(e) => setRuangId(e.value)}
             placeholder="Pilih Nama Kelas"
+            filter
+            showClear
+            loading={loading}
           />
         </div>
 
@@ -137,6 +131,9 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
             }))}
             onChange={(e) => setJurusanId(e.value)}
             placeholder="Pilih Jurusan"
+            filter
+            showClear
+            loading={loading}
           />
         </div>
 
@@ -152,6 +149,9 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
             }))}
             onChange={(e) => setGedungId(e.value)}
             placeholder="Pilih Gedung"
+            filter
+            showClear
+            loading={loading}
           />
         </div>
 
@@ -167,9 +167,13 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
             }))}
             onChange={(e) => setTingkatanId(e.value)}
             placeholder="Pilih Tingkatan"
+            filter
+            showClear
+            loading={loading}
           />
         </div>
 
+        {/* Tombol aksi */}
         <div className="flex justify-content-end gap-2 mt-3">
           <Button
             label="Batal"
@@ -177,7 +181,12 @@ const FormKelas = ({ visible, onHide, onSave, selectedKelas, token }) => {
             className="p-button-text"
             onClick={onHide}
           />
-          <Button label="Simpan" icon="pi pi-check" onClick={handleSubmit} />
+          <Button
+            label="Simpan"
+            icon="pi pi-check"
+            onClick={handleSubmit}
+            disabled={loading || !ruangId || !jurusanId || !gedungId || !tingkatanId}
+          />
         </div>
       </div>
     </Dialog>

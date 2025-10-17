@@ -4,9 +4,15 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { Dialog } from "primereact/dialog";
 import ToastNotifier from "../../../components/ToastNotifier";
 import CustomDataTable from "../../../components/DataTable";
 import FormTransaksi from "./components/FormTransaksi";
+import AdjustPrintMarginLaporan from "./print/AdjustPrintMarginLaporan";
+import dynamic from "next/dynamic";
+
+const PDFViewer = dynamic(() => import("./print/PDFViewer"), { ssr: false });
 
 export default function TransaksiPage() {
   const toastRef = useRef(null);
@@ -20,6 +26,13 @@ export default function TransaksiPage() {
   const [token, setToken] = useState("");
   const [kelasFilter, setKelasFilter] = useState(null);
   const [kelasOptions, setKelasOptions] = useState([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  // Print
+  const [adjustDialog, setAdjustDialog] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [jsPdfPreviewOpen, setJsPdfPreviewOpen] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -49,7 +62,6 @@ export default function TransaksiPage() {
 
       const data = json.data || [];
 
-      // Ambil fullName dari backend
       const kelasSet = new Set();
       const processedData = data.map((t) => {
         const kelasLabel = t.kelas?.fullName || "-";
@@ -59,8 +71,6 @@ export default function TransaksiPage() {
 
       setTransaksi(processedData);
       setFilteredTransaksi(processedData);
-
-      // Dropdown filter kelas
       setKelasOptions(Array.from(kelasSet).map((k) => ({ label: k, value: k })));
     } catch (err) {
       console.error(err);
@@ -70,14 +80,27 @@ export default function TransaksiPage() {
     }
   };
 
+  // 🔍 Search + Filter
   useEffect(() => {
-    if (!kelasFilter) setFilteredTransaksi(transaksi);
-    else setFilteredTransaksi(transaksi.filter((t) => t.kelasLabel === kelasFilter));
-  }, [kelasFilter, transaksi]);
+    let filtered = transaksi;
+
+    if (kelasFilter) {
+      filtered = filtered.filter((t) => t.kelasLabel === kelasFilter);
+    }
+
+    if (searchKeyword.trim() !== "") {
+      filtered = filtered.filter(
+        (t) =>
+          t.siswa?.NAMA?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+          t.siswa?.NIS?.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+    }
+
+    setFilteredTransaksi(filtered);
+  }, [kelasFilter, searchKeyword, transaksi]);
 
   const handleSubmit = async (data) => {
     if (!dialogMode) return;
-
     try {
       if (dialogMode === "add") {
         await fetch(`${API_URL}/transaksi-siswa`, {
@@ -193,17 +216,40 @@ export default function TransaksiPage() {
 
   return (
     <div className="card p-4">
+      <ToastNotifier ref={toastRef} />
+      <ConfirmDialog />
+
       <h3 className="text-xl font-semibold mb-4">Penempatan Siswa ke Kelas</h3>
 
-      <div className="flex justify-content-end mb-3 gap-3">
-        <Dropdown
-          value={kelasFilter}
-          options={kelasOptions}
-          onChange={(e) => setKelasFilter(e.value)}
-          placeholder="Filter berdasarkan kelas"
-          className="w-60"
-          showClear
-        />
+      {/* 🔹 Toolbar atas: Print | Search | Filter Kelas | Tambah */}
+      <div className="flex flex-col md:flex-row justify-content-between align-items-center mb-3 gap-3 flex-wrap">
+        <div className="flex flex-wrap gap-3 align-items-center w-full md:w-auto">
+          <Button
+            icon="pi pi-print"
+            severity="warning"
+            onClick={() => setAdjustDialog(true)}
+          />
+
+          <span className="p-input-icon-left">
+            <i className="pi pi-search" />
+            <InputText
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              placeholder="Cari siswa atau NIS..."
+              className="w-64"
+            />
+          </span>
+
+          <Dropdown
+            value={kelasFilter}
+            options={kelasOptions}
+            onChange={(e) => setKelasFilter(e.value)}
+            placeholder="Pilih kelas"
+            className="w-60"
+            showClear
+          />
+        </div>
+
         <Button
           label="Tambah Transaksi"
           icon="pi pi-plus"
@@ -214,12 +260,14 @@ export default function TransaksiPage() {
         />
       </div>
 
+      {/* 🔹 Tabel Data */}
       <CustomDataTable
         data={filteredTransaksi}
         loading={isLoading}
         columns={transaksiColumns}
       />
-      <ConfirmDialog />
+
+      {/* 🔹 Form Transaksi */}
       <FormTransaksi
         visible={dialogMode !== null}
         onHide={() => {
@@ -231,7 +279,27 @@ export default function TransaksiPage() {
         token={token}
         transaksiList={transaksi}
       />
-      <ToastNotifier ref={toastRef} />
+
+      {/* 🔹 Dialog Print */}
+      <AdjustPrintMarginLaporan
+        adjustDialog={adjustDialog}
+        setAdjustDialog={setAdjustDialog}
+        dataTransaksi={filteredTransaksi}
+        setPdfUrl={setPdfUrl}
+        setFileName={setFileName}
+        setJsPdfPreviewOpen={setJsPdfPreviewOpen}
+      />
+
+      {/* 🔹 PDF Preview */}
+      <Dialog
+        visible={jsPdfPreviewOpen}
+        onHide={() => setJsPdfPreviewOpen(false)}
+        modal
+        style={{ width: "90vw", height: "90vh" }}
+        header="Preview Laporan Transaksi Siswa"
+      >
+        <PDFViewer pdfUrl={pdfUrl} fileName={fileName} paperSize="A4" />
+      </Dialog>
     </div>
   );
 }

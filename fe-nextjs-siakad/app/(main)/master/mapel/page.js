@@ -3,9 +3,16 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { InputText } from "primereact/inputtext";
+import { Dialog } from "primereact/dialog";
+import dynamic from "next/dynamic";
+
 import CustomDataTable from "../../../components/DataTable";
 import ToastNotifier from "../../../components/ToastNotifier";
 import FormMapel from "./components/formDialogMapel";
+import AdjustPrintMarginLaporanMapel from "./print/AdjustPrintMarginLaporanMapel";
+
+const PDFViewer = dynamic(() => import("./print/PDFViewer"), { ssr: false });
 
 export default function MasterMapelPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -13,15 +20,23 @@ export default function MasterMapelPage() {
   const isMounted = useRef(true);
 
   const [mapelList, setMapelList] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedMapel, setSelectedMapel] = useState(null);
   const [dialogMode, setDialogMode] = useState(null);
 
+  // 🔹 Print
+  const [adjustDialog, setAdjustDialog] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [jsPdfPreviewOpen, setJsPdfPreviewOpen] = useState(false);
+
+  // 🔹 Searching
+  const [searchKeyword, setSearchKeyword] = useState("");
+
   useEffect(() => {
     fetchMapel();
-
     return () => {
-      // cleanup saat halaman unmount
       isMounted.current = false;
       toastRef.current = null;
     };
@@ -33,7 +48,9 @@ export default function MasterMapelPage() {
       const res = await fetch(`${API_URL}/master-mapel`);
       const json = await res.json();
       if (!isMounted.current) return;
-      setMapelList(json.data || []);
+      const sorted = json.data?.sort((a, b) => b.MAPEL_ID - a.MAPEL_ID) || [];
+      setMapelList(sorted);
+      setOriginalData(sorted);
     } catch (err) {
       console.error(err);
       toastRef.current?.showToast("01", "Gagal memuat data mata pelajaran");
@@ -92,13 +109,32 @@ export default function MasterMapelPage() {
     });
   };
 
+  // 🔍 Fungsi Search
+  const handleSearch = (keyword) => {
+    setSearchKeyword(keyword);
+    if (!keyword) {
+      setMapelList(originalData);
+    } else {
+      const filtered = originalData.filter(
+        (m) =>
+          m.NAMA_MAPEL.toLowerCase().includes(keyword.toLowerCase()) ||
+          m.KODE_MAPEL.toLowerCase().includes(keyword.toLowerCase()) ||
+          m.KATEGORI.toLowerCase().includes(keyword.toLowerCase())
+      );
+      setMapelList(filtered);
+    }
+  };
+
   const actionBodyTemplate = (row) => (
     <div className="flex gap-2">
       <Button
         icon="pi pi-pencil"
         size="small"
         severity="warning"
-        onClick={() => { setSelectedMapel(row); setDialogMode("edit"); }}
+        onClick={() => {
+          setSelectedMapel(row);
+          setDialogMode("edit");
+        }}
       />
       <Button
         icon="pi pi-trash"
@@ -123,11 +159,34 @@ export default function MasterMapelPage() {
     <div className="card p-4">
       <h3 className="text-xl font-semibold mb-4">Master Mata Pelajaran</h3>
 
-      <div className="flex justify-content-end mb-3 gap-3">
+      {/* 🔹 BARIS UTAMA: Print | Search | Tambah Mapel */}
+      <div className="flex justify-content-end align-items-center mb-3 gap-3 flex-wrap">
+        {/* Tombol Print */}
+        <Button
+          icon="pi pi-print"
+          severity="warning"
+          onClick={() => setAdjustDialog(true)}
+        />
+
+        {/* Search Bar */}
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText
+            value={searchKeyword}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Cari mapel..."
+            className="w-64"
+          />
+        </span>
+
+        {/* Tombol Tambah */}
         <Button
           label="Tambah Mapel"
           icon="pi pi-plus"
-          onClick={() => { setDialogMode("add"); setSelectedMapel(null); }}
+          onClick={() => {
+            setDialogMode("add");
+            setSelectedMapel(null);
+          }}
         />
       </div>
 
@@ -137,10 +196,33 @@ export default function MasterMapelPage() {
 
       <FormMapel
         visible={dialogMode !== null}
-        onHide={() => { setDialogMode(null); setSelectedMapel(null); }}
+        onHide={() => {
+          setDialogMode(null);
+          setSelectedMapel(null);
+        }}
         selectedMapel={selectedMapel}
         onSave={handleSave}
       />
+
+      {/* 🔹 Komponen Print & Preview PDF */}
+      <AdjustPrintMarginLaporanMapel
+        adjustDialog={adjustDialog}
+        setAdjustDialog={setAdjustDialog}
+        dataMapel={mapelList}
+        setPdfUrl={setPdfUrl}
+        setFileName={setFileName}
+        setJsPdfPreviewOpen={setJsPdfPreviewOpen}
+      />
+
+      <Dialog
+        visible={jsPdfPreviewOpen}
+        onHide={() => setJsPdfPreviewOpen(false)}
+        modal
+        style={{ width: "90vw", height: "90vh" }}
+        header="Preview Laporan Mapel"
+      >
+        <PDFViewer pdfUrl={pdfUrl} fileName={fileName} paperSize="A4" />
+      </Dialog>
 
       <ToastNotifier ref={toastRef} />
     </div>

@@ -2,61 +2,72 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { Dialog } from "primereact/dialog";
 import ToastNotifier from "../../../components/ToastNotifier";
 import CustomDataTable from "../../../components/DataTable";
 import FormGedung from "./components/FormGedung";
+import AdjustPrintMarginLaporanGedung from "./print/AdjustPrintMarginLaporanGedung";
+import dynamic from "next/dynamic";
 
-export default function GedungPage() {
+const PDFViewer = dynamic(() => import("./print/PDFViewer"), { ssr: false });
+
+export default function MasterGedungPage() {
   const toastRef = useRef(null);
-  const isMounted = useRef(true); // track mounted state
+  const [gedungList, setGedungList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [dialogMode, setDialogMode] = useState(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
-  const [gedung, setGedung] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedGedung, setSelectedGedung] = useState(null);
-  const [dialogMode, setDialogMode] = useState(null); 
-  const [token, setToken] = useState("");
+  const [adjustDialog, setAdjustDialog] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [jsPdfPreviewOpen, setJsPdfPreviewOpen] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
   useEffect(() => {
-    const t = localStorage.getItem("token");
-    if (!t) window.location.href = "/";
-    else setToken(t);
+    if (!token) window.location.href = "/";
+    else fetchGedung();
   }, []);
 
-  useEffect(() => {
-    if (token) fetchGedung();
-  }, [token]);
-
-  // Cleanup saat unmount
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-      toastRef.current = null;
-    };
-  }, []);
-
+  // 🔹 Fetch data
   const fetchGedung = async () => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/master-gedung`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
-      if (!isMounted.current) return;
-      setGedung(json.data || []);
+      setGedungList(json.data || []);
     } catch (err) {
       console.error(err);
       toastRef.current?.showToast("01", "Gagal memuat data gedung");
     } finally {
-      if (isMounted.current) setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleSubmit = async (data) => {
-    if (!dialogMode) return;
+  // 🔍 Search filter
+  const handleSearch = (keyword) => {
+    setSearchKeyword(keyword);
+    if (!keyword) {
+      fetchGedung();
+    } else {
+      const filtered = gedungList.filter(
+        (g) =>
+          g.NAMA_GEDUNG?.toLowerCase().includes(keyword.toLowerCase()) ||
+          g.LOKASI?.toLowerCase().includes(keyword.toLowerCase())
+      );
+      setGedungList(filtered);
+    }
+  };
 
+  // 💾 Save handler
+  const handleSave = async (data) => {
     try {
       if (dialogMode === "add") {
         await fetch(`${API_URL}/master-gedung`, {
@@ -68,8 +79,8 @@ export default function GedungPage() {
           body: JSON.stringify(data),
         });
         toastRef.current?.showToast("00", "Gedung berhasil ditambahkan");
-      } else if (dialogMode === "edit" && selectedGedung) {
-        await fetch(`${API_URL}/master-gedung/${selectedGedung.GEDUNG_ID}`, {
+      } else if (dialogMode === "edit" && selectedItem) {
+        await fetch(`${API_URL}/master-gedung/${selectedItem.GEDUNG_ID}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -79,21 +90,19 @@ export default function GedungPage() {
         });
         toastRef.current?.showToast("00", "Gedung berhasil diperbarui");
       }
-
-      if (isMounted.current) {
-        await fetchGedung();
-        setDialogMode(null);
-        setSelectedGedung(null);
-      }
+      fetchGedung();
+      setDialogMode(null);
+      setSelectedItem(null);
     } catch (err) {
       console.error(err);
       toastRef.current?.showToast("01", "Gagal menyimpan gedung");
     }
   };
 
-  const handleDelete = (rowData) => {
+  // ❌ Delete handler
+  const handleDelete = (row) => {
     confirmDialog({
-      message: `Yakin ingin menghapus gedung "${rowData.NAMA_GEDUNG}"?`,
+      message: `Yakin ingin menghapus gedung "${row.NAMA_GEDUNG}"?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Hapus",
@@ -101,16 +110,12 @@ export default function GedungPage() {
       acceptClassName: "p-button-danger",
       accept: async () => {
         try {
-          await fetch(`${API_URL}/master-gedung/${rowData.GEDUNG_ID}`, {
+          await fetch(`${API_URL}/master-gedung/${row.GEDUNG_ID}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
           });
           toastRef.current?.showToast("00", "Gedung berhasil dihapus");
-          if (isMounted.current) {
-            setGedung((prev) =>
-              prev.filter((g) => g.GEDUNG_ID !== rowData.GEDUNG_ID)
-            );
-          }
+          fetchGedung();
         } catch (err) {
           console.error(err);
           toastRef.current?.showToast("01", "Gagal menghapus gedung");
@@ -119,68 +124,104 @@ export default function GedungPage() {
     });
   };
 
-  const actionBodyTemplate = (rowData) => (
-    <div className="flex gap-2">
-      <Button
-        icon="pi pi-pencil"
-        size="small"
-        severity="warning"
-        onClick={() => {
-          setSelectedGedung(rowData);
-          setDialogMode("edit");
-        }}
-      />
-      <Button
-        icon="pi pi-trash"
-        size="small"
-        severity="danger"
-        onClick={() => handleDelete(rowData)}
-      />
-    </div>
-  );
-
-  const gedungColumns = [
+  const columns = [
     { field: "GEDUNG_ID", header: "ID", style: { width: "60px" } },
-    { field: "NAMA_GEDUNG", header: "Nama Gedung", filter: true },
-    { field: "LOKASI", header: "Lokasi", filter: true },
-    
+    { field: "NAMA_GEDUNG", header: "Nama Gedung" },
+    { field: "LOKASI", header: "Lokasi" },
     {
       header: "Actions",
-      body: actionBodyTemplate,
+      body: (row) => (
+        <div className="flex gap-2">
+          <Button
+            icon="pi pi-pencil"
+            size="small"
+            severity="warning"
+            onClick={() => {
+              setSelectedItem(row);
+              setDialogMode("edit");
+            }}
+          />
+          <Button
+            icon="pi pi-trash"
+            size="small"
+            severity="danger"
+            onClick={() => handleDelete(row)}
+          />
+        </div>
+      ),
       style: { width: "120px" },
     },
   ];
 
   return (
     <div className="card p-4">
-      <h3 className="text-xl font-semibold mb-4">Manage Gedung</h3>
+      <ToastNotifier ref={toastRef} />
+      <ConfirmDialog />
 
-      <div className="flex justify-content-end mb-3">
+      <h3 className="text-xl font-semibold mb-4">Master Gedung</h3>
+
+      {/* 🔹 Toolbar atas: Print | Search | Tambah */}
+      <div className="flex justify-content-end align-items-center mb-3 gap-3 flex-wrap">
+        <Button
+          icon="pi pi-print"
+          severity="warning"
+          onClick={() => setAdjustDialog(true)}
+        />
+
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText
+            value={searchKeyword}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Cari nama atau lokasi..."
+            className="w-64"
+          />
+        </span>
+
         <Button
           label="Tambah Gedung"
           icon="pi pi-plus"
           onClick={() => {
             setDialogMode("add");
-            setSelectedGedung(null);
+            setSelectedItem(null);
           }}
         />
       </div>
 
-      <CustomDataTable data={gedung} loading={isLoading} columns={gedungColumns} />
+      {/* 🔹 Tabel */}
+      <CustomDataTable data={gedungList} loading={loading} columns={columns} />
 
-      <ConfirmDialog />
-
+      {/* 🔹 Form */}
       <FormGedung
         visible={dialogMode !== null}
         onHide={() => {
           setDialogMode(null);
-          setSelectedGedung(null);
+          setSelectedItem(null);
         }}
-        selectedGedung={selectedGedung}
-        onSave={handleSubmit}
+        selectedGedung={selectedItem}
+        onSave={handleSave}
       />
 
-      <ToastNotifier ref={toastRef} />
+      {/* 🔹 Print dialog */}
+      <AdjustPrintMarginLaporanGedung
+        adjustDialog={adjustDialog}
+        setAdjustDialog={setAdjustDialog}
+        dataGedung={gedungList}
+        setPdfUrl={setPdfUrl}
+        setFileName={setFileName}
+        setJsPdfPreviewOpen={setJsPdfPreviewOpen}
+      />
+
+      {/* 🔹 PDF Preview */}
+      <Dialog
+        visible={jsPdfPreviewOpen}
+        onHide={() => setJsPdfPreviewOpen(false)}
+        modal
+        style={{ width: "90vw", height: "90vh" }}
+        header="Preview Laporan Gedung"
+      >
+        <PDFViewer pdfUrl={pdfUrl} fileName={fileName} paperSize="A4" />
+      </Dialog>
     </div>
   );
 }
