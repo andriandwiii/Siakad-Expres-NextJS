@@ -9,27 +9,30 @@ import FormGedung from "./components/FormGedung";
 
 export default function GedungPage() {
   const toastRef = useRef(null);
-  const isMounted = useRef(true); // track mounted state
+  const isMounted = useRef(true);
 
   const [gedung, setGedung] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedGedung, setSelectedGedung] = useState(null);
-  const [dialogMode, setDialogMode] = useState(null); 
+  const [dialogMode, setDialogMode] = useState(null);
   const [token, setToken] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+  // 🔹 Ambil token dari localStorage
   useEffect(() => {
     const t = localStorage.getItem("token");
     if (!t) window.location.href = "/";
     else setToken(t);
   }, []);
 
+  // 🔹 Fetch data gedung kalau token tersedia
   useEffect(() => {
     if (token) fetchGedung();
   }, [token]);
 
-  // Cleanup saat unmount
+  // 🔹 Cleanup saat unmount
   useEffect(() => {
     return () => {
       isMounted.current = false;
@@ -37,6 +40,7 @@ export default function GedungPage() {
     };
   }, []);
 
+  // 🔹 Ambil semua data gedung
   const fetchGedung = async () => {
     setIsLoading(true);
     try {
@@ -45,7 +49,12 @@ export default function GedungPage() {
       });
       const json = await res.json();
       if (!isMounted.current) return;
-      setGedung(json.data || []);
+
+      if (json.status === "success") {
+        setGedung(json.data || []);
+      } else {
+        toastRef.current?.showToast("01", json.message || "Gagal memuat data gedung");
+      }
     } catch (err) {
       console.error(err);
       toastRef.current?.showToast("01", "Gagal memuat data gedung");
@@ -54,12 +63,24 @@ export default function GedungPage() {
     }
   };
 
+  // 🔹 Tambah atau update gedung
   const handleSubmit = async (data) => {
     if (!dialogMode) return;
 
+    // 🔸 Validasi frontend
+    if (!data.NAMA_GEDUNG || data.NAMA_GEDUNG.trim().length < 3) {
+      toastRef.current?.showToast("01", "Building name must be at least 3 characters.");
+      return;
+    }
+    if (!data.LOKASI || data.LOKASI.trim().length < 3) {
+      toastRef.current?.showToast("01", "Location must be at least 3 characters.");
+      return;
+    }
+
     try {
+      let res;
       if (dialogMode === "add") {
-        await fetch(`${API_URL}/master-gedung`, {
+        res = await fetch(`${API_URL}/master-gedung`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -67,9 +88,8 @@ export default function GedungPage() {
           },
           body: JSON.stringify(data),
         });
-        toastRef.current?.showToast("00", "Gedung berhasil ditambahkan");
       } else if (dialogMode === "edit" && selectedGedung) {
-        await fetch(`${API_URL}/master-gedung/${selectedGedung.GEDUNG_ID}`, {
+        res = await fetch(`${API_URL}/master-gedung/${selectedGedung.GEDUNG_ID}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -77,20 +97,25 @@ export default function GedungPage() {
           },
           body: JSON.stringify(data),
         });
-        toastRef.current?.showToast("00", "Gedung berhasil diperbarui");
       }
 
-      if (isMounted.current) {
+      const result = await res.json();
+
+      if (result.status === "success") {
+        toastRef.current?.showToast("00", result.message || "Gedung berhasil disimpan");
         await fetchGedung();
         setDialogMode(null);
         setSelectedGedung(null);
+      } else {
+        toastRef.current?.showToast("01", result.message || "Gagal menyimpan gedung");
       }
     } catch (err) {
       console.error(err);
-      toastRef.current?.showToast("01", "Gagal menyimpan gedung");
+      toastRef.current?.showToast("01", "Terjadi kesalahan saat menyimpan gedung");
     }
   };
 
+  // 🔹 Hapus gedung
   const handleDelete = (rowData) => {
     confirmDialog({
       message: `Yakin ingin menghapus gedung "${rowData.NAMA_GEDUNG}"?`,
@@ -101,26 +126,31 @@ export default function GedungPage() {
       acceptClassName: "p-button-danger",
       accept: async () => {
         try {
-          await fetch(`${API_URL}/master-gedung/${rowData.GEDUNG_ID}`, {
+          const res = await fetch(`${API_URL}/master-gedung/${rowData.GEDUNG_ID}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
           });
-          toastRef.current?.showToast("00", "Gedung berhasil dihapus");
-          if (isMounted.current) {
-            setGedung((prev) =>
-              prev.filter((g) => g.GEDUNG_ID !== rowData.GEDUNG_ID)
-            );
+          const result = await res.json();
+
+          if (result.status === "success") {
+            toastRef.current?.showToast("00", "Gedung berhasil dihapus");
+            if (isMounted.current) {
+              setGedung((prev) => prev.filter((g) => g.GEDUNG_ID !== rowData.GEDUNG_ID));
+            }
+          } else {
+            toastRef.current?.showToast("01", result.message || "Gagal menghapus gedung");
           }
         } catch (err) {
           console.error(err);
-          toastRef.current?.showToast("01", "Gagal menghapus gedung");
+          toastRef.current?.showToast("01", "Terjadi kesalahan saat menghapus gedung");
         }
       },
     });
   };
 
+  // 🔹 Template tombol edit & hapus
   const actionBodyTemplate = (rowData) => (
-    <div className="flex gap-2">
+    <div className="flex gap-2 justify-center">
       <Button
         icon="pi pi-pencil"
         size="small"
@@ -139,11 +169,11 @@ export default function GedungPage() {
     </div>
   );
 
+  // 🔹 Kolom tabel
   const gedungColumns = [
     { field: "GEDUNG_ID", header: "ID", style: { width: "60px" } },
     { field: "NAMA_GEDUNG", header: "Nama Gedung", filter: true },
     { field: "LOKASI", header: "Lokasi", filter: true },
-    
     {
       header: "Actions",
       body: actionBodyTemplate,
@@ -151,14 +181,49 @@ export default function GedungPage() {
     },
   ];
 
+  // 🔹 Filter hasil pencarian
+  const filteredGedung = gedung.filter(
+    (g) =>
+      g.NAMA_GEDUNG.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      g.LOKASI.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="card p-4">
-      <h3 className="text-xl font-semibold mb-4">Manage Gedung</h3>
+      <h3 className="text-xl font-semibold mb-4 text-green-700">
+        🏢 Manajemen Gedung
+      </h3>
 
-      <div className="flex justify-content-end mb-3">
+      {/* 🔍 Search + Tambah di pojok kanan */}
+      <div className="flex justify-start items-center gap-2 mb-3">
+
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Cari nama gedung atau lokasi..."
+            className="p-inputtext p-component w-72"
+          />
+        </span>
+
+        {searchTerm && (
+          <Button
+            icon="pi pi-times"
+            severity="secondary"
+            size="small"
+            rounded
+            text
+            onClick={() => setSearchTerm("")}
+            tooltip="Hapus pencarian"
+          />
+        )}
+
         <Button
           label="Tambah Gedung"
           icon="pi pi-plus"
+          severity="info"
           onClick={() => {
             setDialogMode("add");
             setSelectedGedung(null);
@@ -166,7 +231,12 @@ export default function GedungPage() {
         />
       </div>
 
-      <CustomDataTable data={gedung} loading={isLoading} columns={gedungColumns} />
+      <CustomDataTable
+        data={filteredGedung}
+        loading={isLoading}
+        columns={gedungColumns}
+        emptyMessage="Belum ada data gedung"
+      />
 
       <ConfirmDialog />
 

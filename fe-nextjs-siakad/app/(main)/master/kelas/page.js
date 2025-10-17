@@ -1,179 +1,219 @@
 "use client";
 
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
-import TabelKelas from "./components/tabelKelas"; // Pastikan pathnya benar
-import FormKelas from "./components/formDialogKelas"; // Pastikan pathnya benar
-import HeaderBar from "@/app/components/headerbar";
-import ToastNotifier from "@/app/components/ToastNotifier";
+import { useEffect, useState, useRef } from "react";
+import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import ToastNotifier from "../../../components/ToastNotifier";
+import CustomDataTable from "../../../components/DataTable";
+import FormKelas from "./components/FormKelas";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const KelasPage = () => {
-  const [data, setData] = useState([]);
-  const [originalData, setOriginalData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [dialogVisible, setDialogVisible] = useState(false);
-
-  const [formData, setFormData] = useState({
-    KELAS_ID: 0,
-    KODE_KELAS: "",
-    TINGKAT: "",
-    JURUSAN: "",
-    NAMA_KELAS: "",
-    STATUS: "",
-  });
-
-  const [errors, setErrors] = useState({});
+export default function KelasPage() {
   const toastRef = useRef(null);
+  const isMounted = useRef(true);
 
+  const [kelas, setKelas] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedKelas, setSelectedKelas] = useState(null);
+  const [dialogMode, setDialogMode] = useState(null);
+  const [token, setToken] = useState("");
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  // Ambil token dari localStorage
   useEffect(() => {
-    fetchKelas();
+    const t = localStorage.getItem("token");
+    if (!t) window.location.href = "/";
+    else setToken(t);
   }, []);
 
+  // Fetch data kelas ketika token sudah ada
+  useEffect(() => {
+    if (token) fetchKelas();
+  }, [token]);
+
+  // Cleanup ketika komponen unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      toastRef.current = null;
+    };
+  }, []);
+
+  // ==============================
+  // Ambil semua data kelas
+  // ==============================
   const fetchKelas = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/kelas`);
-      setData(res.data);
-      setOriginalData(res.data);
-    } catch (err) {
-      console.error("Gagal mengambil data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const res = await fetch(`${API_URL}/master-kelas`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!isMounted.current) return;
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.KODE_KELAS?.trim()) newErrors.KODE_KELAS = "Kode Kelas wajib diisi";
-    if (!formData.TINGKAT?.trim()) newErrors.TINGKAT = "Tingkat wajib diisi";
-    if (!formData.JURUSAN?.trim()) newErrors.JURUSAN = "Jurusan wajib diisi";
-    if (!formData.NAMA_KELAS?.trim()) newErrors.NAMA_KELAS = "Nama Kelas wajib diisi";
-    if (!formData.STATUS?.trim()) newErrors.STATUS = "Status wajib diisi";
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSearch = (keyword) => {
-    if (!keyword) {
-      setData(originalData);
-    } else {
-      const filtered = originalData.filter(
-        (item) =>
-          item.KODE_KELAS.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.NAMA_KELAS.toLowerCase().includes(keyword.toLowerCase()) ||
-          item.JURUSAN.toLowerCase().includes(keyword.toLowerCase())
-      );
-      setData(filtered);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    const isEdit = !!formData.KELAS_ID;
-    const url = isEdit
-      ? `${API_URL}/kelas/${formData.KELAS_ID}`
-      : `${API_URL}/kelas`;
-
-    try {
-      if (isEdit) {
-        await axios.put(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil diperbarui");
+      if (json.status === "00" || json.status === "success") {
+        setKelas(json.data || []);
       } else {
-        await axios.post(url, formData);
-        toastRef.current?.showToast("00", "Data berhasil ditambahkan");
+        toastRef.current?.showToast("01", json.message || "Gagal memuat data kelas");
       }
-      fetchKelas();
-      setDialogVisible(false);
-      resetForm();
     } catch (err) {
-      console.error("Gagal menyimpan data:", err);
-      toastRef.current?.showToast("01", "Gagal menyimpan data");
+      console.error(err);
+      toastRef.current?.showToast("01", "Gagal memuat data kelas");
+    } finally {
+      if (isMounted.current) setIsLoading(false);
     }
   };
 
-  const handleEdit = (row) => {
-    setFormData({ ...row });
-    setDialogVisible(true);
+  // ==============================
+  // Tambah atau Update Kelas
+  // ==============================
+  const handleSubmit = async (data) => {
+    if (!dialogMode) return;
+
+    try {
+      let res;
+      if (dialogMode === "add") {
+        res = await fetch(`${API_URL}/master-kelas`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
+      } else if (dialogMode === "edit" && selectedKelas) {
+        res = await fetch(`${API_URL}/master-kelas/${selectedKelas.KELAS_ID}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
+      }
+
+      const result = await res.json();
+
+      if (result.status === "00" || result.status === "success") {
+        toastRef.current?.showToast("00", result.message || "Kelas berhasil disimpan");
+        await fetchKelas();
+        setDialogMode(null);
+        setSelectedKelas(null);
+      } else {
+        toastRef.current?.showToast("01", result.message || "Gagal menyimpan kelas");
+      }
+    } catch (err) {
+      console.error(err);
+      toastRef.current?.showToast("01", "Terjadi kesalahan saat menyimpan kelas");
+    }
   };
 
-  const handleDelete = (row) => {
+  // ==============================
+  // Hapus Data Kelas
+  // ==============================
+  const handleDelete = (rowData) => {
     confirmDialog({
-      message: `Apakah Anda yakin ingin menghapus kelas ${row.NAMA_KELAS}?`,
+      message: `Yakin ingin menghapus kelas "${rowData.NAMA_KELAS}"?`,
       header: "Konfirmasi Hapus",
       icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Ya",
+      acceptLabel: "Hapus",
       rejectLabel: "Batal",
+      acceptClassName: "p-button-danger",
       accept: async () => {
         try {
-          await axios.delete(`${API_URL}/kelas/${row.KELAS_ID}`);
-          fetchKelas();
-          toastRef.current?.showToast("00", "Data berhasil dihapus");
+          const res = await fetch(`${API_URL}/master-kelas/${rowData.KELAS_ID}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const result = await res.json();
+
+          if (result.status === "00" || result.status === "success") {
+            toastRef.current?.showToast("00", "Kelas berhasil dihapus");
+            if (isMounted.current) {
+              setKelas((prev) =>
+                prev.filter((k) => k.KELAS_ID !== rowData.KELAS_ID)
+              );
+            }
+          } else {
+            toastRef.current?.showToast("01", result.message || "Gagal menghapus kelas");
+          }
         } catch (err) {
-          console.error("Gagal menghapus data:", err);
-          toastRef.current?.showToast("01", "Gagal menghapus data");
+          console.error(err);
+          toastRef.current?.showToast("01", "Terjadi kesalahan saat menghapus kelas");
         }
       },
     });
   };
 
-  const resetForm = () => {
-    setFormData({
-      KELAS_ID: 0,
-      KODE_KELAS: "",
-      TINGKAT: "",
-      JURUSAN: "",
-      NAMA_KELAS: "",
-      STATUS: "",
-    });
-    setErrors({});
-  };
+  // ==============================
+  // Template tombol aksi
+  // ==============================
+  const actionBodyTemplate = (rowData) => (
+    <div className="flex gap-2">
+      <Button
+        icon="pi pi-pencil"
+        size="small"
+        severity="warning"
+        onClick={() => {
+          setSelectedKelas(rowData);
+          setDialogMode("edit");
+        }}
+      />
+      <Button
+        icon="pi pi-trash"
+        size="small"
+        severity="danger"
+        onClick={() => handleDelete(rowData)}
+      />
+    </div>
+  );
+
+  // ==============================
+  // Kolom DataTable
+  // ==============================
+  const kelasColumns = [
+    { field: "KELAS_ID", header: "ID", style: { width: "60px" } },
+    { field: "NAMA_KELAS", header: "Nama Kelas", filter: true },
+    { field: "TINGKATAN", header: "Tingkatan", filter: true },
+    { field: "NAMA_JURUSAN", header: "Jurusan", filter: true },
+    { field: "NAMA_GEDUNG", header: "Gedung", filter: true },
+    {
+      header: "Actions",
+      body: actionBodyTemplate,
+      style: { width: "120px" },
+    },
+  ];
 
   return (
-    <div className="card">
-      <ToastNotifier ref={toastRef} />
-      <ConfirmDialog />
+    <div className="card p-4">
+      <h3 className="text-xl font-semibold mb-4">Manage Kelas</h3>
 
-      <h3 className="text-xl font-semibold mb-3">Master Kelas</h3>
-
-      <div className="flex items-center justify-end">
-        <HeaderBar
-          title=""
-          placeholder="Cari Kelas"
-          onSearch={handleSearch}
-          onAddClick={() => {
-            resetForm();
-            setDialogVisible(true);
+      <div className="flex justify-content-end mb-3">
+        <Button
+          label="Tambah Kelas"
+          icon="pi pi-plus"
+          onClick={() => {
+            setDialogMode("add");
+            setSelectedKelas(null);
           }}
         />
       </div>
 
-      <TabelKelas
-        data={data}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <CustomDataTable data={kelas} loading={isLoading} columns={kelasColumns} />
+
+      <ConfirmDialog />
 
       <FormKelas
-        visible={dialogVisible}
+        visible={dialogMode !== null}
         onHide={() => {
-          setDialogVisible(false);
-          resetForm();
+          setDialogMode(null);
+          setSelectedKelas(null);
         }}
-        onChange={setFormData}
-        onSubmit={handleSubmit}
-        formData={formData}
-        errors={errors}
+        selectedKelas={selectedKelas}
+        onSave={handleSubmit}
       />
+
+      <ToastNotifier ref={toastRef} />
     </div>
   );
-};
-
-export default KelasPage;
+}

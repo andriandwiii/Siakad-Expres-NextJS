@@ -19,12 +19,14 @@ export default function JurusanPage() {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+  // Ambil token dari localStorage
   useEffect(() => {
     const t = localStorage.getItem("token");
     if (!t) window.location.href = "/";
     else setToken(t);
   }, []);
 
+  // Fetch data jurusan kalau token tersedia
   useEffect(() => {
     if (token) fetchJurusan();
   }, [token]);
@@ -37,6 +39,7 @@ export default function JurusanPage() {
     };
   }, []);
 
+  // Ambil semua data jurusan
   const fetchJurusan = async () => {
     setIsLoading(true);
     try {
@@ -54,12 +57,14 @@ export default function JurusanPage() {
     }
   };
 
+  // Tambah atau update jurusan
   const handleSubmit = async (data) => {
     if (!dialogMode) return;
 
     try {
+      let res;
       if (dialogMode === "add") {
-        await fetch(`${API_URL}/master-jurusan`, {
+        res = await fetch(`${API_URL}/master-jurusan`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -67,9 +72,8 @@ export default function JurusanPage() {
           },
           body: JSON.stringify(data),
         });
-        toastRef.current?.showToast("00", "Jurusan berhasil ditambahkan");
       } else if (dialogMode === "edit" && selectedJurusan) {
-        await fetch(`${API_URL}/master-jurusan/${selectedJurusan.JURUSAN_ID}`, {
+        res = await fetch(`${API_URL}/master-jurusan/${selectedJurusan.JURUSAN_ID}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -77,20 +81,26 @@ export default function JurusanPage() {
           },
           body: JSON.stringify(data),
         });
-        toastRef.current?.showToast("00", "Jurusan berhasil diperbarui");
       }
 
-      if (isMounted.current) {
+      const result = await res.json();
+
+      // 🔹 Cek status dari backend
+      if (result.status === "00" || result.status === "success") {
+        toastRef.current?.showToast("00", result.message || "Jurusan berhasil disimpan");
         await fetchJurusan();
         setDialogMode(null);
         setSelectedJurusan(null);
+      } else {
+        toastRef.current?.showToast("01", result.message || "Gagal menyimpan jurusan");
       }
     } catch (err) {
       console.error(err);
-      toastRef.current?.showToast("01", "Gagal menyimpan jurusan");
+      toastRef.current?.showToast("01", "Terjadi kesalahan saat menyimpan jurusan");
     }
   };
 
+  // Hapus jurusan
   const handleDelete = (rowData) => {
     confirmDialog({
       message: `Yakin ingin menghapus jurusan "${rowData.NAMA_JURUSAN}"?`,
@@ -101,24 +111,31 @@ export default function JurusanPage() {
       acceptClassName: "p-button-danger",
       accept: async () => {
         try {
-          await fetch(`${API_URL}/master-jurusan/${rowData.JURUSAN_ID}`, {
+          const res = await fetch(`${API_URL}/master-jurusan/${rowData.JURUSAN_ID}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
           });
-          toastRef.current?.showToast("00", "Jurusan berhasil dihapus");
-          if (isMounted.current) {
-            setJurusan((prev) =>
-              prev.filter((j) => j.JURUSAN_ID !== rowData.JURUSAN_ID)
-            );
+          const result = await res.json();
+
+          if (result.status === "00" || result.status === "success") {
+            toastRef.current?.showToast("00", "Jurusan berhasil dihapus");
+            if (isMounted.current) {
+              setJurusan((prev) =>
+                prev.filter((j) => j.JURUSAN_ID !== rowData.JURUSAN_ID)
+              );
+            }
+          } else {
+            toastRef.current?.showToast("01", result.message || "Gagal menghapus jurusan");
           }
         } catch (err) {
           console.error(err);
-          toastRef.current?.showToast("01", "Gagal menghapus jurusan");
+          toastRef.current?.showToast("01", "Terjadi kesalahan saat menghapus jurusan");
         }
       },
     });
   };
 
+  // Template tombol edit dan hapus
   const actionBodyTemplate = (rowData) => (
     <div className="flex gap-2">
       <Button
@@ -139,11 +156,11 @@ export default function JurusanPage() {
     </div>
   );
 
+  // Kolom tabel
   const jurusanColumns = [
     { field: "JURUSAN_ID", header: "ID", style: { width: "60px" } },
     { field: "NAMA_JURUSAN", header: "Nama Jurusan", filter: true },
     { field: "DESKRIPSI", header: "Deskripsi", filter: true },
-   
     {
       header: "Actions",
       body: actionBodyTemplate,
