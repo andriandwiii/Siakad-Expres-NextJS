@@ -29,6 +29,7 @@ export default function MasterGedungPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
+  // 🔹 Ambil token dari localStorage
   useEffect(() => {
     if (!token) window.location.href = "/";
     else fetchGedung();
@@ -69,8 +70,9 @@ export default function MasterGedungPage() {
   // 💾 Save handler
   const handleSave = async (data) => {
     try {
+      let res;
       if (dialogMode === "add") {
-        await fetch(`${API_URL}/master-gedung`, {
+        res = await fetch(`${API_URL}/master-gedung`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -88,14 +90,13 @@ export default function MasterGedungPage() {
           },
           body: JSON.stringify(data),
         });
-        toastRef.current?.showToast("00", "Gedung berhasil diperbarui");
       }
       fetchGedung();
       setDialogMode(null);
       setSelectedItem(null);
     } catch (err) {
       console.error(err);
-      toastRef.current?.showToast("01", "Gagal menyimpan gedung");
+      toastRef.current?.showToast("01", "Terjadi kesalahan saat menyimpan gedung");
     }
   };
 
@@ -118,7 +119,7 @@ export default function MasterGedungPage() {
           fetchGedung();
         } catch (err) {
           console.error(err);
-          toastRef.current?.showToast("01", "Gagal menghapus gedung");
+          toastRef.current?.showToast("01", "Terjadi kesalahan saat menghapus gedung");
         }
       },
     });
@@ -153,6 +154,13 @@ export default function MasterGedungPage() {
     },
   ];
 
+  // 🔹 Filter hasil pencarian
+  const filteredGedung = gedung.filter(
+    (g) =>
+      g.NAMA_GEDUNG.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      g.LOKASI.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="card p-4">
       <ToastNotifier ref={toastRef} />
@@ -181,6 +189,7 @@ export default function MasterGedungPage() {
         <Button
           label="Tambah Gedung"
           icon="pi pi-plus"
+          severity="info"
           onClick={() => {
             setDialogMode("add");
             setSelectedItem(null);
